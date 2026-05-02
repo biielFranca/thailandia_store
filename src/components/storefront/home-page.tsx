@@ -1,407 +1,175 @@
 import Image from "next/image";
 import Link from "next/link";
 import { storeConfig } from "@/config/store";
-import { homeContent } from "@/themes/thailandia/content/home";
+import { catalogProducts } from "@/themes/thailandia/content/catalog";
 
-const categoryCardStyles = [
-  "md:col-span-2",
-  "",
-  "",
-  "md:col-span-2",
+const menuItems = [
+  { label: "INICIO", href: "#inicio" },
+  { label: "ROUPAS", href: "#destaques" },
+  { label: "NARGUILES", href: "#destaques" },
+  { label: "ACESSORIOS", href: "#destaques" },
+  { label: "PROMOCOES", href: "#destaques" },
+  { label: "SOBRE", href: "#rodape" },
 ] as const;
 
-const featuredSalesProducts = homeContent.featuredProducts.slice(0, 4);
+const featuredProducts = catalogProducts.slice(0, 6);
 
 export function HomePage() {
   return (
-    <main className="flex-1">
-      <section className="border-b border-white/10 bg-black/30">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 text-xs uppercase tracking-[0.28em] text-zinc-400 sm:px-6 lg:px-8">
-          <span>{homeContent.announcement}</span>
-          <span className="hidden text-zinc-500 sm:inline">
-            {storeConfig.contact.instagram}
-          </span>
-        </div>
-      </section>
+    <main className="flex-1 bg-black text-white">
+      <div className="mx-auto max-w-[1440px] px-4 pb-8 pt-4 sm:px-6 lg:px-8">
+        <header
+          id="inicio"
+          className="flex items-center justify-between gap-6 border-b border-white/8 px-2 py-3"
+        >
+          <Link href="/" className="font-heading text-4xl leading-none text-white">
+            THAILANDIA STORE
+          </Link>
 
-      <header className="sticky top-0 z-30 border-b border-white/10 bg-black/70 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <div>
-            <p className="font-heading text-3xl leading-none text-white">
-              THAILANDIA
-            </p>
-            <p className="text-[10px] uppercase tracking-[0.32em] text-zinc-500">
-              Online Sales Page
-            </p>
-          </div>
-
-          <nav className="hidden items-center gap-7 text-sm text-zinc-300 lg:flex">
-            {homeContent.navigation.map((item) => (
-              <a
-                key={item}
-                href={`#${item.toLowerCase().replaceAll(" ", "-")}`}
-                className="transition hover:text-white"
-              >
-                {item}
+          <nav className="hidden items-center gap-10 text-sm font-semibold tracking-[0.04em] text-white/90 lg:flex">
+            {menuItems.map((item) => (
+              <a key={item.label} href={item.href} className="transition hover:text-white/60">
+                {item.label}
               </a>
             ))}
           </nav>
 
-          <div className="flex items-center gap-3">
-            <a
-              href="#destaques"
-              className="hidden rounded-full border border-white/10 px-4 py-2 text-sm text-zinc-200 transition hover:border-white/25 hover:text-white sm:inline-flex"
-            >
-              Ver vitrine
-            </a>
-            <a
-              href="#comprar"
-              className="inline-flex rounded-full bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-black transition hover:bg-[var(--primary-strong)]"
-            >
-              Comprar agora
-            </a>
+          <div className="flex items-center gap-2 text-white">
+            <div className="relative flex h-10 w-10 items-center justify-center">
+              <span className="text-3xl leading-none">🛒</span>
+              <span className="absolute right-0 top-0 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#1246ff] px-1 text-[11px] font-bold text-white">
+                0
+              </span>
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <section
-        id="oferta"
-        className="grid-overlay relative overflow-hidden border-b border-white/10"
-      >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_28%),radial-gradient(circle_at_80%_15%,rgba(245,200,66,0.16),transparent_22%)]" />
-        <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[1.08fr_0.92fr] lg:gap-16 lg:px-8 lg:py-24">
-          <div className="flex flex-col justify-center">
-            <div className="mb-6 inline-flex w-fit items-center gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.26em] text-zinc-300">
-              <span className="h-2 w-2 rounded-full bg-[var(--accent)]" />
-              {homeContent.hero.eyebrow}
-            </div>
+        <section className="relative mt-4 overflow-hidden rounded-[6px] bg-[#0f0f10]">
+          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/85 to-black/10" />
+          <div className="absolute inset-y-0 left-0 z-20 flex items-center px-4 text-5xl text-white/70">
+            <span>‹</span>
+          </div>
+          <div className="absolute inset-y-0 right-0 z-20 flex items-center px-4 text-5xl text-white/70">
+            <span>›</span>
+          </div>
 
-            <h1 className="font-heading max-w-5xl text-6xl leading-[0.92] text-white sm:text-7xl lg:text-[7.25rem]">
-              {homeContent.hero.title}
-            </h1>
-
-            <p className="mt-6 max-w-2xl text-base leading-8 text-zinc-300 sm:text-lg">
-              {homeContent.hero.description}
-            </p>
-
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <a
-                href="#destaques"
-                className="inline-flex items-center justify-center rounded-full bg-[var(--primary)] px-6 py-3 text-sm font-semibold text-black transition hover:bg-[var(--primary-strong)]"
-              >
-                {homeContent.hero.primaryCta}
-              </a>
-              <a
-                href={`/produtos/${homeContent.featuredProducts[0].slug}`}
-                className="inline-flex items-center justify-center rounded-full border border-white/12 bg-white/5 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-              >
-                {homeContent.hero.secondaryCta}
-              </a>
-            </div>
-
-            <div className="mt-8 flex flex-wrap gap-3">
-              {homeContent.hero.highlights.map((item) => (
-                <span
-                  key={item}
-                  className="rounded-full border border-white/10 px-4 py-2 text-xs uppercase tracking-[0.24em] text-zinc-300"
+          <div className="relative grid min-h-[390px] items-stretch lg:grid-cols-[0.9fr_1.1fr]">
+            <div className="z-10 flex flex-col justify-center px-12 py-12 sm:px-16 lg:px-20">
+              <h1 className="font-heading max-w-xl text-[4.2rem] leading-[0.9] text-white sm:text-[5.4rem] lg:text-[6.3rem]">
+                O MANTO DE
+                <br />
+                QUEM DECIDE
+              </h1>
+              <p className="mt-6 max-w-md text-[1.05rem] leading-8 text-white/78">
+                Vista sua postura. Carregue sua essencia.
+                <br />
+                Thailandia nao e sobre roupa. E sobre atitude.
+              </p>
+              <div className="mt-8">
+                <a
+                  href="#destaques"
+                  className="inline-flex min-w-40 items-center justify-center rounded-[4px] bg-[#1246ff] px-7 py-3 text-sm font-bold tracking-[0.04em] text-white transition hover:bg-[#0f3be0]"
                 >
-                  {item}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-4">
-            <div className="panel relative overflow-hidden rounded-[2rem] p-6 sm:p-8">
-              <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(245,200,66,0.24),transparent_38%,rgba(255,255,255,0.03)_70%)]" />
-              <div className="relative">
-                <p className="text-xs uppercase tracking-[0.3em] text-zinc-400">
-                  {homeContent.offer.label}
-                </p>
-                <h2 className="font-heading mt-4 text-4xl text-white sm:text-5xl">
-                  {homeContent.offer.title}
-                </h2>
-                <p className="mt-4 text-sm leading-7 text-zinc-300">
-                  {homeContent.offer.description}
-                </p>
-                <div className="mt-6 space-y-3">
-                  {homeContent.offer.bullets.map((item) => (
-                    <div
-                      key={item}
-                      className="rounded-2xl border border-white/10 bg-black/35 px-4 py-3 text-sm text-zinc-200"
-                    >
-                      {item}
-                    </div>
-                  ))}
-                </div>
+                  VER COLECAO
+                </a>
               </div>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-3">
-              {homeContent.hero.stats.map((stat) => (
-                <div key={stat.label} className="panel rounded-[1.5rem] p-5">
-                  <p className="text-xs uppercase tracking-[0.24em] text-zinc-500">
-                    {stat.label}
-                  </p>
-                  <p className="font-heading mt-3 text-4xl text-white">
-                    {stat.value}
-                  </p>
-                </div>
-              ))}
+            <div className="relative min-h-[390px]">
+              <Image
+                src="/catalog/real-madrid-home-25-26/1.png"
+                alt="Banner Thailandia Store"
+                fill
+                priority
+                className="object-cover opacity-70 grayscale"
+              />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_40%,transparent_0,transparent_35%,rgba(0,0,0,0.4)_100%)]" />
             </div>
           </div>
-        </div>
-      </section>
 
-      <section className="border-b border-white/10 bg-black/20">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-3 px-4 py-5 sm:px-6 lg:px-8">
-          {homeContent.trustBar.map((item) => (
-            <span
-              key={item}
-              className="rounded-full border border-white/10 bg-white/4 px-4 py-2 text-xs uppercase tracking-[0.22em] text-zinc-300"
-            >
-              {item}
-            </span>
-          ))}
-        </div>
-      </section>
-
-      <section
-        id="destaques"
-        className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8"
-      >
-        <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-[var(--accent)]">
-              Produtos em destaque
-            </p>
-            <h2 className="font-heading mt-3 text-4xl text-white sm:text-5xl">
-              ESCOLHA RAPIDA, IMAGEM FORTE, ACAO IMEDIATA
-            </h2>
+          <div className="absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 gap-2">
+            <span className="h-1.5 w-8 rounded-full bg-[#1246ff]" />
+            <span className="h-1.5 w-4 rounded-full bg-white" />
+            <span className="h-1.5 w-4 rounded-full bg-white/70" />
           </div>
-          <p className="max-w-xl text-sm leading-7 text-zinc-400">
-            Esta grade funciona como centro comercial da pagina. O cliente bate
-            o olho, entende o produto e encontra uma acao de compra sem ruir a
-            experiencia.
-          </p>
-        </div>
+        </section>
 
-        <div className="grid gap-5 lg:grid-cols-2">
-          {featuredSalesProducts.map((product, index) => (
-            <article
-              key={product.slug}
-              className={`panel overflow-hidden rounded-[2rem] ${index === 0 ? "lg:col-span-2" : ""}`}
+        <section id="destaques" className="mt-10">
+          <div className="mb-5 flex items-center justify-between">
+            <h2 className="text-[2rem] font-black uppercase tracking-[0.02em] text-white">
+              DESTAQUES
+            </h2>
+            <a
+              href="#"
+              className="text-sm font-bold uppercase tracking-[0.06em] text-[#1246ff] transition hover:text-[#3f67ff]"
             >
-              <div
-                className={`grid gap-0 ${index === 0 ? "lg:grid-cols-[1.1fr_0.9fr]" : "md:grid-cols-[0.95fr_1.05fr]"}`}
+              VER TODOS ›
+            </a>
+          </div>
+
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+            {featuredProducts.map((product) => (
+              <article
+                key={product.slug}
+                className="overflow-hidden rounded-[6px] border border-white/8 bg-[#111111]"
               >
-                <Link
-                  href={`/produtos/${product.slug}`}
-                  className="relative block min-h-[20rem] bg-zinc-900"
-                >
+                <Link href={`/produtos/${product.slug}`} className="block bg-[#151515]">
                   <Image
                     src={product.image}
                     alt={product.name}
-                    width={1200}
-                    height={1200}
-                    className="h-full w-full object-cover"
+                    width={600}
+                    height={700}
+                    className="h-[250px] w-full object-cover"
                   />
                 </Link>
 
-                <div className="flex flex-col justify-between p-6 sm:p-8">
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="rounded-full bg-[var(--primary)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-black">
-                        {product.badge}
-                      </span>
-                      <span className="rounded-full border border-white/10 px-3 py-1 text-xs uppercase tracking-[0.22em] text-zinc-300">
-                        {product.categoryName}
-                      </span>
-                    </div>
-                    <h3 className="font-heading mt-5 text-4xl text-white sm:text-5xl">
-                      {product.shortName}
-                    </h3>
-                    <p className="mt-4 text-sm leading-7 text-zinc-300">
-                      {product.description}
-                    </p>
-                  </div>
-
-                  <div className="mt-8">
-                    <div className="mb-4 flex items-center justify-between rounded-[1.25rem] border border-white/10 bg-white/4 px-4 py-3">
-                      <span className="text-xs uppercase tracking-[0.22em] text-zinc-500">
-                        Faixa comercial
-                      </span>
-                      <span className="font-heading text-3xl text-white">
-                        {product.priceLabel}
-                      </span>
-                    </div>
-                    <div className="flex flex-wrap gap-3">
-                      <Link
-                        href={`/produtos/${product.slug}`}
-                        className="inline-flex rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-zinc-200"
-                      >
-                        Ver detalhes
-                      </Link>
-                      <a
-                        href={product.sourceUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex rounded-full border border-white/10 px-5 py-3 text-sm text-zinc-200 transition hover:border-white/25 hover:text-white"
-                      >
-                        Abrir album
-                      </a>
-                    </div>
-                  </div>
+                <div className="px-4 pb-4 pt-3 text-center">
+                  <h3 className="min-h-12 text-[0.95rem] font-bold uppercase leading-6 text-white">
+                    {product.cardTitle}
+                  </h3>
+                  <p className="mt-1 text-[2rem] font-black leading-none text-[#1246ff]">
+                    {product.displayPrice}
+                  </p>
+                  <Link
+                    href={`/produtos/${product.slug}`}
+                    className="mt-4 inline-flex w-full items-center justify-center rounded-[4px] bg-[#1246ff] px-4 py-3 text-sm font-bold uppercase tracking-[0.04em] text-white transition hover:bg-[#0f3be0]"
+                  >
+                    🛒&nbsp; COMPRAR
+                  </Link>
                 </div>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section
-        id="categorias"
-        className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8"
-      >
-        <div className="mb-8 flex items-end justify-between gap-6">
-          <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-[var(--primary)]">
-              Categorias para vender
-            </p>
-            <h2 className="font-heading mt-3 text-4xl text-white sm:text-5xl">
-              NAVEGACAO CURTA, DECISAO MAIS RAPIDA
-            </h2>
-          </div>
-          <p className="hidden max-w-md text-sm leading-7 text-zinc-400 lg:block">
-            Cada categoria foi escolhida para reduzir dispersao e aumentar a
-            chance do cliente cair direto em produtos com mais apelo.
-          </p>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-4">
-          {homeContent.categories.map((category, index) => (
-            <Link
-              key={category.slug}
-              href={category.href}
-              className={`panel rounded-[2rem] p-6 transition duration-300 hover:-translate-y-1 hover:border-white/20 ${categoryCardStyles[index]}`}
-            >
-              <span className="inline-flex rounded-full bg-white/6 px-3 py-1 text-xs uppercase tracking-[0.22em] text-zinc-400">
-                {category.tag}
-              </span>
-              <h3 className="font-heading mt-5 text-3xl text-white">
-                {category.name}
-              </h3>
-              <p className="mt-3 max-w-sm text-sm leading-7 text-zinc-300">
-                {category.description}
-              </p>
-              <div className="mt-8 flex items-center justify-between rounded-[1.5rem] border border-white/8 bg-[linear-gradient(135deg,rgba(245,200,66,0.16),rgba(255,255,255,0.03),rgba(255,90,54,0.12))] px-5 py-4">
-                <span className="text-sm text-white">Entrar na categoria</span>
-                <span className="text-xl text-[var(--primary)]">+</span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      <section
-        id="confianca"
-        className="mx-auto grid max-w-7xl gap-4 px-4 py-16 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:px-8"
-      >
-        <div className="panel rounded-[2rem] p-6 sm:p-8">
-          <p className="text-xs uppercase tracking-[0.3em] text-[var(--primary)]">
-            Por que essa pagina vende
-          </p>
-          <h2 className="font-heading mt-3 text-4xl text-white sm:text-5xl">
-            MENOS DISTRAÇÃO, MAIS COMPRA
-          </h2>
-
-          <div className="mt-8 space-y-4">
-            {homeContent.sellingPoints.map((item) => (
-              <div
-                key={item.title}
-                className="rounded-[1.5rem] border border-white/10 bg-white/4 p-5"
-              >
-                <h3 className="text-lg font-semibold text-white">
-                  {item.title}
-                </h3>
-                <p className="mt-2 text-sm leading-7 text-zinc-300">
-                  {item.description}
-                </p>
-              </div>
+              </article>
             ))}
           </div>
-        </div>
+        </section>
+      </div>
 
-        <div className="panel rounded-[2rem] p-6 sm:p-8">
-          <p className="text-xs uppercase tracking-[0.3em] text-[var(--accent)]">
-            Prova e fechamento
-          </p>
-          <div className="mt-6 space-y-4">
-            {homeContent.socialProof.map((item, index) => (
-              <div
-                key={item.quote}
-                className="rounded-[1.5rem] border border-white/10 bg-black/25 p-5"
-              >
-                <span className="font-heading text-4xl leading-none text-[var(--primary)]">
-                  0{index + 1}
-                </span>
-                <p className="mt-4 text-sm leading-7 text-zinc-200">
-                  {item.quote}
-                </p>
-                <p className="mt-3 text-xs uppercase tracking-[0.22em] text-zinc-500">
-                  {item.author}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          <div
-            id="comprar"
-            className="mt-8 rounded-[1.75rem] border border-white/10 bg-[linear-gradient(135deg,rgba(255,90,54,0.16),rgba(255,255,255,0.03),rgba(245,200,66,0.12))] p-6"
-          >
-            <p className="text-xs uppercase tracking-[0.26em] text-zinc-300">
-              Fechamento da pagina
-            </p>
-            <p className="font-heading mt-3 text-4xl text-white">
-              {homeContent.finalCta.title}
-            </p>
-            <p className="mt-3 max-w-2xl text-sm leading-7 text-zinc-200">
-              {homeContent.finalCta.description}
-            </p>
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-              <a
-                href="#destaques"
-                className="inline-flex items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-zinc-200"
-              >
-                {homeContent.finalCta.primary}
-              </a>
-              <a
-                href="https://instagram.com/thailandiastore"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center justify-center rounded-full border border-white/10 px-5 py-3 text-sm text-white transition hover:border-white/25"
-              >
-                {homeContent.finalCta.secondary}
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <footer className="border-t border-white/10">
-        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[1fr_auto] lg:px-8">
+      <footer
+        id="rodape"
+        className="border-t border-white/8 bg-[#070707] px-4 py-6 sm:px-6 lg:px-8"
+      >
+        <div className="mx-auto flex max-w-[1440px] flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="font-heading text-3xl text-white">THAILANDIA STORE</p>
-            <p className="mt-3 max-w-xl text-sm leading-7 text-zinc-400">
-              {storeConfig.description}. Esta home agora funciona como pagina
-              de vendas online com foco em vitrine, desejo e acao comercial.
+            <p className="text-2xl font-black uppercase text-white">THAILANDIA STORE</p>
+            <p className="mt-2 text-sm text-white/60">
+              © 2024 {storeConfig.name}. Todos os direitos reservados.
             </p>
           </div>
 
-          <div className="space-y-2 text-sm text-zinc-400">
-            <p>{storeConfig.contact.instagram}</p>
-            <p>{storeConfig.contact.whatsapp}</p>
-            <p>{storeConfig.contact.email}</p>
+          <div className="flex flex-wrap items-center gap-8 text-sm font-semibold uppercase tracking-[0.04em] text-white/70">
+            <a href="#">Trocas e devolucoes</a>
+            <a href="#">Politica de privacidade</a>
+          </div>
+
+          <div className="flex items-center gap-5 text-2xl text-white">
+            <a href="https://instagram.com/thailandiastore" target="_blank" rel="noreferrer">
+              ◎
+            </a>
+            <a href="#" aria-label="TikTok">
+              ♪
+            </a>
+            <a href="#" aria-label="YouTube">
+              ▶
+            </a>
           </div>
         </div>
       </footer>

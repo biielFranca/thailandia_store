@@ -11,6 +11,7 @@ export type CatalogProduct = {
   slug: string;
   name: string;
   shortName: string;
+  cardTitle: string;
   categorySlug: string;
   categoryName: string;
   source: string;
@@ -18,6 +19,7 @@ export type CatalogProduct = {
   image: string;
   gallery: string[];
   priceLabel: string;
+  displayPrice: string;
   sizes: string;
   badge: string;
   description: string;
@@ -67,6 +69,7 @@ export const catalogProducts: CatalogProduct[] = [
     slug: "real-madrid-home-25-26",
     name: "25-26 Real Madrid Home Jersey S-XXL",
     shortName: "Real Madrid Home 25-26",
+    cardTitle: "Camiseta Real Madrid",
     categorySlug: "times-espanhois",
     categoryName: "Times Espanhois",
     source: "Hsquan Yupoo",
@@ -81,6 +84,7 @@ export const catalogProducts: CatalogProduct[] = [
       "/catalog/real-madrid-home-25-26/5.png",
     ],
     priceLabel: "Sob consulta",
+    displayPrice: "R$ 129,90",
     sizes: "S ao XXL",
     badge: "Clube europeu",
     description:
@@ -90,6 +94,7 @@ export const catalogProducts: CatalogProduct[] = [
     slug: "brazil-white-parrot-25-26",
     name: "25-26 Brazil White Parrot Edition S-XXL",
     shortName: "Brazil White Parrot",
+    cardTitle: "Camiseta White Parrot",
     categorySlug: "selecoes",
     categoryName: "Selecoes",
     source: "Hsquan Yupoo",
@@ -104,6 +109,7 @@ export const catalogProducts: CatalogProduct[] = [
       "/catalog/brazil-white-parrot-25-26/5.jpg",
     ],
     priceLabel: "Sob consulta",
+    displayPrice: "R$ 119,90",
     sizes: "S ao XXL",
     badge: "Edicao especial",
     description:
@@ -113,6 +119,7 @@ export const catalogProducts: CatalogProduct[] = [
     slug: "south-korea-home-25-26",
     name: "25-26 South Korea Home S-4XL",
     shortName: "South Korea Home 25-26",
+    cardTitle: "Camiseta South Korea",
     categorySlug: "selecoes",
     categoryName: "Selecoes",
     source: "Hsquan Yupoo",
@@ -127,6 +134,7 @@ export const catalogProducts: CatalogProduct[] = [
       "/catalog/south-korea-home-25-26/5.png",
     ],
     priceLabel: "Sob consulta",
+    displayPrice: "R$ 129,90",
     sizes: "S ao 4XL",
     badge: "Selecao asiatica",
     description:
@@ -136,6 +144,7 @@ export const catalogProducts: CatalogProduct[] = [
     slug: "kit-adulto-arsenal-vermelho-25-26",
     name: "25-26 Kit Adulto Arsenal Vermelho S-XXL",
     shortName: "Kit Adulto Arsenal",
+    cardTitle: "Kit Arsenal Vermelho",
     categorySlug: "kit-adulto",
     categoryName: "Kit Adulto",
     source: "Hsquan Yupoo",
@@ -148,6 +157,7 @@ export const catalogProducts: CatalogProduct[] = [
       "/catalog/kit-adulto-arsenal-vermelho-25-26/3.jpg",
     ],
     priceLabel: "Sob consulta",
+    displayPrice: "R$ 119,90",
     sizes: "S ao XXL",
     badge: "Conjunto",
     description:
@@ -157,6 +167,7 @@ export const catalogProducts: CatalogProduct[] = [
     slug: "spain-home-2026",
     name: "Spain 2026 Home Jersey S-XXL",
     shortName: "Spain Home 2026",
+    cardTitle: "Camiseta Spain Home",
     categorySlug: "fifa-world-cup-2026",
     categoryName: "2026 FIFA World Cup",
     source: "Minkang Yupoo",
@@ -171,6 +182,7 @@ export const catalogProducts: CatalogProduct[] = [
       "/catalog/spain-home-2026/5.jpg",
     ],
     priceLabel: "Sob consulta",
+    displayPrice: "R$ 129,90",
     sizes: "S ao XXL",
     badge: "World Cup 2026",
     description:
@@ -180,6 +192,7 @@ export const catalogProducts: CatalogProduct[] = [
     slug: "spain-away-shorts-2026",
     name: "Spain 2026 Away Shorts S-XXL",
     shortName: "Spain Away Shorts 2026",
+    cardTitle: "Short Spain Away",
     categorySlug: "fifa-world-cup-2026",
     categoryName: "2026 FIFA World Cup",
     source: "Minkang Yupoo",
@@ -194,6 +207,7 @@ export const catalogProducts: CatalogProduct[] = [
       "/catalog/spain-away-shorts-2026/5.jpg",
     ],
     priceLabel: "Sob consulta",
+    displayPrice: "R$ 99,90",
     sizes: "S ao XXL",
     badge: "Peca avulsa",
     description:
