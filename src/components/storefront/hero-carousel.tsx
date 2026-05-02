@@ -43,7 +43,7 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
   return (
     <section className="relative mt-4 overflow-hidden rounded-[6px] bg-[#0f0f10]">
       <div className="absolute inset-0 bg-gradient-to-r from-black via-black/85 to-black/10" />
-      <div className="surface-glow absolute -left-12 top-10 h-32 w-32 rounded-full bg-[#1246ff]/20 blur-3xl" />
+      <div className="surface-glow absolute -left-12 top-10 h-32 w-32 rounded-full bg-[#4f46e5]/25 blur-3xl" />
 
       <button
         type="button"
@@ -56,7 +56,7 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
 
       <button
         type="button"
-        aria-label="Próximo slide"
+        aria-label="Proximo slide"
         onClick={goToNext}
         className="button-pop absolute inset-y-0 right-0 z-20 flex items-center px-4 text-5xl font-light text-white/70 transition hover:text-white"
       >
@@ -71,9 +71,7 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
             <div
               key={slide.slug}
               className={`absolute inset-0 transition-all duration-700 ${
-                isActive
-                  ? "pointer-events-auto opacity-100"
-                  : "pointer-events-none opacity-0"
+                isActive ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
               }`}
             >
               <div className="grid min-h-[390px] items-stretch lg:grid-cols-[0.9fr_1.1fr]">
@@ -84,16 +82,16 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
                     }`}
                   >
                     Drop importado
-                    <span className="h-2 w-2 rounded-full bg-[#1246ff]" />
+                    <span className="h-2 w-2 rounded-full bg-[#4f46e5]" />
                   </span>
                   <h1
                     className={`font-heading max-w-xl text-[3.3rem] leading-[0.9] text-white transition-all duration-700 sm:text-[4.8rem] lg:text-[6.3rem] ${
                       isActive ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
                     }`}
                   >
-                    {slide.title.split("\n").map((line, index) => (
-                      <span key={`${slide.slug}-${index}`}>
-                        {index > 0 ? <br /> : null}
+                    {slide.title.split("\n").map((line, lineIndex) => (
+                      <span key={`${slide.slug}-${lineIndex}`}>
+                        {lineIndex > 0 ? <br /> : null}
                         {line}
                       </span>
                     ))}
@@ -112,7 +110,7 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
                   >
                     <Link
                       href={`/produtos/${slide.slug}`}
-                      className="button-pop inline-flex min-w-40 items-center justify-center rounded-[4px] bg-[#1246ff] px-7 py-3 text-sm font-bold tracking-[0.04em] text-white transition hover:bg-[#0f3be0]"
+                      className="button-pop inline-flex min-w-40 items-center justify-center rounded-[4px] bg-[#4f46e5] px-7 py-3 text-sm font-bold tracking-[0.04em] text-white transition hover:bg-[#4338ca]"
                     >
                       {slide.buttonLabel}
                     </Link>
@@ -150,7 +148,7 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
         <div className="h-[2px] w-full overflow-hidden rounded-full bg-white/12">
           <div
             key={activeSlide.slug}
-            className="animate-carousel-progress h-full rounded-full bg-[#1246ff]"
+            className="animate-carousel-progress h-full rounded-full bg-[#4f46e5]"
           />
         </div>
       </div>
@@ -163,9 +161,7 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
             aria-label={`Ir para slide ${index + 1}`}
             onClick={() => goToSlide(index)}
             className={`h-1.5 rounded-full transition-all duration-300 ${
-              index === activeIndex
-                ? "w-8 bg-[#1246ff]"
-                : "w-4 bg-white/70 hover:bg-white"
+              index === activeIndex ? "w-8 bg-[#4f46e5]" : "w-4 bg-white/70 hover:bg-white"
             }`}
           />
         ))}

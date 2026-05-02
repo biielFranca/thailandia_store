@@ -23,9 +23,10 @@ export function FeaturedProductCarousel({
     }
 
     function handleScroll() {
-      const cardWidth = container.firstElementChild instanceof HTMLElement
-        ? container.firstElementChild.offsetWidth + 20
-        : 1;
+      const cardWidth =
+        container.firstElementChild instanceof HTMLElement
+          ? container.firstElementChild.offsetWidth + 20
+          : 1;
       const nextIndex = Math.round(container.scrollLeft / Math.max(cardWidth, 1));
       setActiveIndex(Math.max(0, Math.min(products.length - 1, nextIndex)));
     }
@@ -52,7 +53,7 @@ export function FeaturedProductCarousel({
   }
 
   return (
-    <section id="destaques" className="mt-10">
+    <section>
       <div className="mb-5 flex items-center justify-between gap-4">
         <div>
           <h2 className="text-[2rem] font-black uppercase tracking-[0.02em] text-white">
@@ -68,15 +69,15 @@ export function FeaturedProductCarousel({
             type="button"
             aria-label="Itens anteriores"
             onClick={() => scrollProducts("left")}
-            className="button-pop flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-[#111111] text-xl text-white transition hover:border-[#1246ff] hover:text-[#1246ff]"
+            className="button-pop flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-[#111111] text-xl text-white transition hover:border-[#4f46e5] hover:text-[#4f46e5]"
           >
             {"<"}
           </button>
           <button
             type="button"
-            aria-label="Próximos itens"
+            aria-label="Proximos itens"
             onClick={() => scrollProducts("right")}
-            className="button-pop flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-[#111111] text-xl text-white transition hover:border-[#1246ff] hover:text-[#1246ff]"
+            className="button-pop flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-[#111111] text-xl text-white transition hover:border-[#4f46e5] hover:text-[#4f46e5]"
           >
             {">"}
           </button>
@@ -92,7 +93,7 @@ export function FeaturedProductCarousel({
             key={product.slug}
             className={`card-hover min-w-[250px] snap-start overflow-hidden rounded-[6px] border bg-[#111111] sm:min-w-[260px] lg:min-w-[230px] xl:min-w-[220px] ${
               index === activeIndex
-                ? "border-[#1246ff]/45 shadow-[0_20px_45px_rgba(18,70,255,0.16)]"
+                ? "border-[#4f46e5]/45 shadow-[0_20px_45px_rgba(79,70,229,0.18)]"
                 : "border-white/8"
             }`}
           >
@@ -113,12 +114,12 @@ export function FeaturedProductCarousel({
               <h3 className="min-h-12 text-[0.95rem] font-bold uppercase leading-6 text-white">
                 {product.cardTitle}
               </h3>
-              <p className="mt-1 text-[2rem] font-black leading-none text-[#1246ff]">
+              <p className="mt-1 text-[2rem] font-black leading-none text-[#4f46e5]">
                 {product.displayPrice}
               </p>
               <Link
                 href={`/produtos/${product.slug}`}
-                className="button-pop mt-4 inline-flex w-full items-center justify-center rounded-[4px] bg-[#1246ff] px-4 py-3 text-sm font-bold uppercase tracking-[0.04em] text-white transition hover:bg-[#0f3be0]"
+                className="button-pop mt-4 inline-flex w-full items-center justify-center rounded-[4px] bg-[#4f46e5] px-4 py-3 text-sm font-bold uppercase tracking-[0.04em] text-white transition hover:bg-[#4338ca]"
               >
                 VER PRODUTO
               </Link>
@@ -140,9 +141,10 @@ export function FeaturedProductCarousel({
                 return;
               }
 
-              const cardWidth = container.firstElementChild instanceof HTMLElement
-                ? container.firstElementChild.offsetWidth + 20
-                : container.clientWidth;
+              const cardWidth =
+                container.firstElementChild instanceof HTMLElement
+                  ? container.firstElementChild.offsetWidth + 20
+                  : container.clientWidth;
 
               container.scrollTo({
                 left: cardWidth * index,
@@ -150,7 +152,7 @@ export function FeaturedProductCarousel({
               });
             }}
             className={`h-1.5 rounded-full transition-all duration-300 ${
-              index === activeIndex ? "w-8 bg-[#1246ff]" : "w-3 bg-white/20 hover:bg-white/55"
+              index === activeIndex ? "w-8 bg-[#4f46e5]" : "w-3 bg-white/20 hover:bg-white/55"
             }`}
           />
         ))}
