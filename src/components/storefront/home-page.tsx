@@ -1,3 +1,5 @@
+import Image from "next/image";
+import Link from "next/link";
 import { storeConfig } from "@/config/store";
 import { homeContent } from "@/themes/thailandia/content/home";
 
@@ -141,7 +143,7 @@ export function HomePage() {
                         Faixa de preco
                       </p>
                       <p className="mt-2 font-heading text-3xl text-white">
-                        R$ 149+
+                        Sob consulta
                       </p>
                     </div>
                   </div>
@@ -172,22 +174,23 @@ export function HomePage() {
         <div className="mb-8 flex items-end justify-between gap-6">
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-[var(--primary)]">
-              Categorias principais
+              Categorias reais
             </p>
             <h2 className="font-heading mt-3 text-4xl text-white sm:text-5xl">
-              COMPRE POR ENERGIA, NAO SO POR PRODUTO
+              CATEGORIAS PUXADAS DOS CATALOGOS BASE
             </h2>
           </div>
           <p className="hidden max-w-md text-sm leading-7 text-zinc-400 lg:block">
-            A navegacao inicial prioriza leitura rapida, desejo visual e acesso
-            direto as familias mais comerciais do MVP.
+            A estrutura abaixo foi reorganizada com base nas secoes reais dos
+            catalogos hsquan996 e minkang para ficar pronta para navegacao.
           </p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-4">
           {homeContent.categories.map((category, index) => (
-            <article
-              key={category.name}
+            <Link
+              key={category.slug}
+              href={category.href}
               className={`panel rounded-[2rem] p-6 transition duration-300 hover:-translate-y-1 hover:border-white/20 ${categoryCardStyles[index]}`}
             >
               <span className="inline-flex rounded-full bg-white/6 px-3 py-1 text-xs uppercase tracking-[0.22em] text-zinc-400">
@@ -197,10 +200,16 @@ export function HomePage() {
                 {category.name}
               </h3>
               <p className="mt-3 max-w-sm text-sm leading-7 text-zinc-300">
-                {category.caption}
+                {category.description}
               </p>
-              <div className="mt-8 h-32 rounded-[1.5rem] border border-white/8 bg-[linear-gradient(135deg,rgba(245,200,66,0.16),rgba(255,255,255,0.03),rgba(255,90,54,0.12))]" />
-            </article>
+              <p className="mt-5 text-xs uppercase tracking-[0.2em] text-zinc-500">
+                Fonte: {category.source.includes("hsquan") ? "Hsquan" : "Minkang"}
+              </p>
+              <div className="mt-8 flex items-center justify-between rounded-[1.5rem] border border-white/8 bg-[linear-gradient(135deg,rgba(245,200,66,0.16),rgba(255,255,255,0.03),rgba(255,90,54,0.12))] px-5 py-4">
+                <span className="text-sm text-white">Ver categoria</span>
+                <span className="text-xl text-[var(--primary)]">+</span>
+              </div>
+            </Link>
           ))}
         </div>
       </section>
@@ -213,46 +222,69 @@ export function HomePage() {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.3em] text-[var(--accent)]">
-                Mais vendidos
+                Produtos reais
               </p>
               <h2 className="font-heading mt-3 text-4xl text-white sm:text-5xl">
-                PRODUTOS COM LEITURA DE CAMPANHA
+                CARDS COM IMAGENS REAIS DOS ALBUNS
               </h2>
             </div>
             <p className="max-w-xl text-sm leading-7 text-zinc-400">
               Cards pensados para sustentar preco, categoria e presenca de
-              produto sem depender de excesso de texto.
+              produto sem depender de excesso de texto. Os itens abaixo usam
+              capas reais dos catalogos Yupoo enviados por voce.
             </p>
           </div>
 
           <div className="mt-8 grid gap-4 lg:grid-cols-3">
             {homeContent.featuredProducts.map((product) => (
               <article
-                key={product.name}
+                key={product.slug}
                 className="rounded-[2rem] border border-white/10 bg-black/40 p-5"
               >
-                <div
-                  className={`h-72 rounded-[1.5rem] bg-gradient-to-br ${product.accent}`}
-                />
+                <Link
+                  href={`/produtos/${product.slug}`}
+                  className="relative block overflow-hidden rounded-[1.5rem] border border-white/10 bg-zinc-900"
+                >
+                  <Image
+                    src={product.image}
+                    alt={product.name}
+                    width={900}
+                    height={900}
+                    className="h-72 w-full object-cover transition duration-500 hover:scale-[1.03]"
+                  />
+                </Link>
                 <div className="mt-5 flex items-start justify-between gap-4">
                   <div>
                     <p className="text-xs uppercase tracking-[0.24em] text-zinc-500">
-                      {product.category}
+                      {product.categoryName}
                     </p>
                     <h3 className="font-heading mt-2 text-3xl text-white">
-                      {product.name}
+                      {product.shortName}
                     </h3>
+                    <p className="mt-2 text-xs uppercase tracking-[0.2em] text-zinc-500">
+                      {product.source}
+                    </p>
                   </div>
                   <span className="rounded-full border border-white/10 px-3 py-1 text-sm text-zinc-200">
-                    {product.price}
+                    {product.priceLabel}
                   </span>
                 </div>
-                <a
-                  href="#checkout"
-                  className="mt-5 inline-flex rounded-full bg-white px-4 py-2 text-sm font-semibold text-black transition hover:bg-zinc-200"
-                >
-                  Ver produto
-                </a>
+                <div className="mt-5 flex gap-3">
+                  <Link
+                    href={`/produtos/${product.slug}`}
+                    className="inline-flex rounded-full bg-white px-4 py-2 text-sm font-semibold text-black transition hover:bg-zinc-200"
+                  >
+                    Ver produto
+                  </Link>
+                  <a
+                    href={product.sourceUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex rounded-full border border-white/10 px-4 py-2 text-sm text-zinc-200 transition hover:border-white/25 hover:text-white"
+                  >
+                    Abrir album
+                  </a>
+                </div>
               </article>
             ))}
           </div>
