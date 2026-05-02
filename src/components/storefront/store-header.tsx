@@ -89,11 +89,23 @@ export function StoreHeader() {
         <div className="flex h-[72px] items-center justify-between gap-4">
           <Link
             href="/"
-            className="font-display text-2xl leading-none tracking-tight sm:text-3xl"
+            className="inline-flex items-center"
             style={{ color: "var(--text-primary)" }}
             aria-label={brand.name}
           >
-            {brand.wordmark}
+            {/*
+              The logo SVG uses currentColor for fill, so it inherits the
+              link's text color. Use a plain <img> instead of next/image to
+              keep the SVG inlined-friendly and avoid the optimizer rasterizing
+              vectors.
+            */}
+            <img
+              src={brand.logo.src}
+              alt={brand.name}
+              width={brand.logo.headerWidth}
+              height={(brand.logo.headerWidth * brand.logo.height) / brand.logo.width}
+              className="h-7 w-auto sm:h-8"
+            />
           </Link>
 
           <nav
