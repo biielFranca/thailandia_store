@@ -1,7 +1,7 @@
 export const storeConfig = {
   name: "Thailandia Store",
   slug: "thailandia",
-  description: "Moda importada e streetwear direto da Tailândia",
+  description: "Moda importada e streetwear direto da Tailandia",
   currency: "BRL",
   locale: "pt-BR",
   contact: {

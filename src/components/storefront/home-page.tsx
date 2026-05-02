@@ -118,7 +118,7 @@ export function HomePage() {
                         NIGHT LEAGUE
                       </p>
                       <p className="mt-2 max-w-xs text-sm leading-7 text-zinc-300">
-                        Mistura de futebol retrô, modelagem oversized e ataque
+                        Mistura de futebol retro, modelagem oversized e ataque
                         visual de campanha.
                       </p>
                     </div>
@@ -130,7 +130,7 @@ export function HomePage() {
                   <div className="mt-6 grid grid-cols-2 gap-3">
                     <div className="rounded-3xl border border-white/10 bg-white/4 p-4">
                       <p className="text-xs uppercase tracking-[0.22em] text-zinc-500">
-                        Peça hero
+                        Peca hero
                       </p>
                       <p className="mt-2 font-heading text-3xl text-white">
                         Jersey 97
@@ -138,7 +138,7 @@ export function HomePage() {
                     </div>
                     <div className="rounded-3xl border border-white/10 bg-white/4 p-4">
                       <p className="text-xs uppercase tracking-[0.22em] text-zinc-500">
-                        Faixa de preço
+                        Faixa de preco
                       </p>
                       <p className="mt-2 font-heading text-3xl text-white">
                         R$ 149+
@@ -175,12 +175,12 @@ export function HomePage() {
               Categorias principais
             </p>
             <h2 className="font-heading mt-3 text-4xl text-white sm:text-5xl">
-              COMPRE POR ENERGIA, NÃO SÓ POR PRODUTO
+              COMPRE POR ENERGIA, NAO SO POR PRODUTO
             </h2>
           </div>
           <p className="hidden max-w-md text-sm leading-7 text-zinc-400 lg:block">
-            A navegação inicial prioriza leitura rápida, desejo visual e acesso
-            direto às famílias mais comerciais do MVP.
+            A navegacao inicial prioriza leitura rapida, desejo visual e acesso
+            direto as familias mais comerciais do MVP.
           </p>
         </div>
 
@@ -220,7 +220,7 @@ export function HomePage() {
               </h2>
             </div>
             <p className="max-w-xl text-sm leading-7 text-zinc-400">
-              Cards pensados para sustentar preço, categoria e presença de
+              Cards pensados para sustentar preco, categoria e presenca de
               produto sem depender de excesso de texto.
             </p>
           </div>
@@ -262,7 +262,7 @@ export function HomePage() {
       <section className="mx-auto grid max-w-7xl gap-4 px-4 py-16 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:px-8">
         <div className="panel rounded-[2rem] p-6 sm:p-8">
           <p className="text-xs uppercase tracking-[0.3em] text-[var(--primary)]">
-            Confiança de compra
+            Confianca de compra
           </p>
           <h2 className="font-heading mt-3 text-4xl text-white sm:text-5xl">
             FLUXO FEITO PARA CONVERTER SEM PERDER CONTROLE
@@ -287,7 +287,7 @@ export function HomePage() {
 
         <div className="panel rounded-[2rem] p-6 sm:p-8">
           <p className="text-xs uppercase tracking-[0.3em] text-[var(--accent)]">
-            Estrutura da experiência
+            Estrutura da experiencia
           </p>
           <div className="mt-6 space-y-4">
             {homeContent.experience.map((item, index) => (
@@ -316,8 +316,8 @@ export function HomePage() {
               PEDIDO, PAGAMENTO E RASTREIO NO MESMO FLUXO
             </p>
             <p className="mt-3 max-w-2xl text-sm leading-7 text-zinc-200">
-              A próxima etapa técnica pode conectar carrinho, checkout e estado
-              de pagamento sem redesenhar a home. A interface já aponta o
+              A proxima etapa tecnica pode conectar carrinho, checkout e estado
+              de pagamento sem redesenhar a home. A interface ja aponta o
               comportamento comercial esperado.
             </p>
           </div>
@@ -329,7 +329,7 @@ export function HomePage() {
           <div>
             <p className="font-heading text-3xl text-white">THAILANDIA STORE</p>
             <p className="mt-3 max-w-xl text-sm leading-7 text-zinc-400">
-              {storeConfig.description}. Base visual preparada para catálogo,
+              {storeConfig.description}. Base visual preparada para catalogo,
               produto, carrinho, checkout e rastreio no MVP.
             </p>
           </div>

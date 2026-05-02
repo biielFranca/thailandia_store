@@ -11,8 +11,8 @@ export const homeContent = {
     eyebrow: "Thailandia Store",
     title: "STREETWEAR IMPORTADO COM ENERGIA DE QUADRA E ESTILO DE RUA",
     description:
-      "Peças selecionadas para quem quer vestir identidade. Camisas de time, kits esportivos e looks pesados com curadoria comercial e visual escuro.",
-    primaryCta: "Explorar coleção",
+      "Pecas selecionadas para quem quer vestir identidade. Camisas de time, kits esportivos e looks pesados com curadoria comercial e visual escuro.",
+    primaryCta: "Explorar colecao",
     secondaryCta: "Ver mais vendidos",
     highlights: [
       "Drops limitados",
@@ -22,13 +22,13 @@ export const homeContent = {
     stats: [
       { label: "Modelos em alta", value: "120+" },
       { label: "Categorias ativas", value: "08" },
-      { label: "Atualização do drop", value: "Semanal" },
+      { label: "Atualizacao do drop", value: "Semanal" },
     ],
   },
   categories: [
     {
       name: "Camisas de Time",
-      caption: "Clubes clássicos, seleções e edições especiais.",
+      caption: "Clubes classicos, selecoes e edicoes especiais.",
       tag: "Futebol",
     },
     {
@@ -38,12 +38,12 @@ export const homeContent = {
     },
     {
       name: "Streetwear Importado",
-      caption: "Modelagens largas, contraste forte e presença visual.",
+      caption: "Modelagens largas, contraste forte e presenca visual.",
       tag: "Lifestyle",
     },
     {
-      name: "Acessórios",
-      caption: "Bonés, meias e peças para completar o drop.",
+      name: "Acessorios",
+      caption: "Bones, meias e pecas para completar o drop.",
       tag: "Essenciais",
     },
   ],
@@ -71,23 +71,23 @@ export const homeContent = {
     {
       title: "Curadoria comercial",
       description:
-        "Seleção de produtos com apelo de compra rápido e leitura visual forte para campanhas.",
+        "Selecao de produtos com apelo de compra rapido e leitura visual forte para campanhas.",
     },
     {
       title: "Checkout direto",
       description:
-        "Fluxo enxuto para reduzir atrito e levar o cliente do interesse ao pagamento sem ruído.",
+        "Fluxo enxuto para reduzir atrito e levar o cliente do interesse ao pagamento sem ruido.",
     },
     {
-      title: "Pós-venda rastreável",
+      title: "Pos-venda rastreavel",
       description:
         "Pedido, status e pagamento preparados para acompanhamento claro no MVP.",
     },
   ],
   experience: [
     "Hero com chamada forte, prova visual e CTA acima da dobra",
-    "Categorias apresentadas como atalhos de exploração",
-    "Grade de produtos destacando preço, categoria e impacto visual",
-    "Faixa de confiança com pagamento, envio e rastreio",
+    "Categorias apresentadas como atalhos de exploracao",
+    "Grade de produtos destacando preco, categoria e impacto visual",
+    "Faixa de confianca com pagamento, envio e rastreio",
   ],
 } as const;
