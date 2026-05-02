@@ -1,17 +1,24 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
-import { Inter } from "next/font/google";
+import { DM_Serif_Display, Inter } from "next/font/google";
 import { brand } from "@/themes/thailandia/content/brand";
 import "./globals.css";
 
-// Display family — Nowstalgic. Drop the file at `public/fonts/Nowstalgic.woff2`.
-// See public/fonts/README.md for details.
-const displayFont = localFont({
-  src: "../../public/fonts/Nowstalgic.woff2",
+// Display family. Target is **Nowstalgic** — when the file is dropped at
+// `public/fonts/Nowstalgic.woff2` (see public/fonts/README.md), swap this
+// import back to:
+//   import localFont from "next/font/local";
+//   const displayFont = localFont({
+//     src: "../../public/fonts/Nowstalgic.woff2",
+//     variable: "--font-display", display: "swap", weight: "400",
+//     fallback: ["Georgia", "serif"],
+//   });
+// Until then, DM Serif Display is the closest Google substitute (bold vintage
+// display serif) so the dev server runs and the visual hierarchy is preserved.
+const displayFont = DM_Serif_Display({
   variable: "--font-display",
-  display: "swap",
   weight: "400",
-  fallback: ["Georgia", "serif"],
+  subsets: ["latin"],
+  display: "swap",
 });
 
 const bodyFont = Inter({
