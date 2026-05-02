@@ -72,6 +72,41 @@ img {
   backdrop-filter: blur(14px);
 }
 
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes glow-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.9;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes carousel-progress {
+  from {
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+
+  to {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+}
+
 .button-pop {
   transition:
     transform 180ms ease,
@@ -106,4 +141,16 @@ img {
 
 .scrollbar-hidden::-webkit-scrollbar {
   display: none;
+}
+
+.marquee-track {
+  animation: marquee 18s linear infinite;
+}
+
+.surface-glow {
+  animation: glow-pulse 4.2s ease-in-out infinite;
+}
+
+.animate-carousel-progress {
+  animation: carousel-progress 5s linear forwards;
 }
