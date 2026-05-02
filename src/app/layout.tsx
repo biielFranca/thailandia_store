@@ -1,22 +1,28 @@
 import type { Metadata } from "next";
-import { Bebas_Neue, Manrope } from "next/font/google";
+import localFont from "next/font/local";
+import { Inter } from "next/font/google";
+import { brand } from "@/themes/thailandia/content/brand";
 import "./globals.css";
 
-const headingFont = Bebas_Neue({
-  variable: "--font-heading",
+// Display family — Nowstalgic. Drop the file at `public/fonts/Nowstalgic.woff2`.
+// See public/fonts/README.md for details.
+const displayFont = localFont({
+  src: "../../public/fonts/Nowstalgic.woff2",
+  variable: "--font-display",
+  display: "swap",
   weight: "400",
-  subsets: ["latin"],
+  fallback: ["Georgia", "serif"],
 });
 
-const bodyFont = Manrope({
+const bodyFont = Inter({
   variable: "--font-body",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Thailandia Store | Streetwear importado e performance",
-  description:
-    "E-commerce de moda importada com foco em camisetas de time, conjuntos esportivos e streetwear premium.",
+  title: brand.metaTitle,
+  description: brand.metaDescription,
 };
 
 export default function RootLayout({
@@ -27,7 +33,7 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${headingFont.variable} ${bodyFont.variable} h-full`}
+      className={`${displayFont.variable} ${bodyFont.variable} h-full`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

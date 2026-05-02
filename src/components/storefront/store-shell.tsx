@@ -10,7 +10,7 @@ export function StoreShell({ children }: StoreShellProps) {
   return (
     <>
       <StoreHeader />
-      <div className="min-h-screen pt-[8.5rem] sm:pt-[8.75rem]">{children}</div>
+      <div className="min-h-screen pt-[72px]">{children}</div>
       <StoreFooter />
     </>
   );

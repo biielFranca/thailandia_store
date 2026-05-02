@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { brand } from "@/themes/thailandia/content/brand";
 import { catalogCategories } from "@/themes/thailandia/content/catalog";
 
 const mainLinks = [
-  { label: "Inicio", href: "/" },
+  { label: "Início", href: "/" },
   { label: "Destaques", href: "/#destaques" },
-  { label: "Lancamentos", href: "/#lancamentos" },
+  { label: "Lançamentos", href: "/#lancamentos" },
   { label: "Categorias", href: "/#categorias" },
 ] as const;
 
@@ -19,7 +20,7 @@ function CartIcon() {
       className="h-5 w-5"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.8"
+      strokeWidth="1.6"
       strokeLinecap="round"
       strokeLinejoin="round"
     >
@@ -30,98 +31,155 @@ function CartIcon() {
   );
 }
 
+// The category strip only appears on the home and category pages — keeping it
+// off PDP/cart/checkout/auth lets the primary content occupy the first fold.
+function shouldShowCategoryStrip(pathname: string | null) {
+  if (!pathname) return false;
+  if (pathname === "/") return true;
+  if (pathname.startsWith("/categorias")) return true;
+  return false;
+}
+
 export function StoreHeader() {
   const pathname = usePathname();
+  const showCategoryStrip = shouldShowCategoryStrip(pathname);
+  const cartCount = 0;
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-[rgba(6,8,24,0.88)] backdrop-blur-xl">
-      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
-        <div className="flex min-h-16 items-center justify-between gap-4">
-          <Link href="/" className="font-heading text-3xl leading-none text-white sm:text-4xl">
-            THAILANDIA STORE
+    <header
+      className="fixed inset-x-0 top-0 z-50 border-b backdrop-blur-md"
+      style={{
+        borderColor: "var(--border-subtle)",
+        backgroundColor: "color-mix(in oklab, var(--surface-1) 88%, transparent)",
+      }}
+    >
+      <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
+        <div className="flex h-[72px] items-center justify-between gap-4">
+          <Link
+            href="/"
+            className="font-display text-2xl leading-none tracking-tight sm:text-3xl"
+            style={{ color: "var(--text-primary)" }}
+            aria-label={brand.name}
+          >
+            {brand.wordmark}
           </Link>
 
-          <nav className="hidden items-center gap-6 text-sm font-semibold uppercase tracking-[0.08em] text-white/76 lg:flex">
-            {mainLinks.map((link) => (
-              <Link
-                key={link.label}
-                href={link.href}
-                className="transition hover:text-[#4f46e5]"
-              >
-                {link.label}
-              </Link>
-            ))}
+          <nav
+            className="hidden items-center gap-7 text-sm font-medium lg:flex"
+            style={{ color: "var(--text-secondary)" }}
+          >
+            {mainLinks.map((link) => {
+              const isActive =
+                link.href === "/" ? pathname === "/" : pathname?.startsWith(link.href.split("#")[0] || "/");
+              return (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className="transition-colors duration-200 hover:[color:var(--text-primary)]"
+                  style={isActive ? { color: "var(--text-primary)" } : undefined}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
           </nav>
 
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2">
             <Link
               href="/login"
-              className={`button-pop rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] transition sm:text-sm ${
-                pathname === "/login"
-                  ? "border-[#4f46e5] bg-[#4f46e5] text-white"
-                  : "border-white/10 bg-white/5 text-white/82"
-              }`}
+              className="hidden h-10 items-center rounded-[8px] px-4 text-sm font-medium transition-colors duration-200 sm:inline-flex"
+              style={{
+                color: "var(--text-secondary)",
+              }}
             >
-              Login
+              Entrar
             </Link>
             <Link
               href="/cadastro"
-              className={`button-pop rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] transition sm:text-sm ${
-                pathname === "/cadastro"
-                  ? "border-[#a855f7] bg-[#a855f7] text-white"
-                  : "border-white/10 bg-white/5 text-white/82"
-              }`}
+              className="hidden h-10 items-center rounded-[8px] border px-4 text-sm font-medium transition-colors duration-200 sm:inline-flex"
+              style={{
+                borderColor: "var(--border-subtle)",
+                color: "var(--text-primary)",
+              }}
             >
-              Cadastro
+              Cadastrar
             </Link>
             <button
               type="button"
-              aria-label="Abrir carrinho"
-              className="button-pop relative inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white"
+              aria-label={`Abrir carrinho${cartCount ? ` (${cartCount} itens)` : ""}`}
+              className="relative inline-flex h-10 w-10 items-center justify-center rounded-[8px] border transition-colors duration-200"
+              style={{
+                borderColor: "var(--border-subtle)",
+                color: "var(--text-primary)",
+              }}
             >
               <CartIcon />
-              <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#4f46e5] px-1 text-[11px] font-bold text-white">
-                0
-              </span>
+              {cartCount > 0 && (
+                <span
+                  className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[11px] font-semibold price"
+                  style={{
+                    backgroundColor: "var(--cta)",
+                    color: "var(--cta-foreground)",
+                  }}
+                >
+                  {cartCount}
+                </span>
+              )}
             </button>
           </div>
         </div>
       </div>
 
-      <div className="border-t border-white/6 bg-[rgba(7,10,30,0.92)]">
-        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
-          <nav className="scrollbar-hidden flex items-center gap-3 overflow-x-auto py-3">
-            <Link
-              href="/"
-              className={`rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] transition ${
-                pathname === "/"
-                  ? "border-[#4f46e5] bg-[#4f46e5]/20 text-white"
-                  : "border-white/10 bg-white/[0.04] text-white/68 hover:border-[#4f46e5]/40 hover:text-white"
-              }`}
-            >
-              Todas
-            </Link>
-            {catalogCategories.map((category) => {
-              const href = `/categorias/${category.slug}`;
-              const isActive = pathname === href;
-
-              return (
-                <Link
-                  key={category.slug}
-                  href={href}
-                  className={`rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] transition ${
-                    isActive
-                      ? "border-[#4f46e5] bg-[#4f46e5]/20 text-white"
-                      : "border-white/10 bg-white/[0.04] text-white/68 hover:border-[#4f46e5]/40 hover:text-white"
-                  }`}
-                >
-                  {category.name}
-                </Link>
-              );
-            })}
-          </nav>
+      {showCategoryStrip && (
+        <div
+          className="border-t"
+          style={{
+            borderColor: "var(--border-subtle)",
+            backgroundColor: "var(--surface-1)",
+          }}
+        >
+          <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
+            <nav className="scrollbar-hidden flex items-center gap-1 overflow-x-auto py-2.5">
+              <CategoryChip href="/" active={pathname === "/"} label="Todas" />
+              {catalogCategories.map((category) => {
+                const href = `/categorias/${category.slug}`;
+                return (
+                  <CategoryChip
+                    key={category.slug}
+                    href={href}
+                    active={pathname === href}
+                    label={category.name}
+                  />
+                );
+              })}
+            </nav>
+          </div>
         </div>
-      </div>
+      )}
     </header>
+  );
+}
+
+function CategoryChip({
+  href,
+  label,
+  active,
+}: {
+  href: string;
+  label: string;
+  active: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      className="whitespace-nowrap rounded-[4px] px-3 py-1.5 text-xs font-medium tracking-wide uppercase transition-colors duration-200"
+      style={
+        active
+          ? { color: "var(--text-primary)", backgroundColor: "var(--surface-2)" }
+          : { color: "var(--text-tertiary)" }
+      }
+    >
+      {label}
+    </Link>
   );
 }
