@@ -4,6 +4,8 @@ export type CatalogCategory = {
   accent: string;
   description: string;
   href: string;
+  coverImage?: string;
+  comingSoon?: boolean;
 };
 
 export type CatalogProduct = {
@@ -20,51 +22,78 @@ export type CatalogProduct = {
   sizes: string;
   badge: string;
   description: string;
+  // Extended fields for football store UX
+  line?: string;       // "Linha Torcedor" | "Linha Jogador" | "Linha Retrô"
+  status?: string;     // "Novo" | "Pronta entrega" | "Últimas unidades" | "Sob encomenda"
+  season?: string;     // "24/25" | "25/26"
+  isFeatured?: boolean;
+  isBestseller?: boolean;
 };
 
 export const catalogCategories: CatalogCategory[] = [
   {
-    slug: "kit-adulto",
-    name: "Kit Adulto",
-    accent: "Conjuntos completos",
-    description:
-      "Combos de camisa e short para quem quer visual fechado, leitura forte e compra rapida.",
-    href: "/categorias/kit-adulto",
+    slug: "europeus",
+    name: "Europeus",
+    accent: "Clubes europeus",
+    description: "Real Madrid, Barcelona, PSG, Milan, Arsenal, City, United e mais.",
+    href: "/categorias/europeus",
+    coverImage: "/catalog/real-madrid-home-25-26/1.png",
   },
   {
     slug: "selecoes",
-    name: "Selecoes",
-    accent: "Edicoes especiais",
-    description:
-      "Camisas de selecoes com visual marcante, boa saida comercial e apelo de lancamento.",
+    name: "Seleções",
+    accent: "Edições especiais",
+    description: "Brasil, Argentina, França, Alemanha, Portugal, Japão e outras.",
     href: "/categorias/selecoes",
+    coverImage: "/catalog/brazil-white-parrot-25-26/1.jpg",
   },
   {
-    slug: "times-espanhois",
-    name: "Times Espanhois",
-    accent: "Linha de clubes",
-    description:
-      "Pecas inspiradas nos gigantes espanhois, pensadas para destaque de vitrine e alto clique.",
-    href: "/categorias/times-espanhois",
+    slug: "brasileiros",
+    name: "Brasileiros",
+    accent: "Clubes nacionais",
+    description: "Flamengo, Corinthians, Palmeiras, São Paulo, Santos, Vasco e outros.",
+    href: "/categorias/brasileiros",
+    comingSoon: true,
+  },
+  {
+    slug: "kit-adulto",
+    name: "Kit Adulto",
+    accent: "Conjuntos completos",
+    description: "Camisa + short com visual fechado e compra no impulso.",
+    href: "/categorias/kit-adulto",
+    coverImage: "/catalog/kit-adulto-arsenal-vermelho-25-26/1.jpg",
   },
   {
     slug: "fifa-world-cup-2026",
     name: "World Cup 2026",
-    accent: "Capsula de copa",
-    description:
-      "Modelos e pecas avulsas com cara de evento, ideais para criar urgencia e novidade.",
+    accent: "Cápsula de Copa",
+    description: "Edições comemorativas e colecionáveis da Copa do Mundo 2026.",
     href: "/categorias/fifa-world-cup-2026",
+    coverImage: "/catalog/spain-home-2026/1.jpg",
+  },
+  {
+    slug: "retro",
+    name: "Retrô",
+    accent: "Clássicos do futebol",
+    description: "Relíquias do futebol mundial. Peças históricas com alma de colecionador.",
+    href: "/categorias/retro",
+    comingSoon: true,
   },
 ];
+
+// Keep legacy slug for existing routes
+export const catalogCategoriesLegacy: Record<string, string> = {
+  "times-espanhois": "europeus",
+};
 
 export const catalogProducts: CatalogProduct[] = [
   {
     slug: "real-madrid-home-25-26",
     name: "25-26 Real Madrid Home Jersey S-XXL",
     shortName: "Real Madrid Home 25-26",
-    cardTitle: "Camiseta Real Madrid",
-    categorySlug: "times-espanhois",
-    categoryName: "Times Espanhois",
+    cardTitle: "Real Madrid Home",
+    categorySlug: "europeus",
+    categoryName: "Europeus",
     image: "/catalog/real-madrid-home-25-26/1.png",
     gallery: [
       "/catalog/real-madrid-home-25-26/1.png",
@@ -75,18 +104,23 @@ export const catalogProducts: CatalogProduct[] = [
     ],
     priceLabel: "R$ 129,90",
     displayPrice: "R$ 129,90",
-    sizes: "S ao XXL",
+    sizes: "S, M, G, GG, XGG",
     badge: "Mais vendido",
+    line: "Linha Torcedor",
+    status: "Pronta entrega",
+    season: "25/26",
+    isFeatured: true,
+    isBestseller: true,
     description:
-      "Camisa de impacto visual forte, perfeita para abrir colecao, campanha ou bloco principal da home.",
+      "A camisa do Real Madrid 25/26 com qualidade de importado, tecido respirável e acabamento premium. Pronta entrega.",
   },
   {
     slug: "brazil-white-parrot-25-26",
     name: "25-26 Brazil White Parrot Edition S-XXL",
-    shortName: "Brazil White Parrot",
-    cardTitle: "Camiseta White Parrot",
+    shortName: "Brasil White Parrot",
+    cardTitle: "Brasil White Parrot",
     categorySlug: "selecoes",
-    categoryName: "Selecoes",
+    categoryName: "Seleções",
     image: "/catalog/brazil-white-parrot-25-26/1.jpg",
     gallery: [
       "/catalog/brazil-white-parrot-25-26/1.jpg",
@@ -97,18 +131,23 @@ export const catalogProducts: CatalogProduct[] = [
     ],
     priceLabel: "R$ 119,90",
     displayPrice: "R$ 119,90",
-    sizes: "S ao XXL",
-    badge: "Lancamento",
+    sizes: "S, M, G, GG, XGG",
+    badge: "Lançamento",
+    line: "Linha Torcedor",
+    status: "Novo",
+    season: "25/26",
+    isFeatured: true,
+    isBestseller: false,
     description:
-      "Modelo com leitura premium e pegada fashion, feito para sustentar carrossel e secao de novidade.",
+      "Edição especial White Parrot da Seleção Brasileira. Design exclusivo, peça de colecionador com entrega imediata.",
   },
   {
     slug: "south-korea-home-25-26",
     name: "25-26 South Korea Home S-4XL",
-    shortName: "South Korea Home 25-26",
-    cardTitle: "Camiseta South Korea",
+    shortName: "Coreia do Sul Home",
+    cardTitle: "Coreia do Sul Home",
     categorySlug: "selecoes",
-    categoryName: "Selecoes",
+    categoryName: "Seleções",
     image: "/catalog/south-korea-home-25-26/1.png",
     gallery: [
       "/catalog/south-korea-home-25-26/1.png",
@@ -119,15 +158,20 @@ export const catalogProducts: CatalogProduct[] = [
     ],
     priceLabel: "R$ 129,90",
     displayPrice: "R$ 129,90",
-    sizes: "S ao 4XL",
-    badge: "Edicao quente",
+    sizes: "S, M, G, GG, XGG, 3XG, 4XG",
+    badge: "Edição quente",
+    line: "Linha Torcedor",
+    status: "Pronta entrega",
+    season: "25/26",
+    isFeatured: false,
+    isBestseller: true,
     description:
-      "Peca com shape limpo e leitura forte para campanhas de selecoes e vitrine mobile.",
+      "Camisa da Coreia do Sul 25/26 disponível até 4XL. Design clean, qualidade importada e tamanhos amplos.",
   },
   {
     slug: "kit-adulto-arsenal-vermelho-25-26",
     name: "25-26 Kit Adulto Arsenal Vermelho S-XXL",
-    shortName: "Kit Adulto Arsenal",
+    shortName: "Kit Arsenal 25/26",
     cardTitle: "Kit Arsenal Vermelho",
     categorySlug: "kit-adulto",
     categoryName: "Kit Adulto",
@@ -139,16 +183,21 @@ export const catalogProducts: CatalogProduct[] = [
     ],
     priceLabel: "R$ 119,90",
     displayPrice: "R$ 119,90",
-    sizes: "S ao XXL",
-    badge: "Combo",
+    sizes: "S, M, G, GG, XGG",
+    badge: "Kit completo",
+    line: "Linha Torcedor",
+    status: "Últimas unidades",
+    season: "25/26",
+    isFeatured: true,
+    isBestseller: false,
     description:
-      "Conjunto com cara de compra imediata, ideal para bloco de oferta e ticket medio mais forte.",
+      "Kit completo Arsenal 25/26 com camisa + short. Visual fechado, compra direta. Estoque limitado.",
   },
   {
     slug: "spain-home-2026",
     name: "Spain 2026 Home Jersey S-XXL",
-    shortName: "Spain Home 2026",
-    cardTitle: "Camiseta Spain Home",
+    shortName: "Espanha Home 2026",
+    cardTitle: "Espanha Home 2026",
     categorySlug: "fifa-world-cup-2026",
     categoryName: "World Cup 2026",
     image: "/catalog/spain-home-2026/1.jpg",
@@ -161,16 +210,21 @@ export const catalogProducts: CatalogProduct[] = [
     ],
     priceLabel: "R$ 129,90",
     displayPrice: "R$ 129,90",
-    sizes: "S ao XXL",
-    badge: "Capsula 2026",
+    sizes: "S, M, G, GG, XGG",
+    badge: "Copa 2026",
+    line: "Linha Torcedor",
+    status: "Novo",
+    season: "2026",
+    isFeatured: true,
+    isBestseller: false,
     description:
-      "Camisa pensada para bloco de novidade com linguagem de evento e giro de atencao rapido.",
+      "Camisa oficial da Espanha para a Copa do Mundo 2026. Peça comemorativa de colecionador, importada.",
   },
   {
     slug: "spain-away-shorts-2026",
     name: "Spain 2026 Away Shorts S-XXL",
-    shortName: "Spain Away Shorts 2026",
-    cardTitle: "Short Spain Away",
+    shortName: "Short Espanha 2026",
+    cardTitle: "Short Espanha Away",
     categorySlug: "fifa-world-cup-2026",
     categoryName: "World Cup 2026",
     image: "/catalog/spain-away-shorts-2026/1.jpg",
@@ -183,21 +237,34 @@ export const catalogProducts: CatalogProduct[] = [
     ],
     priceLabel: "R$ 99,90",
     displayPrice: "R$ 99,90",
-    sizes: "S ao XXL",
-    badge: "Peca avulsa",
+    sizes: "S, M, G, GG, XGG",
+    badge: "Copa 2026",
+    line: "Linha Torcedor",
+    status: "Pronta entrega",
+    season: "2026",
+    isFeatured: false,
+    isBestseller: false,
     description:
-      "Item complementar para composicao de look, oferta cruzada e bloco de lancamentos.",
+      "Short Away da Espanha para Copa 2026. Composição perfeita com a camisa home ou como peça avulsa.",
   },
 ];
 
 export function getProductBySlug(slug: string) {
-  return catalogProducts.find((product) => product.slug === slug);
+  return catalogProducts.find((p) => p.slug === slug);
 }
 
 export function getCategoryBySlug(slug: string) {
-  return catalogCategories.find((category) => category.slug === slug);
+  return catalogCategories.find((c) => c.slug === slug);
 }
 
 export function getProductsByCategory(slug: string) {
-  return catalogProducts.filter((product) => product.categorySlug === slug);
+  return catalogProducts.filter((p) => p.categorySlug === slug);
+}
+
+export function getFeaturedProducts() {
+  return catalogProducts.filter((p) => p.isFeatured);
+}
+
+export function getBestsellerProducts() {
+  return catalogProducts.filter((p) => p.isBestseller);
 }

@@ -15,15 +15,18 @@ export const brand = {
     headerHeight: 44,
     footerHeight: 56,
   },
-  tagline: 'Streetwear importado, curadoria noturna.',
+  tagline: 'Camisas importadas dos maiores clubes do mundo.',
   // SEO + tab title fallback.
-  metaTitle: 'Thailandia Store | Streetwear importado',
+  metaTitle: 'Thailandia Store | Camisas importadas de times',
   metaDescription:
-    'E-commerce de streetwear importado com curadoria noturna, foco em produto e checkout sem atrito.',
+    'Camisas importadas de clubes europeus, brasileiros e seleções. Estoque limitado, novidades frequentes e envio para todo o Brasil.',
+  // WhatsApp — number in E.164 format (digits only, with country code, no +).
+  // Used to build wa.me links: https://wa.me/{whatsappNumber}?text=...
+  whatsappNumber: '5511999999999',
+  whatsappDefaultMessage: 'Olá! Vi o site da TS e gostaria de mais informações.',
   social: [
-    { label: 'Instagram', short: 'IG', href: '#' },
-    { label: 'TikTok', short: 'TT', href: '#' },
-    { label: 'YouTube', short: 'YT', href: '#' },
+    { label: 'Instagram', short: 'IG', href: 'https://instagram.com/thailandiastore' },
+    { label: 'WhatsApp', short: 'WA', href: 'https://wa.me/5511999999999' },
   ],
 } as const
 
