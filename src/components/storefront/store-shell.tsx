@@ -1,4 +1,9 @@
+"use client";
+
 import type { ReactNode } from "react";
+import { StoreProvider } from "@/contexts/store";
+import { CartDrawer } from "@/components/storefront/cart-drawer";
+import { SearchOverlay } from "@/components/storefront/search-overlay";
 import { StoreFooter } from "@/components/storefront/store-footer";
 import { StoreHeader } from "@/components/storefront/store-header";
 
@@ -8,10 +13,12 @@ type StoreShellProps = {
 
 export function StoreShell({ children }: StoreShellProps) {
   return (
-    <>
+    <StoreProvider>
       <StoreHeader />
-      <div className="min-h-screen pt-[72px]">{children}</div>
+      <div className="min-h-screen pt-[68px]">{children}</div>
       <StoreFooter />
-    </>
+      <CartDrawer />
+      <SearchOverlay />
+    </StoreProvider>
   );
 }

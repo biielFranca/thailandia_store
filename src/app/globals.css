@@ -116,6 +116,17 @@ img {
   letter-spacing: -0.01em;
 }
 
+/* Title utility — Anton (Drop Shade approx).
+   Use only on: hero headlines, section H2s, category names, short callouts.
+   Never on body text, UI labels, or price figures. */
+.font-title {
+  font-family: var(--font-title), "Impact", "Arial Black", sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  text-shadow: 2px 3px 0 rgba(0, 0, 0, 0.55);
+}
+
 .price {
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;

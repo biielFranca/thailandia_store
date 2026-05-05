@@ -1,7 +1,5 @@
-import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Reveal } from "@/components/storefront/reveal";
+import { ProductCard } from "@/components/storefront/product-card";
 import { StoreShell } from "@/components/storefront/store-shell";
 import {
   catalogCategories,
@@ -9,90 +7,64 @@ import {
   getProductsByCategory,
 } from "@/themes/thailandia/content/catalog";
 
-type CategoryPageProps = {
-  params: Promise<{ slug: string }>;
-};
+type Props = { params: Promise<{ slug: string }> };
 
 export function generateStaticParams() {
-  return catalogCategories.map((category) => ({
-    slug: category.slug,
-  }));
+  return catalogCategories.map((c) => ({ slug: c.slug }));
 }
 
-export default async function CategoryPage({ params }: CategoryPageProps) {
+export default async function CategoryPage({ params }: Props) {
   const { slug } = await params;
   const category = getCategoryBySlug(slug);
-
-  if (!category) {
-    notFound();
-  }
+  if (!category) notFound();
 
   const products = getProductsByCategory(slug);
 
   return (
     <StoreShell>
-      <main className="mx-auto flex w-full max-w-[1440px] flex-1 flex-col px-4 pb-12 pt-6 sm:px-6 lg:px-8">
-        <Reveal>
-          <section className="panel rounded-[2rem] p-6 sm:p-8">
-            <p className="text-xs uppercase tracking-[0.28em] text-[#8e7dff]">
-              Categoria da loja
-            </p>
-            <h1 className="font-heading mt-3 text-5xl text-white sm:text-6xl">
-              {category.name}
-            </h1>
-            <p className="mt-4 max-w-3xl text-base leading-8 text-white/66">
-              {category.description}
-            </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link
-                href="/"
-                className="rounded-full border border-white/10 px-4 py-2 text-sm text-white/78 transition hover:border-[#4f46e5]/40 hover:text-white"
-              >
-                Voltar para home
-              </Link>
-              <Link
-                href="/login"
-                className="rounded-full bg-[#4f46e5] px-4 py-2 text-sm font-semibold text-white"
-              >
-                Entrar para comprar
-              </Link>
-            </div>
-          </section>
-        </Reveal>
+      <main className="mx-auto w-full max-w-[1280px] px-4 pb-16 pt-6 sm:px-6 lg:px-8">
 
-        <section className="mt-8 grid gap-4 lg:grid-cols-3">
-          {products.map((product, index) => (
-            <Reveal key={product.slug} delayMs={index * 70}>
-              <article className="card-hover overflow-hidden rounded-[2rem] border border-white/8 bg-[#090d22]">
-                <Link href={`/produtos/${product.slug}`} className="block">
-                  <Image
-                    src={product.image}
-                    alt={product.name}
-                    width={900}
-                    height={900}
-                    className="h-80 w-full object-cover"
-                  />
-                </Link>
-                <div className="p-5">
-                  <p className="text-xs uppercase tracking-[0.22em] text-[#8e7dff]">
-                    {product.badge}
-                  </p>
-                  <h2 className="font-heading mt-2 text-3xl text-white">{product.shortName}</h2>
-                  <p className="mt-3 text-sm leading-7 text-white/62">{product.description}</p>
-                  <div className="mt-5 flex items-center justify-between gap-3">
-                    <p className="font-heading text-3xl text-white">{product.displayPrice}</p>
-                    <Link
-                      href={`/produtos/${product.slug}`}
-                      className="button-pop rounded-full bg-[#4f46e5] px-4 py-2 text-sm font-bold uppercase tracking-[0.1em] text-white"
-                    >
-                      Comprar
-                    </Link>
-                  </div>
-                </div>
-              </article>
-            </Reveal>
-          ))}
-        </section>
+        {/* Header */}
+        <div className="mb-8">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em]"
+            style={{ color: "var(--cta)" }}>
+            {category.accent}
+          </p>
+          <h1 className="font-title mt-1 text-4xl text-white sm:text-5xl">
+            {category.name.toUpperCase()}
+          </h1>
+          <p className="mt-2 max-w-xl text-sm leading-relaxed"
+            style={{ color: "var(--text-secondary)" }}>
+            {category.description}
+          </p>
+          <p className="mt-3 text-[11px]" style={{ color: "var(--text-tertiary)" }}>
+            {products.length} {products.length === 1 ? "produto encontrado" : "produtos encontrados"}
+          </p>
+        </div>
+
+        {/* Grid */}
+        {products.length > 0 ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {products.map((product) => (
+              <ProductCard
+                key={product.slug}
+                product={product}
+                sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center rounded-[16px] border px-8 py-20 text-center"
+            style={{ borderColor: "var(--border-subtle)", backgroundColor: "var(--surface-1)" }}>
+            <p className="text-4xl">👕</p>
+            <p className="mt-4 text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
+              Em breve por aqui
+            </p>
+            <p className="mt-2 text-sm" style={{ color: "var(--text-secondary)" }}>
+              Estamos preparando os produtos desta categoria. Volte em breve!
+            </p>
+          </div>
+        )}
       </main>
     </StoreShell>
   );

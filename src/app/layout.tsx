@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DM_Serif_Display, Inter } from "next/font/google";
+import { Anton, DM_Serif_Display, Inter } from "next/font/google";
 import { brand } from "@/themes/thailandia/content/brand";
 import "./globals.css";
 
@@ -16,6 +16,16 @@ import "./globals.css";
 // display serif) so the dev server runs and the visual hierarchy is preserved.
 const displayFont = DM_Serif_Display({
   variable: "--font-display",
+  weight: "400",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+// Title family — Anton (Drop Shade substitute).
+// Used ONLY in high-impact display spots: hero headlines, section titles,
+// category names, short commercial callouts. NOT for body text or UI labels.
+const titleFont = Anton({
+  variable: "--font-title",
   weight: "400",
   subsets: ["latin"],
   display: "swap",
@@ -40,7 +50,7 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${displayFont.variable} ${bodyFont.variable} h-full`}
+      className={`${displayFont.variable} ${titleFont.variable} ${bodyFont.variable} h-full`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

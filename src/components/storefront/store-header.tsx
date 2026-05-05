@@ -3,16 +3,21 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { useStore } from "@/contexts/store";
 import { brand } from "@/themes/thailandia/content/brand";
 import { catalogCategories } from "@/themes/thailandia/content/catalog";
 
+// ─── Nav links ────────────────────────────────────────────────────────────────
+
 const mainLinks = [
-  { label: "Início",       href: "/",              kind: "link" as const },
-  { label: "Europeus",     href: "/categorias/europeus",  kind: "link" as const },
-  { label: "Seleções",     href: "/categorias/selecoes",  kind: "link" as const },
-  { label: "Lançamentos",  href: "/#lancamentos",  kind: "link" as const },
-  { label: "Categorias",   href: "/categorias",    kind: "categories" as const },
+  { label: "Início",      href: "/",             kind: "link" as const },
+  { label: "Europeias",   href: "/categorias/europeias",  kind: "link" as const },
+  { label: "Seleções",    href: "/categorias/selecoes",   kind: "link" as const },
+  { label: "Lançamentos", href: "/#lancamentos",  kind: "link" as const },
+  { label: "Categorias",  href: "/categorias",    kind: "categories" as const },
 ];
+
+// ─── Icons ────────────────────────────────────────────────────────────────────
 
 function CartIcon() {
   return (
@@ -33,10 +38,11 @@ function SearchIcon() {
   );
 }
 
-function WhatsAppIcon() {
+function UserIcon() {
   return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4.5 w-4.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="7" r="4" />
+      <path d="M5.5 21a8.38 8.38 0 0 1 13 0" />
     </svg>
   );
 }
@@ -52,14 +58,14 @@ function ChevronDown({ open }: { open: boolean }) {
   );
 }
 
+// ─── Component ────────────────────────────────────────────────────────────────
+
 export function StoreHeader() {
   const pathname = usePathname();
-  const cartCount = 0;
+  const { cartCount, openCart, openSearch } = useStore();
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const headerRef = useRef<HTMLElement | null>(null);
-
-  const waLink = `https://wa.me/${brand.whatsappNumber}?text=${encodeURIComponent(brand.whatsappDefaultMessage)}`;
 
   useEffect(() => { setCategoriesOpen(false); setMobileOpen(false); }, [pathname]);
 
@@ -88,15 +94,21 @@ export function StoreHeader() {
       <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
         <div className="flex h-[68px] items-center justify-between gap-4">
 
-          {/* Logo */}
-          <Link href="/" className="inline-flex flex-shrink-0 items-center" aria-label={brand.name}>
+          {/* Logo + Store name */}
+          <Link href="/" className="inline-flex flex-shrink-0 items-center gap-2.5" aria-label={brand.name}>
             <img
               src={brand.logo.src}
-              alt={brand.name}
+              alt=""
               width={(brand.logo.headerHeight * brand.logo.width) / brand.logo.height}
               height={brand.logo.headerHeight}
               className="h-9 w-auto sm:h-10"
             />
+            <span
+              className="font-title hidden text-lg sm:block"
+              style={{ color: "var(--text-primary)", textShadow: "1px 2px 0 rgba(0,0,0,0.6)" }}
+            >
+              {brand.name}
+            </span>
           </Link>
 
           {/* Desktop nav */}
@@ -129,24 +141,28 @@ export function StoreHeader() {
 
           {/* Right actions */}
           <div className="flex items-center gap-2">
-            {/* Search — desktop */}
-            <button type="button" aria-label="Buscar"
-              className="hidden h-9 w-9 items-center justify-center rounded-[8px] border transition-colors duration-200 lg:inline-flex"
+
+            {/* Search */}
+            <button type="button" aria-label="Buscar produtos"
+              onClick={openSearch}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border transition-colors duration-200 hover:[border-color:var(--border-strong)]"
               style={{ borderColor: "var(--border-subtle)", color: "var(--text-secondary)" }}>
               <SearchIcon />
             </button>
 
-            {/* WhatsApp — visible on sm+ */}
-            <a href={waLink} target="_blank" rel="noopener noreferrer"
-              className="hidden h-9 items-center gap-2 rounded-[8px] px-4 text-xs font-semibold transition-opacity hover:opacity-90 sm:inline-flex"
-              style={{ backgroundColor: "#25D366", color: "#fff" }}>
-              <WhatsAppIcon />
-              <span className="hidden md:inline">WhatsApp</span>
-            </a>
+            {/* Login — desktop */}
+            <Link href="/login"
+              className="hidden h-9 items-center gap-2 rounded-[8px] border px-4 text-xs font-semibold transition-colors duration-200 hover:[border-color:var(--border-strong)] sm:inline-flex"
+              style={{ borderColor: "var(--border-subtle)", color: "var(--text-primary)" }}>
+              <UserIcon />
+              <span className="hidden md:inline">Login</span>
+            </Link>
 
             {/* Cart */}
-            <button type="button" aria-label={`Abrir carrinho${cartCount ? ` (${cartCount} itens)` : ""}`}
-              className="relative inline-flex h-9 w-9 items-center justify-center rounded-[8px] border transition-colors duration-200"
+            <button type="button"
+              aria-label={`Abrir carrinho${cartCount ? ` (${cartCount} ${cartCount === 1 ? "item" : "itens"})` : ""}`}
+              onClick={openCart}
+              className="relative inline-flex h-9 w-9 items-center justify-center rounded-[8px] border transition-colors duration-200 hover:[border-color:var(--border-strong)]"
               style={{ borderColor: "var(--border-subtle)", color: "var(--text-primary)" }}>
               <CartIcon />
               {cartCount > 0 && (
@@ -175,7 +191,7 @@ export function StoreHeader() {
 
       {/* Mobile menu */}
       <div className="overflow-hidden border-t transition-[max-height,opacity] duration-300 ease-out lg:hidden"
-        style={{ borderColor: mobileOpen ? "var(--border-subtle)" : "transparent", backgroundColor: "var(--surface-1)", maxHeight: mobileOpen ? "480px" : "0px", opacity: mobileOpen ? 1 : 0 }}>
+        style={{ borderColor: mobileOpen ? "var(--border-subtle)" : "transparent", backgroundColor: "var(--surface-1)", maxHeight: mobileOpen ? "520px" : "0px", opacity: mobileOpen ? 1 : 0 }}>
         <nav className="mx-auto max-w-[1280px] flex flex-col gap-1 px-4 py-4 sm:px-6">
           {mainLinks.filter((l) => l.kind === "link").map((link) => (
             <Link key={link.label} href={link.href}
@@ -194,12 +210,19 @@ export function StoreHeader() {
               </Link>
             ))}
           </div>
-          <a href={waLink} target="_blank" rel="noopener noreferrer"
-            className="mt-2 flex items-center justify-center gap-2 rounded-[8px] py-3 text-sm font-semibold"
-            style={{ backgroundColor: "#25D366", color: "#fff" }}>
-            <WhatsAppIcon />
-            Falar no WhatsApp
-          </a>
+          {/* Mobile search + login */}
+          <div className="mt-2 flex gap-2 border-t pt-3" style={{ borderColor: "var(--border-subtle)" }}>
+            <button type="button" onClick={() => { setMobileOpen(false); openSearch(); }}
+              className="flex flex-1 items-center justify-center gap-2 rounded-[8px] border py-2.5 text-sm font-medium"
+              style={{ borderColor: "var(--border-subtle)", color: "var(--text-secondary)" }}>
+              <SearchIcon /> Buscar
+            </button>
+            <Link href="/login"
+              className="flex flex-1 items-center justify-center gap-2 rounded-[8px] border py-2.5 text-sm font-semibold"
+              style={{ borderColor: "var(--border-subtle)", color: "var(--text-primary)" }}>
+              <UserIcon /> Login
+            </Link>
+          </div>
         </nav>
       </div>
 
@@ -232,6 +255,8 @@ export function StoreHeader() {
     </header>
   );
 }
+
+// ─── CategoryItem ─────────────────────────────────────────────────────────────
 
 function CategoryItem({ href, label, accent, active, comingSoon }: {
   href: string; label: string; accent: string; active: boolean; comingSoon?: boolean;
