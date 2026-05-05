@@ -1,19 +1,10 @@
 import type { Metadata } from "next";
-import { Anton, DM_Serif_Display, Inter } from "next/font/google";
+import localFont from "next/font/local";
+import { DM_Serif_Display, Inter } from "next/font/google";
 import { brand } from "@/themes/thailandia/content/brand";
 import "./globals.css";
 
-// Display family. Target is **Nowstalgic** — when the file is dropped at
-// `public/fonts/Nowstalgic.woff2` (see public/fonts/README.md), swap this
-// import back to:
-//   import localFont from "next/font/local";
-//   const displayFont = localFont({
-//     src: "../../public/fonts/Nowstalgic.woff2",
-//     variable: "--font-display", display: "swap", weight: "400",
-//     fallback: ["Georgia", "serif"],
-//   });
-// Until then, DM Serif Display is the closest Google substitute (bold vintage
-// display serif) so the dev server runs and the visual hierarchy is preserved.
+// Display family — DM Serif Display (vintage serif for section headers).
 const displayFont = DM_Serif_Display({
   variable: "--font-display",
   weight: "400",
@@ -21,14 +12,31 @@ const displayFont = DM_Serif_Display({
   display: "swap",
 });
 
-// Title family — Anton (Drop Shade substitute).
-// Used ONLY in high-impact display spots: hero headlines, section titles,
-// category names, short commercial callouts. NOT for body text or UI labels.
-const titleFont = Anton({
+// Title family — Drop Shade Regular (the real deal).
+// Used ONLY on high-impact spots: hero headlines, section H2s, category names,
+// short commercial callouts. Never on body text, UI labels, or price figures.
+// Variants available in public/fonts/:
+//   DropShade-Regular  → standard (use for most titles)
+//   DropShade-Shadow   → deeper shadow (use for ultra-bold hero moments)
+//   DropShade-Outline  → hollow / outline effect
+//   DropShade-Extrude  → 3-D extruded look
+//   DropShade-Melt     → melting style
+const titleFont = localFont({
+  src: [
+    {
+      path: "../../public/fonts/DropShade-Regular.ttf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/DropShade-Shadow.ttf",
+      weight: "700",
+      style: "normal",
+    },
+  ],
   variable: "--font-title",
-  weight: "400",
-  subsets: ["latin"],
   display: "swap",
+  fallback: ["Impact", "Arial Black", "sans-serif"],
 });
 
 const bodyFont = Inter({

@@ -116,15 +116,15 @@ img {
   letter-spacing: -0.01em;
 }
 
-/* Title utility — Anton (Drop Shade approx).
+/* Title utility — Drop Shade.
    Use only on: hero headlines, section H2s, category names, short callouts.
-   Never on body text, UI labels, or price figures. */
+   Never on body text, UI labels, or price figures.
+   The shadow effect is baked into the font — no CSS text-shadow needed. */
 .font-title {
   font-family: var(--font-title), "Impact", "Arial Black", sans-serif;
   font-weight: 400;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  text-shadow: 2px 3px 0 rgba(0, 0, 0, 0.55);
 }
 
 .price {
