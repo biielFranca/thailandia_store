@@ -93,18 +93,12 @@ export function StoreHeader() {
             style={{ color: "var(--text-primary)" }}
             aria-label={brand.name}
           >
-            {/*
-              The logo SVG uses currentColor for fill, so it inherits the
-              link's text color. Use a plain <img> instead of next/image to
-              keep the SVG inlined-friendly and avoid the optimizer rasterizing
-              vectors.
-            */}
             <img
               src={brand.logo.src}
               alt={brand.name}
-              width={brand.logo.headerWidth}
-              height={(brand.logo.headerWidth * brand.logo.height) / brand.logo.width}
-              className="h-7 w-auto sm:h-8"
+              width={(brand.logo.headerHeight * brand.logo.width) / brand.logo.height}
+              height={brand.logo.headerHeight}
+              className="h-9 w-auto sm:h-11"
             />
           </Link>
 

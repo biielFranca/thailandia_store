@@ -6,15 +6,14 @@ export const brand = {
   // Wordmark used in header/footer. Kept separate from `name` in case the
   // visible mark differs from the legal/title name (e.g. uppercase styling).
   wordmark: 'THAILANDIA',
-  // Logo asset paths. SVG renders monochrome via currentColor — color it
-  // through the parent's CSS color. Drop the production logo at the same
-  // path to override; keep dimensions roughly 240x40 for the header slot.
+  // Logo asset. Square-ish "TS crown" mark — sized by height in the
+  // header/footer so layout stays predictable.
   logo: {
-    src: '/brand/logo.svg',
-    width: 240,
-    height: 40,
-    // Width the logo should render at in the header (px). The SVG scales.
-    headerWidth: 168,
+    src: '/brand/logo.png',
+    width: 558,
+    height: 470,
+    headerHeight: 44,
+    footerHeight: 56,
   },
   tagline: 'Streetwear importado, curadoria noturna.',
   // SEO + tab title fallback.
