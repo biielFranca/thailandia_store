@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la /root/Downloads/thailandia_store-main/thailandia_store-main/ 2>/dev/null || ls -la C:/Users/Biel/Downloads/thailandia_store-main/thailandia_store-main/ 2>/dev/null || find . -maxdepth 2 -type d | grep -v node_modules | grep -v \".next\")",
+      "Bash(ls \"C:\\\\Users\\\\Biel\\\\Downloads\" | grep -i \".html\")",
+      "Bash(Get-ChildItem -Name)",
+      "Bash(find \"C:\\\\\\\\Users\\\\\\\\Biel\\\\\\\\Downloads\\\\\\\\Nova pasta\" -type f -name \"*.html\")",
+      "Bash(head -n 100 \"C:\\\\\\\\Users\\\\\\\\Biel\\\\\\\\Downloads\\\\\\\\Nova pasta\\\\\\\\Login _ cadastro.html\")",
+      "Bash(wc -l \"C:\\\\\\\\Users\\\\\\\\Biel\\\\\\\\Downloads\\\\\\\\Nova pasta\\\\\\\\Login _ cadastro.html\")",
+      "Bash(cat \"C:\\\\\\\\Users\\\\\\\\Biel\\\\\\\\Downloads\\\\\\\\Nova pasta\\\\\\\\Login _ cadastro.html\")",
+      "Bash(grep -o 'class=\"[^\"]*\"' \"C:\\\\\\\\Users\\\\\\\\Biel\\\\\\\\Downloads\\\\\\\\Nova pasta\\\\\\\\Login _ cadastro.html\")",
+      "Bash(grep -o 'rgb\\([0-9, ]*\\)' \"C:\\\\\\\\Users\\\\\\\\Biel\\\\\\\\Downloads\\\\\\\\Nova pasta\\\\\\\\Login _ cadastro.html\")"
+    ]
+  }
+}

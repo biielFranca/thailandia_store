@@ -58,13 +58,13 @@ export function HomePage() {
       <main className="flex w-full min-w-0 flex-1 flex-col overflow-x-hidden">
 
         {/* ── 1. Hero ───────────────────────────────────────────────────── */}
-        <div className="mx-auto w-full max-w-[1280px] px-4 pb-4 pt-5 sm:px-6 lg:px-8">
+        <div className="mx-auto w-full max-w-[1440px] px-3 pb-4 pt-3 sm:px-6 sm:pt-5 lg:px-8">
           <HeroCarousel slides={heroSlides} />
         </div>
 
         {/* ── 2. Trust bar ─────────────────────────────────────────────── */}
         <div className="border-y" style={{ borderColor: "var(--border-subtle)", backgroundColor: "var(--surface-1)" }}>
-          <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-[1440px] px-3 sm:px-6 lg:px-8">
             <ul className="scrollbar-hidden flex items-center overflow-x-auto divide-x" style={{ borderColor: "var(--border-subtle)" } as React.CSSProperties}>
               {[
                 { icon: "✈️", text: "Produtos importados selecionados" },
@@ -84,7 +84,7 @@ export function HomePage() {
           </div>
         </div>
 
-        <div className="mx-auto w-full max-w-[1280px] flex-1 flex-col px-4 pb-20 sm:px-6 lg:px-8">
+        <div className="mx-auto w-full max-w-[1440px] flex-1 flex-col px-3 pb-20 sm:px-6 lg:px-8">
 
           {/* ── 3. Drop da semana ───────────────────────────────────────── */}
           <section id="lancamentos" className="mt-14">
@@ -188,7 +188,7 @@ export function HomePage() {
                 <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: "var(--cta)" }}>
                   Sobre a loja
                 </p>
-                <h2 className="font-title mt-2 text-3xl text-white sm:text-4xl">
+                <h2 className="font-title mt-2 text-white" style={{ fontSize: "clamp(1.6rem, 4vw, 2.5rem)", lineHeight: 1.05 }}>
                   CURADORIA DE MANTOS IMPORTADOS
                 </h2>
                 <p className="mt-4 max-w-xl text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
@@ -242,7 +242,7 @@ function SectionHeader({
         <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: "var(--cta)" }}>
           {overline}
         </p>
-        <h2 className="font-title mt-1 text-3xl text-white sm:text-4xl">
+        <h2 className="font-title mt-1 text-white" style={{ fontSize: "clamp(1.6rem, 4vw, 2.5rem)", lineHeight: 1.05 }}>
           {title.toUpperCase()}
         </h2>
         {subtitle && (

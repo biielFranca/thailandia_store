@@ -110,7 +110,7 @@ export function HeroCarousel({ slides }: Props) {
   return (
     <section
       className="relative w-full overflow-hidden rounded-[14px]"
-      style={{ minHeight: "420px", backgroundColor: "#07070f" }}
+      style={{ height: "clamp(380px, 60vh, 640px)", backgroundColor: "#07070f" }}
       aria-roledescription="carousel"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
@@ -126,7 +126,7 @@ export function HeroCarousel({ slides }: Props) {
             <div className="hidden h-full lg:grid lg:grid-cols-[48%_52%]">
 
               {/* Left — copy */}
-              <div className="relative z-10 flex flex-col justify-center px-12 py-12"
+              <div className="relative z-10 flex flex-col justify-center px-[clamp(1.5rem,4vw,3rem)] py-[clamp(1.5rem,4vw,3rem)]"
                 style={{ background: "linear-gradient(to right, #07070f 70%, transparent)" }}>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/50">
                   Importado selecionado
