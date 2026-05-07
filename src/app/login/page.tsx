@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { useAuth } from "@/contexts/auth";
+import { AuthProvider, useAuth } from "@/contexts/auth";
 import { brand } from "@/themes/thailandia/content/brand";
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
@@ -262,8 +262,10 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense>
-      <LoginForm />
-    </Suspense>
+    <AuthProvider>
+      <Suspense>
+        <LoginForm />
+      </Suspense>
+    </AuthProvider>
   );
 }
