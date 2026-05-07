@@ -17,7 +17,7 @@ export function StoreFooter() {
 
       {/* WhatsApp banner */}
       <div className="border-b" style={{ borderColor: "var(--border-subtle)", backgroundColor: "var(--surface-1)" }}>
-        <div className="mx-auto flex max-w-[1280px] flex-col items-center justify-between gap-4 px-4 py-8 text-center sm:flex-row sm:text-left sm:px-6 lg:px-8">
+        <div className="w-full flex flex-col items-center justify-between gap-4 px-3 py-8 text-center sm:flex-row sm:text-left sm:px-6 lg:px-10 xl:px-16 2xl:px-24">
           <div>
             <p className="font-display text-xl sm:text-2xl" style={{ color: "var(--text-primary)" }}>
               Não encontrou o que procura?
@@ -36,7 +36,7 @@ export function StoreFooter() {
       </div>
 
       {/* Main footer grid */}
-      <div className="mx-auto max-w-[1280px] px-4 py-14 sm:px-6 lg:px-8">
+      <div className="w-full px-3 py-14 sm:px-6 lg:px-10 xl:px-16 2xl:px-24">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr]">
 
           {/* Brand column */}
@@ -106,7 +106,7 @@ export function StoreFooter() {
 
       {/* Bottom bar */}
       <div className="border-t" style={{ borderColor: "var(--border-subtle)" }}>
-        <div className="mx-auto flex max-w-[1280px] flex-col items-center justify-between gap-2 px-4 py-5 text-xs sm:flex-row sm:px-6 lg:px-8"
+        <div className="w-full flex flex-col items-center justify-between gap-2 px-3 py-5 text-xs sm:flex-row sm:px-6 lg:px-10 xl:px-16 2xl:px-24"
           style={{ color: "var(--text-tertiary)" }}>
           <span>© {new Date().getFullYear()} {brand.name}. Todos os direitos reservados.</span>
           <span>Produtos importados selecionados · Envio para todo o Brasil</span>

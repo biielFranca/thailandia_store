@@ -245,7 +245,7 @@ export function CategoryPageClient({ category, products }: Props) {
   );
 
   return (
-    <main className="mx-auto w-full max-w-[1280px] px-4 pb-16 pt-6 sm:px-6 lg:px-8">
+    <main className="w-full px-3 pb-16 pt-6 sm:px-6 lg:px-10 xl:px-16 2xl:px-24">
 
       {/* Breadcrumb */}
       <nav className="mb-6 flex items-center gap-2 text-xs" style={{ color: "var(--text-tertiary)" }}>

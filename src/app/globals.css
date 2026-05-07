@@ -69,6 +69,9 @@
   --color-sale: var(--sale);
   --font-sans: var(--font-body);
   --font-display: var(--font-display);
+
+  /* Custom breakpoint for ultrawide monitors (default tw goes up to 2xl=1536px) */
+  --breakpoint-3xl: 1920px;
 }
 
 * {

@@ -94,7 +94,7 @@ export function StoreHeader() {
       className="fixed inset-x-0 top-0 z-50 border-b backdrop-blur-md"
       style={{ borderColor: "var(--border-subtle)", backgroundColor: "color-mix(in oklab, var(--surface-1) 92%, transparent)" }}
     >
-      <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
+      <div className="w-full px-3 sm:px-6 lg:px-10 xl:px-16 2xl:px-24">
         <div className="flex h-[68px] items-center justify-between gap-4">
 
           {/* Logo + Store name */}
@@ -239,7 +239,7 @@ export function StoreHeader() {
       {/* Mobile menu */}
       <div className="overflow-hidden border-t transition-[max-height,opacity] duration-300 ease-out lg:hidden"
         style={{ borderColor: mobileOpen ? "var(--border-subtle)" : "transparent", backgroundColor: "var(--surface-1)", maxHeight: mobileOpen ? "520px" : "0px", opacity: mobileOpen ? 1 : 0 }}>
-        <nav className="mx-auto max-w-[1280px] flex flex-col gap-1 px-4 py-4 sm:px-6">
+        <nav className="w-full flex flex-col gap-1 px-3 py-4 sm:px-6 lg:px-10">
           {mainLinks.filter((l) => l.kind === "link").map((link) => (
             <Link key={link.label} href={link.href}
               className="rounded-[8px] px-4 py-3 text-sm font-medium transition-colors duration-200 hover:[background-color:var(--surface-2)]"

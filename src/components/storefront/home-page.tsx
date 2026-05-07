@@ -58,13 +58,13 @@ export function HomePage() {
       <main className="flex w-full min-w-0 flex-1 flex-col overflow-x-hidden">
 
         {/* ── 1. Hero ───────────────────────────────────────────────────── */}
-        <div className="mx-auto w-full max-w-[1440px] px-3 pb-4 pt-3 sm:px-6 sm:pt-5 lg:px-8">
+        <div className="w-full px-3 pb-4 pt-3 sm:px-6 sm:pt-5 lg:px-10 xl:px-16 2xl:px-24">
           <HeroCarousel slides={heroSlides} />
         </div>
 
         {/* ── 2. Trust bar ─────────────────────────────────────────────── */}
         <div className="border-y" style={{ borderColor: "var(--border-subtle)", backgroundColor: "var(--surface-1)" }}>
-          <div className="mx-auto max-w-[1440px] px-3 sm:px-6 lg:px-8">
+          <div className="w-full px-3 sm:px-6 lg:px-10 xl:px-16 2xl:px-24">
             <ul className="scrollbar-hidden flex items-center overflow-x-auto divide-x" style={{ borderColor: "var(--border-subtle)" } as React.CSSProperties}>
               {[
                 { icon: "✈️", text: "Produtos importados selecionados" },
@@ -84,7 +84,7 @@ export function HomePage() {
           </div>
         </div>
 
-        <div className="mx-auto w-full max-w-[1440px] flex-1 flex-col px-3 pb-20 sm:px-6 lg:px-8">
+        <div className="w-full flex-1 flex-col px-3 pb-20 sm:px-6 lg:px-10 xl:px-16 2xl:px-24">
 
           {/* ── 3. Drop da semana ───────────────────────────────────────── */}
           <section id="lancamentos" className="mt-14">
@@ -104,7 +104,7 @@ export function HomePage() {
               overline="Navegar por categoria"
               title="O que você procura?"
             />
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6">
               {catalogCategories.map((category) => (
                 <Link
                   key={category.slug}
@@ -172,10 +172,10 @@ export function HomePage() {
               linkHref="/categorias/europeias"
               linkLabel="Ver catálogo →"
             />
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {featuredProducts.slice(0, 8).map((p) => (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6">
+              {featuredProducts.slice(0, 12).map((p) => (
                 <ProductCard key={p.slug} product={p}
-                  sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" />
+                  sizes="(min-width: 1536px) 16vw, (min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" />
               ))}
             </div>
           </section>
