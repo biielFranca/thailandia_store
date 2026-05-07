@@ -11,6 +11,18 @@ import {
   catalogProducts,
 } from "@/themes/thailandia/content/catalog";
 
+// ─── Category gradient map ─────────────────────────────────────────────────────
+
+const CATEGORY_GRADIENTS: Record<string, string> = {
+  nacionais:  "linear-gradient(135deg, rgba(0,156,59,0.55) 0%, rgba(255,223,0,0.35) 100%)",
+  europeias:  "linear-gradient(135deg, rgba(30,107,255,0.55) 0%, rgba(120,40,200,0.35) 100%)",
+  selecoes:   "linear-gradient(135deg, rgba(255,200,0,0.55) 0%, rgba(0,80,200,0.35) 100%)",
+  retros:     "linear-gradient(135deg, rgba(180,120,50,0.55) 0%, rgba(80,40,20,0.35) 100%)",
+  femininas:  "linear-gradient(135deg, rgba(220,60,120,0.55) 0%, rgba(140,40,180,0.35) 100%)",
+  conjuntos:  "linear-gradient(135deg, rgba(0,180,160,0.55) 0%, rgba(0,100,220,0.35) 100%)",
+  infantil:   "linear-gradient(135deg, rgba(255,130,0,0.55) 0%, rgba(255,200,0,0.35) 100%)",
+};
+
 // ─── Hero slides ──────────────────────────────────────────────────────────────
 
 const heroSlides = [
@@ -126,7 +138,9 @@ export function HomePage() {
                       className="object-cover opacity-40 transition-opacity duration-300 group-hover:opacity-60"
                     />
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+                  <div className="absolute inset-0"
+                    style={{ background: CATEGORY_GRADIENTS[category.slug] ?? "linear-gradient(135deg, rgba(30,30,40,0.7) 0%, rgba(0,0,0,0.5) 100%)" }} />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                   <div className="absolute inset-x-0 bottom-0 p-4">
                     <div className="flex items-end justify-between gap-2">
                       <div>

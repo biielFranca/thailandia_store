@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useStore } from "@/contexts/store";
 import { searchProducts } from "@/themes/thailandia/content/catalog";
@@ -32,6 +33,7 @@ export function SearchOverlay() {
   const { searchOpen, closeSearch } = useStore();
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
 
   // Focus input when opened
   useEffect(() => {
@@ -42,15 +44,19 @@ export function SearchOverlay() {
     }
   }, [searchOpen]);
 
-  // Close on Esc
+  // Close on Esc, navigate on Enter
   useEffect(() => {
     if (!searchOpen) return;
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") closeSearch();
+      if (e.key === "Enter" && query.trim()) {
+        closeSearch();
+        router.push(`/busca?q=${encodeURIComponent(query.trim())}`);
+      }
     }
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [searchOpen, closeSearch]);
+  }, [searchOpen, closeSearch, query, router]);
 
   const results = searchProducts(query);
   const hasQuery = query.trim().length > 0;
@@ -113,10 +119,19 @@ export function SearchOverlay() {
                 </p>
               ) : (
                 <>
-                  <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.14em]"
-                    style={{ color: "var(--text-tertiary)" }}>
-                    {results.length} {results.length === 1 ? "resultado" : "resultados"}
-                  </p>
+                  <div className="mb-3 flex items-center justify-between">
+                    <p className="text-[11px] font-medium uppercase tracking-[0.14em]"
+                      style={{ color: "var(--text-tertiary)" }}>
+                      {results.length} {results.length === 1 ? "resultado" : "resultados"}
+                    </p>
+                    <Link
+                      href={`/busca?q=${encodeURIComponent(query.trim())}`}
+                      onClick={closeSearch}
+                      className="text-xs font-medium transition-colors hover:[color:var(--cta)]"
+                      style={{ color: "var(--text-secondary)" }}>
+                      Ver todos →
+                    </Link>
+                  </div>
                   <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                     {results.slice(0, 9).map((product) => (
                       <li key={product.slug}>

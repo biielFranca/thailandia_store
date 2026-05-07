@@ -48,6 +48,27 @@
   --dur-reveal: 420ms;
 }
 
+/* Light theme — applied when <html data-theme="light"> */
+[data-theme="light"] {
+  --background: #f5f5f7;
+  --surface-1: #ffffff;
+  --surface-2: #f0f0f3;
+  --surface-3: #e8e8ec;
+  --border-subtle: #dcdce4;
+  --border-strong: #b4b4c0;
+  --text-primary: #0a0a0b;
+  --text-secondary: #4a4a55;
+  --text-tertiary: #8888a0;
+  --cta: #1e6bff;
+  --cta-hover: #0f4fcc;
+  --cta-press: #0a3faa;
+  --cta-foreground: #ffffff;
+  --success: #16a34a;
+  --warning: #d97706;
+  --danger: #dc2626;
+  --sale: #dc2626;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--text-primary);

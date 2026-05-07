@@ -48,6 +48,30 @@ function UserIcon() {
   );
 }
 
+function SunIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="4.5" />
+      <line x1="12" y1="2" x2="12" y2="4.5" />
+      <line x1="12" y1="19.5" x2="12" y2="22" />
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+      <line x1="2" y1="12" x2="4.5" y2="12" />
+      <line x1="19.5" y1="12" x2="22" y2="12" />
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+    </svg>
+  );
+}
+
+function MoonIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+    </svg>
+  );
+}
+
 function ChevronDown({ open }: { open: boolean }) {
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24"
@@ -68,7 +92,24 @@ export function StoreHeader() {
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
   const headerRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("ts-theme") as "dark" | "light" | null;
+    if (saved) { setTheme(saved); document.documentElement.setAttribute("data-theme", saved); }
+  }, []);
+
+  function toggleTheme() {
+    const next = theme === "dark" ? "light" : "dark";
+    setTheme(next);
+    localStorage.setItem("ts-theme", next);
+    if (next === "light") {
+      document.documentElement.setAttribute("data-theme", "light");
+    } else {
+      document.documentElement.removeAttribute("data-theme");
+    }
+  }
 
   useEffect(() => { setCategoriesOpen(false); setMobileOpen(false); }, [pathname]);
 
@@ -144,6 +185,14 @@ export function StoreHeader() {
 
           {/* Right actions */}
           <div className="flex items-center gap-2">
+
+            {/* Theme toggle */}
+            <button type="button" aria-label={theme === "dark" ? "Ativar tema claro" : "Ativar tema escuro"}
+              onClick={toggleTheme}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border transition-colors duration-200 hover:[border-color:var(--border-strong)]"
+              style={{ borderColor: "var(--border-subtle)", color: "var(--text-secondary)" }}>
+              {theme === "dark" ? <SunIcon /> : <MoonIcon />}
+            </button>
 
             {/* Search */}
             <button type="button" aria-label="Buscar produtos"

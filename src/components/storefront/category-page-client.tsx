@@ -97,6 +97,7 @@ export function CategoryPageClient({ category, products }: Props) {
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [selectedBadges, setSelectedBadges] = useState<string[]>([]);
+  const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   // Derive available sizes/statuses/badges from actual products
@@ -114,6 +115,18 @@ export function CategoryPageClient({ category, products }: Props) {
   const availableBadges = useMemo(() => {
     const all = new Set(products.map((p) => p.badge).filter(Boolean) as string[]);
     return BADGE_LIST.filter((b) => all.has(b));
+  }, [products]);
+
+  const availableTeams = useMemo(() => {
+    const seen = new Set<string>();
+    const ordered: string[] = [];
+    products.forEach((p) => {
+      if (p.team && !seen.has(p.team)) {
+        seen.add(p.team);
+        ordered.push(p.team);
+      }
+    });
+    return ordered.sort((a, b) => a.localeCompare(b));
   }, [products]);
 
   function toggleFilter(list: string[], setList: (v: string[]) => void, value: string) {
@@ -146,6 +159,10 @@ export function CategoryPageClient({ category, products }: Props) {
       list = list.filter((p) => p.badge && selectedBadges.includes(p.badge));
     }
 
+    if (selectedTeams.length > 0) {
+      list = list.filter((p) => p.team && selectedTeams.includes(p.team));
+    }
+
     list.sort((a, b) => {
       if (sort === "name-asc")   return a.name.localeCompare(b.name);
       if (sort === "name-desc")  return b.name.localeCompare(a.name);
@@ -155,14 +172,15 @@ export function CategoryPageClient({ category, products }: Props) {
     });
 
     return list;
-  }, [products, query, selectedSizes, selectedStatuses, selectedBadges, sort]);
+  }, [products, query, selectedSizes, selectedStatuses, selectedBadges, selectedTeams, sort]);
 
-  const activeFilterCount = selectedSizes.length + selectedStatuses.length + selectedBadges.length;
+  const activeFilterCount = selectedSizes.length + selectedStatuses.length + selectedBadges.length + selectedTeams.length;
 
   function clearAll() {
     setSelectedSizes([]);
     setSelectedStatuses([]);
     setSelectedBadges([]);
+    setSelectedTeams([]);
     setQuery("");
     setSort("default");
   }
@@ -237,6 +255,18 @@ export function CategoryPageClient({ category, products }: Props) {
               <CheckFilter key={b} label={b}
                 checked={selectedBadges.includes(b)}
                 onChange={() => toggleFilter(selectedBadges, setSelectedBadges, b)} />
+            ))}
+          </div>
+        </FilterGroup>
+      )}
+
+      {availableTeams.length > 0 && (
+        <FilterGroup title="Time">
+          <div className="flex flex-col gap-1">
+            {availableTeams.map((t) => (
+              <CheckFilter key={t} label={t}
+                checked={selectedTeams.includes(t)}
+                onChange={() => toggleFilter(selectedTeams, setSelectedTeams, t)} />
             ))}
           </div>
         </FilterGroup>
@@ -331,7 +361,7 @@ export function CategoryPageClient({ category, products }: Props) {
           {/* Active filter chips */}
           {activeFilterCount > 0 && (
             <div className="mb-4 flex flex-wrap gap-2">
-              {[...selectedSizes, ...selectedStatuses, ...selectedBadges].map((f) => (
+              {[...selectedSizes, ...selectedStatuses, ...selectedBadges, ...selectedTeams].map((f) => (
                 <span key={f}
                   className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium"
                   style={{ borderColor: "var(--border-strong)", color: "var(--text-primary)" }}>
@@ -339,6 +369,7 @@ export function CategoryPageClient({ category, products }: Props) {
                   <button type="button" onClick={() => {
                     if (selectedSizes.includes(f)) toggleFilter(selectedSizes, setSelectedSizes, f);
                     else if (selectedStatuses.includes(f)) toggleFilter(selectedStatuses, setSelectedStatuses, f);
+                    else if (selectedTeams.includes(f)) toggleFilter(selectedTeams, setSelectedTeams, f);
                     else toggleFilter(selectedBadges, setSelectedBadges, f);
                   }} style={{ color: "var(--text-tertiary)" }}>
                     ×
