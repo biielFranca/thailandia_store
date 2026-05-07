@@ -1,0 +1,208 @@
+@import "tailwindcss";
+
+/*
+ * Thailandia storefront — design tokens.
+ * Components consume these via var(--token), never hex literals.
+ * Per-store theming = swap this file's :root values per theme provider.
+ */
+:root {
+  /* Base canvas */
+  --background: #0a0a0b;
+
+  /* Surface elevation scale */
+  --surface-1: #131316;
+  --surface-2: #1b1b20;
+  --surface-3: #08080a;
+
+  /* Borders */
+  --border-subtle: #26262c;
+  --border-strong: #3a3a42;
+
+  /* Text */
+  --text-primary: #f5f5f7;
+  --text-secondary: #a1a1aa;
+  --text-tertiary: #5c5c66;
+
+  /* Conversion accent — electric blue */
+  --cta: #1e6bff;
+  --cta-hover: #3a85ff;
+  --cta-press: #0f4fcc;
+  --cta-foreground: #ffffff;
+  --cta-halo: 0 0 0 6px rgba(30, 107, 255, 0.18);
+
+  /* Status */
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --sale: #ff4d4d;
+
+  /* Radii (spec scale: 4 / 8 / 12 / 16) */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+
+  /* Motion */
+  --ease-out-ui: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-ui: 200ms;
+  --dur-reveal: 420ms;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--text-primary);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-strong: var(--border-strong);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-cta: var(--cta);
+  --color-cta-hover: var(--cta-hover);
+  --color-cta-press: var(--cta-press);
+  --color-cta-foreground: var(--cta-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-sale: var(--sale);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--text-primary);
+  font-family: var(--font-body), system-ui, sans-serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: var(--cta);
+  color: var(--cta-foreground);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+/* Typography role utilities. Display = Nowstalgic, hero/section/wordmark only. */
+.font-display {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.font-heading {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+/* Title utility — Drop Shade.
+   Use only on: hero headlines, section H2s, category names, short callouts.
+   Never on body text, UI labels, or price figures.
+   The shadow effect is baked into the font — no CSS text-shadow needed. */
+.font-title {
+  font-family: var(--font-title), "Impact", "Arial Black", sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.price {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* Surface primitives */
+.panel {
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+}
+
+.panel-elevated {
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+}
+
+/* Focus discipline — every interactive gets a CTA-blue ring on keyboard focus. */
+:where(a, button, input, select, textarea, [role="button"], [tabindex]):focus-visible {
+  outline: 2px solid var(--cta);
+  outline-offset: 2px;
+  border-radius: inherit;
+}
+
+/* Primary CTA halo — reserved for the conversion button. Do NOT apply to chips/links. */
+.cta-halo:hover {
+  box-shadow: var(--cta-halo);
+}
+
+/* Scrollbars-hidden helper for horizontal rails */
+.scrollbar-hidden {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+
+/* Reveal — used sparingly (hero only). */
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.reveal {
+  animation: reveal-up var(--dur-reveal) var(--ease-out-ui) both;
+}
+
+/* Carousel autoplay progress bar */
+@keyframes carousel-progress {
+  from {
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  to {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+}
+.animate-carousel-progress {
+  animation: carousel-progress 6s linear forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
