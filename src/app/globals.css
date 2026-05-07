@@ -193,7 +193,7 @@ img {
   }
 }
 .animate-carousel-progress {
-  animation: carousel-progress 6s linear forwards;
+  animation: carousel-progress 5.5s linear forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { HeroCarousel } from "@/components/storefront/hero-carousel";
+import { FeaturedProductCarousel } from "@/components/storefront/featured-product-carousel";
 import { ProductCard } from "@/components/storefront/product-card";
 import { StoreShell } from "@/components/storefront/store-shell";
 import {
@@ -46,8 +47,8 @@ const heroSlides = [
 // ─── Computed lists ───────────────────────────────────────────────────────────
 
 const featuredProducts = getFeaturedProducts().slice(0, 8);
-const dropProducts     = catalogProducts.slice(0, 4);
-const bestsellerList   = getBestsellerProducts().slice(0, 4);
+const dropProducts     = catalogProducts.slice(0, 8);
+const bestsellerList   = getBestsellerProducts().slice(0, 8);
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
@@ -94,12 +95,7 @@ export function HomePage() {
               linkHref="/categorias/europeias"
               linkLabel="Ver tudo →"
             />
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {dropProducts.map((p) => (
-                <ProductCard key={p.slug} product={p}
-                  sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" />
-              ))}
-            </div>
+            <FeaturedProductCarousel products={dropProducts} />
           </section>
 
           {/* ── 4. Categorias ───────────────────────────────────────────── */}
@@ -165,12 +161,7 @@ export function HomePage() {
               linkHref="/categorias/nacionais"
               linkLabel="Ver todos →"
             />
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {bestsellerList.map((p) => (
-                <ProductCard key={p.slug} product={p}
-                  sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" />
-              ))}
-            </div>
+            <FeaturedProductCarousel products={bestsellerList} />
           </section>
 
           {/* ── 6. Destaques (mais produtos em grid) ─────────────────────── */}
