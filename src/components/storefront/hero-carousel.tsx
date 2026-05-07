@@ -189,11 +189,11 @@ export function HeroCarousel({ slides }: Props) {
             </div>
 
             {/* ── Mobile: full-bleed image + overlay ── */}
-            <div className="flex h-full flex-col justify-end lg:hidden">
+            <div className="relative flex h-full flex-col justify-end lg:hidden">
               {/* Background image */}
               <Image src={slide.image} alt={slide.title.replace("\n", " ")} fill
-                sizes="100vw" priority={idx === 0}
-                className="object-cover object-top" />
+                sizes="(max-width: 1024px) 100vw, 0px" priority={idx === 0}
+                className="object-cover object-center" />
               {/* Gradient */}
               <div className="absolute inset-0"
                 style={{ background: "linear-gradient(to top, rgba(7,7,15,0.95) 35%, rgba(7,7,15,0.4) 70%, transparent)" }} />
