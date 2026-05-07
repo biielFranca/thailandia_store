@@ -17,7 +17,7 @@ export function StoreShell({ children }: StoreShellProps) {
     <AuthProvider>
       <StoreProvider>
         <StoreHeader />
-        <div className="min-h-screen pt-[68px]">{children}</div>
+        <div className="min-h-screen w-full min-w-0 overflow-x-hidden pt-[68px]">{children}</div>
         <StoreFooter />
         <CartDrawer />
         <SearchOverlay />

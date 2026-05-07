@@ -55,7 +55,7 @@ const bestsellerList   = getBestsellerProducts().slice(0, 8);
 export function HomePage() {
   return (
     <StoreShell>
-      <main className="flex w-full flex-1 flex-col">
+      <main className="flex w-full min-w-0 flex-1 flex-col overflow-x-hidden">
 
         {/* ── 1. Hero ───────────────────────────────────────────────────── */}
         <div className="mx-auto w-full max-w-[1280px] px-4 pb-4 pt-5 sm:px-6 lg:px-8">

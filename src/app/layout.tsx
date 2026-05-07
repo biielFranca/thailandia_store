@@ -60,7 +60,7 @@ export default function RootLayout({
       lang="pt-BR"
       className={`${titleFont.variable} ${displayFont.variable} ${bodyFont.variable} h-full`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col w-full overflow-x-hidden">{children}</body>
     </html>
   );
 }

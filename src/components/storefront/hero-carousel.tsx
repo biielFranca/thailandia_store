@@ -109,7 +109,7 @@ export function HeroCarousel({ slides }: Props) {
 
   return (
     <section
-      className="relative overflow-hidden rounded-[14px]"
+      className="relative w-full overflow-hidden rounded-[14px]"
       style={{ minHeight: "420px", backgroundColor: "#07070f" }}
       aria-roledescription="carousel"
       onMouseEnter={() => setPaused(true)}
