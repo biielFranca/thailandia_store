@@ -184,7 +184,7 @@ function AdminGuard({ children }: { children: React.ReactNode }) {
 
       {/* Sidebar */}
       <aside
-        className="fixed inset-y-0 left-0 z-40 flex w-[220px] flex-col border-r transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] lg:translate-x-0"
+        className="fixed inset-y-0 left-0 z-40 flex w-[220px] flex-col border-r transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] -translate-x-full lg:translate-x-0"
         style={{
           borderColor: "var(--border-subtle)",
           backgroundColor: "var(--surface-1)",

@@ -11,11 +11,12 @@ import { catalogCategories } from "@/themes/thailandia/content/catalog";
 // ─── Nav links ────────────────────────────────────────────────────────────────
 
 const mainLinks = [
-  { label: "Início",      href: "/",             kind: "link" as const },
-  { label: "Europeias",   href: "/categorias/europeias",  kind: "link" as const },
-  { label: "Seleções",    href: "/categorias/selecoes",   kind: "link" as const },
-  { label: "Lançamentos", href: "/#lancamentos",  kind: "link" as const },
-  { label: "Categorias",  href: "/categorias",    kind: "categories" as const },
+  { label: "Início",         href: "/",                             kind: "link" as const },
+  { label: "Europeias",      href: "/categorias/europeias",         kind: "link" as const },
+  { label: "Seleções",       href: "/categorias/selecoes",          kind: "link" as const },
+  { label: "World Cup 2026", href: "/categorias/world-cup-2026",    kind: "special" as const },
+  { label: "Lançamentos",    href: "/#lancamentos",                 kind: "link" as const },
+  { label: "Categorias",     href: "/categorias",                   kind: "categories" as const },
 ];
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
@@ -171,6 +172,18 @@ export function StoreHeader() {
                   </button>
                 );
               }
+              if (link.kind === "special") {
+                const isActive = pathname?.startsWith(link.href);
+                return (
+                  <Link key={link.label} href={link.href}
+                    className="inline-flex items-center gap-1.5 rounded-[6px] px-2.5 py-1 text-xs font-bold uppercase tracking-[0.08em] transition-all duration-200"
+                    style={isActive
+                      ? { background: "linear-gradient(90deg, #c8960c, #e8b820)", color: "#000" }
+                      : { background: "linear-gradient(90deg, rgba(200,150,12,0.18), rgba(232,184,32,0.12))", color: "#e8b820", border: "1px solid rgba(232,184,32,0.35)" }}>
+                    ⚽ {link.label}
+                  </Link>
+                );
+              }
               const base = link.href.split("#")[0] || "/";
               const isActive = link.href === "/" ? pathname === "/" : pathname?.startsWith(base);
               return (
@@ -287,8 +300,14 @@ export function StoreHeader() {
 
       {/* Mobile menu */}
       <div className="overflow-hidden border-t transition-[max-height,opacity] duration-300 ease-out lg:hidden"
-        style={{ borderColor: mobileOpen ? "var(--border-subtle)" : "transparent", backgroundColor: "var(--surface-1)", maxHeight: mobileOpen ? "520px" : "0px", opacity: mobileOpen ? 1 : 0 }}>
+        style={{ borderColor: mobileOpen ? "var(--border-subtle)" : "transparent", backgroundColor: "var(--surface-1)", maxHeight: mobileOpen ? "80vh" : "0px", opacity: mobileOpen ? 1 : 0, overflowY: mobileOpen ? "auto" : "hidden" }}>
         <nav className="w-full flex flex-col gap-1 px-3 py-4 sm:px-6 lg:px-10">
+          {/* World Cup 2026 special link */}
+          <Link href="/categorias/world-cup-2026"
+            className="flex items-center gap-2 rounded-[8px] px-4 py-3 text-sm font-bold uppercase tracking-[0.08em] transition-colors duration-200"
+            style={{ background: "linear-gradient(90deg, rgba(200,150,12,0.15), rgba(232,184,32,0.08))", color: "#e8b820", border: "1px solid rgba(232,184,32,0.25)" }}>
+            ⚽ World Cup 2026
+          </Link>
           {mainLinks.filter((l) => l.kind === "link").map((link) => (
             <Link key={link.label} href={link.href}
               className="rounded-[8px] px-4 py-3 text-sm font-medium transition-colors duration-200 hover:[background-color:var(--surface-2)]"
@@ -297,7 +316,10 @@ export function StoreHeader() {
             </Link>
           ))}
           <div className="mt-2 border-t pt-3" style={{ borderColor: "var(--border-subtle)" }}>
-            {catalogCategories.filter((c) => !c.comingSoon).map((cat) => (
+            <p className="mb-1.5 px-4 text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--text-tertiary)" }}>
+              Categorias
+            </p>
+            {catalogCategories.filter((c) => !c.comingSoon && c.slug !== "world-cup-2026").map((cat) => (
               <Link key={cat.slug} href={cat.href}
                 className="flex items-center justify-between rounded-[8px] px-4 py-2.5 text-sm transition-colors duration-200 hover:[background-color:var(--surface-2)]"
                 style={{ color: "var(--text-secondary)" }}>

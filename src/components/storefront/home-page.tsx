@@ -8,19 +8,23 @@ import {
   catalogCategories,
   getFeaturedProducts,
   getBestsellerProducts,
+  getProductsByCollection,
   catalogProducts,
 } from "@/themes/thailandia/content/catalog";
 
 // ─── Category gradient map ─────────────────────────────────────────────────────
 
 const CATEGORY_GRADIENTS: Record<string, string> = {
-  nacionais:  "linear-gradient(135deg, rgba(0,156,59,0.55) 0%, rgba(255,223,0,0.35) 100%)",
-  europeias:  "linear-gradient(135deg, rgba(30,107,255,0.55) 0%, rgba(120,40,200,0.35) 100%)",
-  selecoes:   "linear-gradient(135deg, rgba(255,200,0,0.55) 0%, rgba(0,80,200,0.35) 100%)",
-  retros:     "linear-gradient(135deg, rgba(180,120,50,0.55) 0%, rgba(80,40,20,0.35) 100%)",
-  femininas:  "linear-gradient(135deg, rgba(220,60,120,0.55) 0%, rgba(140,40,180,0.35) 100%)",
-  conjuntos:  "linear-gradient(135deg, rgba(0,180,160,0.55) 0%, rgba(0,100,220,0.35) 100%)",
-  infantil:   "linear-gradient(135deg, rgba(255,130,0,0.55) 0%, rgba(255,200,0,0.35) 100%)",
+  nacionais:       "linear-gradient(135deg, rgba(0,156,59,0.55) 0%, rgba(255,223,0,0.35) 100%)",
+  europeias:       "linear-gradient(135deg, rgba(30,107,255,0.55) 0%, rgba(120,40,200,0.35) 100%)",
+  selecoes:        "linear-gradient(135deg, rgba(255,200,0,0.55) 0%, rgba(0,80,200,0.35) 100%)",
+  retros:          "linear-gradient(135deg, rgba(180,120,50,0.55) 0%, rgba(80,40,20,0.35) 100%)",
+  femininas:       "linear-gradient(135deg, rgba(220,60,120,0.55) 0%, rgba(140,40,180,0.35) 100%)",
+  conjuntos:       "linear-gradient(135deg, rgba(0,180,160,0.55) 0%, rgba(0,100,220,0.35) 100%)",
+  infantil:        "linear-gradient(135deg, rgba(255,130,0,0.55) 0%, rgba(255,200,0,0.35) 100%)",
+  americas:        "linear-gradient(135deg, rgba(220,50,50,0.55) 0%, rgba(255,180,0,0.35) 100%)",
+  "resto-do-mundo": "linear-gradient(135deg, rgba(0,160,100,0.55) 0%, rgba(0,80,180,0.35) 100%)",
+  "world-cup-2026": "linear-gradient(135deg, rgba(220,160,0,0.65) 0%, rgba(180,30,30,0.45) 100%)",
 };
 
 // ─── Hero slides ──────────────────────────────────────────────────────────────
@@ -58,9 +62,10 @@ const heroSlides = [
 
 // ─── Computed lists ───────────────────────────────────────────────────────────
 
-const featuredProducts = getFeaturedProducts().slice(0, 8);
-const dropProducts     = catalogProducts.slice(0, 8);
-const bestsellerList   = getBestsellerProducts().slice(0, 8);
+const featuredProducts  = getFeaturedProducts().slice(0, 8);
+const dropProducts      = catalogProducts.slice(0, 8);
+const bestsellerList    = getBestsellerProducts().slice(0, 8);
+const worldCupProducts  = getProductsByCollection("world-cup-2026").slice(0, 8);
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
@@ -110,64 +115,110 @@ export function HomePage() {
             <FeaturedProductCarousel products={dropProducts} />
           </section>
 
-          {/* ── 4. Categorias ───────────────────────────────────────────── */}
+          {/* ── 4. World Cup 2026 banner ──────────────────────────────── */}
+          {worldCupProducts.length > 0 && (
+            <section id="world-cup-2026" className="mt-16">
+              <div className="relative overflow-hidden rounded-[16px] border p-6 sm:p-8 lg:p-10"
+                style={{ borderColor: "rgba(232,184,32,0.3)", background: "linear-gradient(135deg, rgba(220,160,0,0.12) 0%, rgba(180,30,30,0.10) 100%)" }}>
+                {/* decorative glow */}
+                <div className="pointer-events-none absolute -right-20 -top-20 h-60 w-60 rounded-full opacity-20"
+                  style={{ background: "radial-gradient(circle, #e8b820 0%, transparent 70%)" }} />
+                <div className="pointer-events-none absolute -bottom-10 -left-10 h-40 w-40 rounded-full opacity-10"
+                  style={{ background: "radial-gradient(circle, #e83820 0%, transparent 70%)" }} />
+                <div className="relative mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <span className="inline-flex items-center gap-1.5 rounded-[6px] px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em]"
+                      style={{ background: "linear-gradient(90deg, #c8960c, #e8b820)", color: "#000" }}>
+                      ⚽ Coleção oficial
+                    </span>
+                    <h2 className="font-title mt-2 text-white" style={{ fontSize: "clamp(1.8rem, 5vw, 3rem)", lineHeight: 1.0 }}>
+                      WORLD CUP 2026
+                    </h2>
+                    <p className="mt-1 text-sm" style={{ color: "var(--text-secondary)" }}>
+                      Camisas de seleção, kits especiais e lançamentos da Copa do Mundo.
+                    </p>
+                  </div>
+                  <Link href="/categorias/world-cup-2026"
+                    className="flex-shrink-0 rounded-[8px] px-5 py-2.5 text-sm font-semibold transition-all duration-200 hover:opacity-90"
+                    style={{ background: "linear-gradient(90deg, #c8960c, #e8b820)", color: "#000" }}>
+                    Ver coleção completa →
+                  </Link>
+                </div>
+                <FeaturedProductCarousel products={worldCupProducts} />
+              </div>
+            </section>
+          )}
+
+          {/* ── 5. Categorias ───────────────────────────────────────────── */}
           <section id="categorias" className="mt-16">
             <SectionHeader
               overline="Navegar por categoria"
               title="O que você procura?"
             />
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6">
-              {catalogCategories.map((category) => (
-                <Link
-                  key={category.slug}
-                  href={category.comingSoon ? "#" : category.href}
-                  className="group relative block overflow-hidden rounded-[12px] border"
-                  style={{
-                    borderColor: "var(--border-subtle)",
-                    backgroundColor: "var(--surface-1)",
-                    aspectRatio: "16/9",
-                    pointerEvents: category.comingSoon ? "none" : "auto",
-                  }}
-                >
-                  {category.coverImage && (
-                    <Image
-                      src={category.coverImage}
-                      alt={category.name}
-                      fill
-                      sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                      className="object-cover opacity-40 transition-opacity duration-300 group-hover:opacity-60"
-                    />
-                  )}
-                  <div className="absolute inset-0"
-                    style={{ background: CATEGORY_GRADIENTS[category.slug] ?? "linear-gradient(135deg, rgba(30,30,40,0.7) 0%, rgba(0,0,0,0.5) 100%)" }} />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  <div className="absolute inset-x-0 bottom-0 p-4">
-                    <div className="flex items-end justify-between gap-2">
-                      <div>
-                        <p className="text-[10px] font-medium uppercase tracking-[0.14em]" style={{ color: "var(--text-tertiary)" }}>
-                          {category.accent}
-                        </p>
-                        <h3 className="font-title mt-0.5 text-lg text-white">
-                          {category.name}
-                        </h3>
-                      </div>
-                      {category.comingSoon ? (
-                        <span className="rounded-[4px] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em]"
-                          style={{ backgroundColor: "var(--surface-2)", color: "var(--text-tertiary)", border: "1px solid var(--border-subtle)" }}>
-                          Em breve
+            <div className="grid gap-3 grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6">
+              {catalogCategories.map((category) => {
+                const gradient = category.gradient ?? CATEGORY_GRADIENTS[category.slug] ?? "linear-gradient(135deg, rgba(30,30,40,0.7) 0%, rgba(0,0,0,0.5) 100%)";
+                const isWorldCup = category.isSpecial;
+                return (
+                  <Link
+                    key={category.slug}
+                    href={category.comingSoon ? "#" : category.href}
+                    className="group relative block overflow-hidden rounded-[12px] border transition-all duration-300"
+                    style={{
+                      borderColor: isWorldCup ? "rgba(232,184,32,0.4)" : "var(--border-subtle)",
+                      backgroundColor: "var(--surface-1)",
+                      aspectRatio: "16/9",
+                      pointerEvents: category.comingSoon ? "none" : "auto",
+                      boxShadow: isWorldCup ? "0 0 20px rgba(232,184,32,0.15)" : undefined,
+                    }}
+                  >
+                    {category.coverImage && (
+                      <Image
+                        src={category.coverImage}
+                        alt={category.name}
+                        fill
+                        sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 50vw"
+                        className="object-cover opacity-40 transition-opacity duration-300 group-hover:opacity-60"
+                      />
+                    )}
+                    <div className="absolute inset-0" style={{ background: gradient }} />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                    {isWorldCup && (
+                      <div className="absolute right-2 top-2">
+                        <span className="rounded-[4px] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em]"
+                          style={{ background: "linear-gradient(90deg, #c8960c, #e8b820)", color: "#000" }}>
+                          Copa
                         </span>
-                      ) : (
-                        <span className="text-sm transition-transform duration-200 group-hover:translate-x-0.5"
-                          style={{ color: "var(--text-tertiary)" }}>→</span>
-                      )}
+                      </div>
+                    )}
+                    <div className="absolute inset-x-0 bottom-0 p-3 sm:p-4">
+                      <div className="flex items-end justify-between gap-2">
+                        <div>
+                          <p className="text-[9px] sm:text-[10px] font-medium uppercase tracking-[0.14em]" style={{ color: isWorldCup ? "#e8b820" : "var(--text-tertiary)" }}>
+                            {category.accent}
+                          </p>
+                          <h3 className="font-title mt-0.5 text-base sm:text-lg text-white leading-tight">
+                            {category.name}
+                          </h3>
+                        </div>
+                        {category.comingSoon ? (
+                          <span className="rounded-[4px] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em]"
+                            style={{ backgroundColor: "var(--surface-2)", color: "var(--text-tertiary)", border: "1px solid var(--border-subtle)" }}>
+                            Em breve
+                          </span>
+                        ) : (
+                          <span className="text-sm transition-transform duration-200 group-hover:translate-x-0.5"
+                            style={{ color: isWorldCup ? "#e8b820" : "var(--text-tertiary)" }}>→</span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                );
+              })}
             </div>
           </section>
 
-          {/* ── 5. Mais vendidos ─────────────────────────────────────────── */}
+          {/* ── 6. Mais vendidos ─────────────────────────────────────────── */}
           <section id="destaques" className="mt-16">
             <SectionHeader
               overline="Mais procurados"
@@ -178,7 +229,7 @@ export function HomePage() {
             <FeaturedProductCarousel products={bestsellerList} />
           </section>
 
-          {/* ── 6. Destaques (mais produtos em grid) ─────────────────────── */}
+          {/* ── 7. Destaques (mais produtos em grid) ─────────────────────── */}
           <section className="mt-16">
             <SectionHeader
               overline="Curadoria importada"
@@ -186,15 +237,15 @@ export function HomePage() {
               linkHref="/categorias/europeias"
               linkLabel="Ver catálogo →"
             />
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6">
+            <div className="grid gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6">
               {featuredProducts.slice(0, 12).map((p) => (
                 <ProductCard key={p.slug} product={p}
-                  sizes="(min-width: 1536px) 16vw, (min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" />
+                  sizes="(min-width: 1536px) 16vw, (min-width: 1024px) 25vw, (min-width: 640px) 50vw, 50vw" />
               ))}
             </div>
           </section>
 
-          {/* ── 7. Sobre a TS ───────────────────────────────────────────── */}
+          {/* ── 8. Sobre a TS ───────────────────────────────────────────── */}
           <section className="mt-16">
             <div className="rounded-[16px] border p-8 sm:p-10 lg:grid lg:grid-cols-[1fr_auto] lg:items-center lg:gap-12"
               style={{ borderColor: "var(--border-subtle)", backgroundColor: "var(--surface-1)" }}>

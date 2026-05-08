@@ -8,6 +8,8 @@ export type CatalogCategory = {
   href: string;
   coverImage?: string;
   comingSoon?: boolean;
+  isSpecial?: boolean;    // destaque visual diferenciado (ex.: World Cup 2026)
+  gradient?: string;      // gradiente customizado para o card
 };
 
 export type CatalogProduct = {
@@ -31,6 +33,9 @@ export type CatalogProduct = {
   isFeatured?: boolean;
   isBestseller?: boolean;
   team?: string;
+  region?: string;          // "Europa" | "América do Sul" | "MLS" | "Ásia" | "África" | etc.
+  collection?: string;      // "world-cup-2026" | etc. — slug da coleção/campanha
+  tags?: string[];          // ["lançamento", "copa", "brasil"]
 };
 
 // ─── Categories (7) ──────────────────────────────────────────────────────────
@@ -91,6 +96,34 @@ export const catalogCategories: CatalogCategory[] = [
     description: "Camisas importadas para os pequenos torcedores. Tamanhos de 4 a 14 anos.",
     href: "/categorias/infantil",
     coverImage: "/catalog/barcelona-kids-kit-25-26/1.jpg",
+  },
+  {
+    slug: "americas",
+    name: "Américas",
+    accent: "MLS · CONMEBOL · Clubes",
+    description: "Inter Miami, Boca Juniors, River Plate, Club América e os maiores clubes das Américas.",
+    href: "/categorias/americas",
+    coverImage: "/catalog/inter-miami-home-26-27/1.jpg",
+    gradient: "linear-gradient(135deg, rgba(220,50,50,0.55) 0%, rgba(255,180,0,0.35) 100%)",
+  },
+  {
+    slug: "resto-do-mundo",
+    name: "Resto do Mundo",
+    accent: "Ásia · África · Outros",
+    description: "Al-Nassr, clubes asiáticos, africanos e ligas alternativas. Futebol sem fronteiras.",
+    href: "/categorias/resto-do-mundo",
+    coverImage: "/catalog/al-nassr-kids-25-26/1.jpg",
+    gradient: "linear-gradient(135deg, rgba(0,160,100,0.55) 0%, rgba(0,80,180,0.35) 100%)",
+  },
+  {
+    slug: "world-cup-2026",
+    name: "World Cup 2026",
+    accent: "Coleção Copa do Mundo",
+    description: "Camisas oficiais, kits especiais e toda a coleção comemorativa da Copa do Mundo 2026. Edições limitadas.",
+    href: "/categorias/world-cup-2026",
+    coverImage: "/catalog/brazil-home-2026/1.jpg",
+    isSpecial: true,
+    gradient: "linear-gradient(135deg, rgba(220,160,0,0.65) 0%, rgba(180,30,30,0.45) 100%)",
   },
 ];
 
@@ -237,8 +270,8 @@ export const catalogProducts: CatalogProduct[] = [
     name: "Inter Miami Home 26/27",
     shortName: "Inter Miami 26/27",
     cardTitle: "Inter Miami Home",
-    categorySlug: "europeias",
-    categoryName: "Europeias",
+    categorySlug: "americas",
+    categoryName: "Américas",
     image: "/catalog/inter-miami-home-26-27/1.jpg",
     gallery: ["/catalog/inter-miami-home-26-27/1.jpg"],
     priceLabel: "R$ 129,90",
@@ -252,6 +285,8 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: false,
     isBestseller: false,
     team: "Inter Miami",
+    region: "MLS",
+    tags: ["mls", "americas"],
     description: "A camisa do clube de Messi e Suárez na temporada 26/27. Rosa clássico de Miami, importado.",
   },
 
@@ -368,6 +403,9 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: true,
     isBestseller: true,
     team: "Brasil",
+    region: "América do Sul",
+    collection: "world-cup-2026",
+    tags: ["copa", "brasil", "lançamento"],
     description: "A camisa canarinho para a Copa do Mundo 2026. Edição comemorativa importada — peça histórica para torcedores e colecionadores.",
   },
   {
@@ -390,6 +428,9 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: true,
     isBestseller: false,
     team: "Argentina",
+    region: "América do Sul",
+    collection: "world-cup-2026",
+    tags: ["copa", "argentina", "manga longa"],
     description: "A celeste y blanca em versão manga longa para a Copa 2026. Peça diferenciada da campeã do mundo.",
   },
   {
@@ -412,6 +453,9 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: false,
     isBestseller: false,
     team: "Croácia",
+    region: "Europa",
+    collection: "world-cup-2026",
+    tags: ["copa", "croácia"],
     description: "O xadrez croata para a Copa 2026. Identidade única, acabamento importado.",
   },
   {
@@ -952,6 +996,156 @@ export const catalogProducts: CatalogProduct[] = [
     description: "Short da Espanha Copa 2026. Perfeito com a camisa da Roja ou como peça avulsa.",
   },
 
+  // ── AMÉRICAS ────────────────────────────────────────────────────────────────
+
+  {
+    slug: "river-plate-home-26-27",
+    name: "River Plate Home 26/27",
+    shortName: "River Plate 26/27",
+    cardTitle: "River Plate Home",
+    categorySlug: "americas",
+    categoryName: "Américas",
+    image: "/catalog/river-plate-home-26-27/1.jpg",
+    gallery: ["/catalog/river-plate-home-26-27/1.jpg"],
+    priceLabel: "R$ 129,90",
+    displayPrice: "R$ 129,90",
+    priceValue: 129.90,
+    sizes: ["P", "M", "G", "GG", "XG", "XGG"],
+    badge: "CONMEBOL",
+    line: "Linha Torcedor",
+    status: "Pronta entrega",
+    season: "26/27",
+    isFeatured: false,
+    isBestseller: false,
+    team: "River Plate",
+    region: "América do Sul",
+    tags: ["argentina", "americas", "conmebol"],
+    description: "A camisa do Millonario para a temporada 26/27. Branco e vermelho clássicos do futebol argentino.",
+  },
+  {
+    slug: "boca-juniors-home-26-27",
+    name: "Boca Juniors Home 26/27",
+    shortName: "Boca Juniors 26/27",
+    cardTitle: "Boca Juniors Home",
+    categorySlug: "americas",
+    categoryName: "Américas",
+    image: "/catalog/boca-juniors-retro-20-21/1.jpg",
+    gallery: ["/catalog/boca-juniors-retro-20-21/1.jpg"],
+    priceLabel: "R$ 129,90",
+    displayPrice: "R$ 129,90",
+    priceValue: 129.90,
+    sizes: ["P", "M", "G", "GG", "XG", "XGG"],
+    badge: "La Bombonera",
+    line: "Linha Torcedor",
+    status: "Novo",
+    season: "26/27",
+    isFeatured: true,
+    isBestseller: false,
+    team: "Boca Juniors",
+    region: "América do Sul",
+    tags: ["argentina", "americas", "conmebol"],
+    description: "A camisa xeneize 26/27 — azul e ouro de La Bombonera. Paixão argentina, qualidade importada.",
+  },
+  {
+    slug: "club-america-home-26-27",
+    name: "Club América Home 26/27",
+    shortName: "Club América 26/27",
+    cardTitle: "Club América Home",
+    categorySlug: "americas",
+    categoryName: "Américas",
+    image: "/catalog/club-america-home-26-27/1.jpg",
+    gallery: ["/catalog/club-america-home-26-27/1.jpg"],
+    priceLabel: "R$ 129,90",
+    displayPrice: "R$ 129,90",
+    priceValue: 129.90,
+    sizes: ["P", "M", "G", "GG", "XG", "XGG"],
+    badge: "Liga MX",
+    line: "Linha Torcedor",
+    status: "Pronta entrega",
+    season: "26/27",
+    isFeatured: false,
+    isBestseller: false,
+    team: "Club América",
+    region: "México",
+    tags: ["mexico", "americas", "liga mx"],
+    description: "A camisa do Las Águilas 26/27. Ouro e azul-marinho do maior clube do México.",
+  },
+
+  // ── RESTO DO MUNDO ───────────────────────────────────────────────────────────
+
+  {
+    slug: "al-nassr-home-26-27",
+    name: "Al-Nassr Home 26/27",
+    shortName: "Al-Nassr 26/27",
+    cardTitle: "Al-Nassr Home",
+    categorySlug: "resto-do-mundo",
+    categoryName: "Resto do Mundo",
+    image: "/catalog/al-nassr-kids-25-26/1.jpg",
+    gallery: ["/catalog/al-nassr-kids-25-26/1.jpg"],
+    priceLabel: "R$ 129,90",
+    displayPrice: "R$ 129,90",
+    priceValue: 129.90,
+    sizes: ["P", "M", "G", "GG", "XG", "XGG"],
+    badge: "Saudi Pro League",
+    line: "Linha Torcedor",
+    status: "Novo",
+    season: "26/27",
+    isFeatured: true,
+    isBestseller: false,
+    team: "Al-Nassr",
+    region: "Ásia",
+    tags: ["arábia saudita", "asia", "cr7"],
+    description: "A camisa adulta do Al-Nassr 26/27 — o clube de Cristiano Ronaldo. Identidade árabe, acabamento premium.",
+  },
+  {
+    slug: "kashima-antlers-home-26-27",
+    name: "Kashima Antlers Home 26/27",
+    shortName: "Kashima 26/27",
+    cardTitle: "Kashima Antlers Home",
+    categorySlug: "resto-do-mundo",
+    categoryName: "Resto do Mundo",
+    image: "/catalog/kashima-antlers-home-26-27/1.jpg",
+    gallery: ["/catalog/kashima-antlers-home-26-27/1.jpg"],
+    priceLabel: "R$ 119,90",
+    displayPrice: "R$ 119,90",
+    priceValue: 119.90,
+    sizes: ["P", "M", "G", "GG", "XG", "XGG"],
+    badge: "J-League",
+    line: "Linha Torcedor",
+    status: "Pronta entrega",
+    season: "26/27",
+    isFeatured: false,
+    isBestseller: false,
+    team: "Kashima Antlers",
+    region: "Ásia",
+    tags: ["japão", "asia", "j-league"],
+    description: "O vermelho do Kashima Antlers 26/27 — um dos clubes mais vitoriosos do Japão. Importada, qualidade diferenciada.",
+  },
+  {
+    slug: "mamelodi-sundowns-home-26-27",
+    name: "Mamelodi Sundowns Home 26/27",
+    shortName: "Mamelodi Sundowns 26/27",
+    cardTitle: "Mamelodi Sundowns Home",
+    categorySlug: "resto-do-mundo",
+    categoryName: "Resto do Mundo",
+    image: "/catalog/mamelodi-sundowns-home-26-27/1.jpg",
+    gallery: ["/catalog/mamelodi-sundowns-home-26-27/1.jpg"],
+    priceLabel: "R$ 119,90",
+    displayPrice: "R$ 119,90",
+    priceValue: 119.90,
+    sizes: ["P", "M", "G", "GG", "XG", "XGG"],
+    badge: "África",
+    line: "Linha Torcedor",
+    status: "Sob encomenda",
+    season: "26/27",
+    isFeatured: false,
+    isBestseller: false,
+    team: "Mamelodi Sundowns",
+    region: "África",
+    tags: ["africa", "sul-africa"],
+    description: "O amarelo do Mamelodi Sundowns 26/27 — o maior clube da África do Sul. Peça rara para colecionadores.",
+  },
+
   // ── INFANTIL ────────────────────────────────────────────────────────────────
 
   {
@@ -1077,7 +1271,15 @@ export function getCategoryBySlug(slug: string) {
 }
 
 export function getProductsByCategory(slug: string) {
+  // World Cup 2026 page shows products tagged with that collection regardless of category
+  if (slug === "world-cup-2026") {
+    return catalogProducts.filter((p) => p.collection === "world-cup-2026" || p.categorySlug === "world-cup-2026");
+  }
   return catalogProducts.filter((p) => p.categorySlug === slug);
+}
+
+export function getProductsByCollection(collection: string) {
+  return catalogProducts.filter((p) => p.collection === collection);
 }
 
 export function getFeaturedProducts() {

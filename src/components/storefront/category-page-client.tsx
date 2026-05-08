@@ -92,6 +92,10 @@ interface Props {
   products: CatalogProduct[];
 }
 
+const COLLECTION_LABELS: Record<string, string> = {
+  "world-cup-2026": "World Cup 2026",
+};
+
 export function CategoryPageClient({ category, products }: Props) {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("default");
@@ -99,7 +103,9 @@ export function CategoryPageClient({ category, products }: Props) {
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [selectedBadges, setSelectedBadges] = useState<string[]>([]);
   const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
+  const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const isWorldCup = category.slug === "world-cup-2026";
 
   // Derive available sizes/statuses/badges from actual products
   const availableSizes = useMemo(() => {
@@ -128,6 +134,11 @@ export function CategoryPageClient({ category, products }: Props) {
       }
     });
     return ordered.sort((a, b) => a.localeCompare(b));
+  }, [products]);
+
+  const availableCollections = useMemo(() => {
+    const all = new Set(products.map((p) => p.collection).filter(Boolean) as string[]);
+    return Array.from(all);
   }, [products]);
 
   function toggleFilter(list: string[], setList: (v: string[]) => void, value: string) {
@@ -164,6 +175,10 @@ export function CategoryPageClient({ category, products }: Props) {
       list = list.filter((p) => p.team && selectedTeams.includes(p.team));
     }
 
+    if (selectedCollections.length > 0) {
+      list = list.filter((p) => p.collection && selectedCollections.includes(p.collection));
+    }
+
     list.sort((a, b) => {
       if (sort === "name-asc")   return a.name.localeCompare(b.name);
       if (sort === "name-desc")  return b.name.localeCompare(a.name);
@@ -173,15 +188,16 @@ export function CategoryPageClient({ category, products }: Props) {
     });
 
     return list;
-  }, [products, query, selectedSizes, selectedStatuses, selectedBadges, selectedTeams, sort]);
+  }, [products, query, selectedSizes, selectedStatuses, selectedBadges, selectedTeams, selectedCollections, sort]);
 
-  const activeFilterCount = selectedSizes.length + selectedStatuses.length + selectedBadges.length + selectedTeams.length;
+  const activeFilterCount = selectedSizes.length + selectedStatuses.length + selectedBadges.length + selectedTeams.length + selectedCollections.length;
 
   function clearAll() {
     setSelectedSizes([]);
     setSelectedStatuses([]);
     setSelectedBadges([]);
     setSelectedTeams([]);
+    setSelectedCollections([]);
     setQuery("");
     setSort("default");
   }
@@ -272,6 +288,18 @@ export function CategoryPageClient({ category, products }: Props) {
           </div>
         </FilterGroup>
       )}
+
+      {availableCollections.length > 0 && (
+        <FilterGroup title="Coleção">
+          <div className="flex flex-col gap-1">
+            {availableCollections.map((c) => (
+              <CheckFilter key={c} label={COLLECTION_LABELS[c] ?? c}
+                checked={selectedCollections.includes(c)}
+                onChange={() => toggleFilter(selectedCollections, setSelectedCollections, c)} />
+            ))}
+          </div>
+        </FilterGroup>
+      )}
     </div>
   );
 
@@ -288,9 +316,20 @@ export function CategoryPageClient({ category, products }: Props) {
       </nav>
 
       {/* Header */}
-      <div className="mb-8">
+      <div className={`mb-8 ${isWorldCup ? "relative overflow-hidden rounded-[16px] border p-6 sm:p-8" : ""}`}
+        style={isWorldCup ? { borderColor: "rgba(232,184,32,0.3)", background: "linear-gradient(135deg, rgba(220,160,0,0.1) 0%, rgba(180,30,30,0.08) 100%)" } : undefined}>
+        {isWorldCup && (
+          <>
+            <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full opacity-20"
+              style={{ background: "radial-gradient(circle, #e8b820 0%, transparent 70%)" }} />
+            <span className="mb-3 inline-flex items-center gap-1.5 rounded-[6px] px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em]"
+              style={{ background: "linear-gradient(90deg, #c8960c, #e8b820)", color: "#000" }}>
+              ⚽ Coleção oficial
+            </span>
+          </>
+        )}
         <p className="text-[11px] font-semibold uppercase tracking-[0.2em]"
-          style={{ color: "var(--cta)" }}>
+          style={{ color: isWorldCup ? "#e8b820" : "var(--cta)" }}>
           {category.accent}
         </p>
         <h1 className="font-title mt-1 text-4xl text-white sm:text-5xl">
@@ -362,7 +401,8 @@ export function CategoryPageClient({ category, products }: Props) {
           {/* Active filter chips */}
           {activeFilterCount > 0 && (
             <div className="mb-4 flex flex-wrap gap-2">
-              {[...selectedSizes, ...selectedStatuses, ...selectedBadges, ...selectedTeams].map((f) => (
+              {[...selectedSizes, ...selectedStatuses, ...selectedBadges, ...selectedTeams,
+                ...selectedCollections.map((c) => COLLECTION_LABELS[c] ?? c)].map((f) => (
                 <span key={f}
                   className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium"
                   style={{ borderColor: "var(--border-strong)", color: "var(--text-primary)" }}>
@@ -371,7 +411,10 @@ export function CategoryPageClient({ category, products }: Props) {
                     if (selectedSizes.includes(f)) toggleFilter(selectedSizes, setSelectedSizes, f);
                     else if (selectedStatuses.includes(f)) toggleFilter(selectedStatuses, setSelectedStatuses, f);
                     else if (selectedTeams.includes(f)) toggleFilter(selectedTeams, setSelectedTeams, f);
-                    else toggleFilter(selectedBadges, setSelectedBadges, f);
+                    else if (selectedCollections.includes(f) || Object.values(COLLECTION_LABELS).includes(f)) {
+                      const key = Object.entries(COLLECTION_LABELS).find(([, v]) => v === f)?.[0] ?? f;
+                      toggleFilter(selectedCollections, setSelectedCollections, key);
+                    } else toggleFilter(selectedBadges, setSelectedBadges, f);
                   }} style={{ color: "var(--text-tertiary)" }}>
                     ×
                   </button>
