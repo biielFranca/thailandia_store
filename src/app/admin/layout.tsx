@@ -30,6 +30,64 @@ function ProductsIcon() {
   );
 }
 
+function OrdersIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4.5 w-4.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+      <rect x="9" y="3" width="6" height="4" rx="1" />
+      <line x1="9" y1="12" x2="15" y2="12" /><line x1="9" y1="16" x2="12" y2="16" />
+    </svg>
+  );
+}
+
+function CategoryIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4.5 w-4.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+    </svg>
+  );
+}
+
+function StockIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4.5 w-4.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
+      <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+      <line x1="12" y1="12" x2="12" y2="16" /><line x1="10" y1="14" x2="14" y2="14" />
+    </svg>
+  );
+}
+
+function UsersIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4.5 w-4.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </svg>
+  );
+}
+
+function CouponIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4.5 w-4.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+      <circle cx="7" cy="7" r="1.5" fill="currentColor" stroke="none"/>
+    </svg>
+  );
+}
+
+function ReportsIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4.5 w-4.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <line x1="18" y1="20" x2="18" y2="10" />
+      <line x1="12" y1="20" x2="12" y2="4" />
+      <line x1="6" y1="20" x2="6" y2="14" />
+    </svg>
+  );
+}
+
 function StoreIcon() {
   return (
     <svg viewBox="0 0 24 24" className="h-4.5 w-4.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -59,11 +117,37 @@ function MenuIcon() {
   );
 }
 
-// ─── Nav links ────────────────────────────────────────────────────────────────
+// ─── Nav sections ─────────────────────────────────────────────────────────────
 
-const navLinks = [
-  { label: "Dashboard", href: "/admin", icon: <DashboardIcon />, exact: true },
-  { label: "Produtos", href: "/admin/produtos", icon: <ProductsIcon /> },
+const navSections = [
+  {
+    label: "Principal",
+    links: [
+      { label: "Painel", href: "/admin", icon: <DashboardIcon />, exact: true },
+      { label: "Pedidos", href: "/admin/pedidos", icon: <OrdersIcon /> },
+    ],
+  },
+  {
+    label: "Catálogo",
+    links: [
+      { label: "Produtos", href: "/admin/produtos", icon: <ProductsIcon /> },
+      { label: "Categorias", href: "/admin/categorias", icon: <CategoryIcon /> },
+      { label: "Estoque", href: "/admin/estoque", icon: <StockIcon /> },
+    ],
+  },
+  {
+    label: "Clientes",
+    links: [
+      { label: "Clientes", href: "/admin/clientes", icon: <UsersIcon /> },
+      { label: "Cupons", href: "/admin/cupons", icon: <CouponIcon /> },
+    ],
+  },
+  {
+    label: "Análise",
+    links: [
+      { label: "Relatórios", href: "/admin/relatorios", icon: <ReportsIcon /> },
+    ],
+  },
 ];
 
 // ─── Guard ────────────────────────────────────────────────────────────────────
@@ -118,9 +202,17 @@ function AdminGuard({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Nav */}
-        <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-3">
-          {navLinks.map((link) => (
-            <NavItem key={link.href} {...link} />
+        <nav className="flex flex-1 flex-col overflow-y-auto p-3">
+          {navSections.map((section) => (
+            <div key={section.label} className="mb-4">
+              <p className="mb-1 px-3 text-[9px] font-semibold uppercase tracking-[0.2em]"
+                style={{ color: "var(--text-tertiary)" }}>
+                {section.label}
+              </p>
+              {section.links.map((link) => (
+                <NavItem key={link.href} {...link} />
+              ))}
+            </div>
           ))}
         </nav>
 
