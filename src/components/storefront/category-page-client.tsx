@@ -67,7 +67,8 @@ function FilterGroup({ title, children }: { title: string; children: React.React
 function CheckFilter({ label, checked, onChange }: { label: string; checked: boolean; onChange: () => void }) {
   return (
     <label className="flex cursor-pointer items-center gap-2 py-0.5 text-sm transition-colors hover:[color:var(--text-primary)]"
-      style={{ color: checked ? "var(--text-primary)" : "var(--text-secondary)" }}>
+      style={{ color: checked ? "var(--text-primary)" : "var(--text-secondary)" }}
+      onClick={onChange}>
       <span
         className="flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-[3px] border transition-all"
         style={checked
