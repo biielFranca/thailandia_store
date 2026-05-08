@@ -103,6 +103,7 @@ export function CategoryPageClient({ category, products }: Props) {
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [selectedBadges, setSelectedBadges] = useState<string[]>([]);
   const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
+  const [selectedLeagues, setSelectedLeagues] = useState<string[]>([]);
   const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const isWorldCup = category.slug === "world-cup-2026";
@@ -131,6 +132,18 @@ export function CategoryPageClient({ category, products }: Props) {
       if (p.team && !seen.has(p.team)) {
         seen.add(p.team);
         ordered.push(p.team);
+      }
+    });
+    return ordered.sort((a, b) => a.localeCompare(b));
+  }, [products]);
+
+  const availableLeagues = useMemo(() => {
+    const seen = new Set<string>();
+    const ordered: string[] = [];
+    products.forEach((p) => {
+      if (p.league && !seen.has(p.league)) {
+        seen.add(p.league);
+        ordered.push(p.league);
       }
     });
     return ordered.sort((a, b) => a.localeCompare(b));
@@ -175,6 +188,10 @@ export function CategoryPageClient({ category, products }: Props) {
       list = list.filter((p) => p.team && selectedTeams.includes(p.team));
     }
 
+    if (selectedLeagues.length > 0) {
+      list = list.filter((p) => p.league && selectedLeagues.includes(p.league));
+    }
+
     if (selectedCollections.length > 0) {
       list = list.filter((p) => p.collection && selectedCollections.includes(p.collection));
     }
@@ -188,15 +205,16 @@ export function CategoryPageClient({ category, products }: Props) {
     });
 
     return list;
-  }, [products, query, selectedSizes, selectedStatuses, selectedBadges, selectedTeams, selectedCollections, sort]);
+  }, [products, query, selectedSizes, selectedStatuses, selectedBadges, selectedTeams, selectedLeagues, selectedCollections, sort]);
 
-  const activeFilterCount = selectedSizes.length + selectedStatuses.length + selectedBadges.length + selectedTeams.length + selectedCollections.length;
+  const activeFilterCount = selectedSizes.length + selectedStatuses.length + selectedBadges.length + selectedTeams.length + selectedLeagues.length + selectedCollections.length;
 
   function clearAll() {
     setSelectedSizes([]);
     setSelectedStatuses([]);
     setSelectedBadges([]);
     setSelectedTeams([]);
+    setSelectedLeagues([]);
     setSelectedCollections([]);
     setQuery("");
     setSort("default");
@@ -284,6 +302,18 @@ export function CategoryPageClient({ category, products }: Props) {
               <CheckFilter key={t} label={t}
                 checked={selectedTeams.includes(t)}
                 onChange={() => toggleFilter(selectedTeams, setSelectedTeams, t)} />
+            ))}
+          </div>
+        </FilterGroup>
+      )}
+
+      {availableLeagues.length > 0 && (
+        <FilterGroup title="Liga / Campeonato">
+          <div className="flex flex-col gap-1">
+            {availableLeagues.map((l) => (
+              <CheckFilter key={l} label={l}
+                checked={selectedLeagues.includes(l)}
+                onChange={() => toggleFilter(selectedLeagues, setSelectedLeagues, l)} />
             ))}
           </div>
         </FilterGroup>
@@ -401,23 +431,19 @@ export function CategoryPageClient({ category, products }: Props) {
           {/* Active filter chips */}
           {activeFilterCount > 0 && (
             <div className="mb-4 flex flex-wrap gap-2">
-              {[...selectedSizes, ...selectedStatuses, ...selectedBadges, ...selectedTeams,
-                ...selectedCollections.map((c) => COLLECTION_LABELS[c] ?? c)].map((f) => (
-                <span key={f}
+              {[
+                ...selectedSizes.map((v) => ({ label: v, remove: () => toggleFilter(selectedSizes, setSelectedSizes, v) })),
+                ...selectedStatuses.map((v) => ({ label: v, remove: () => toggleFilter(selectedStatuses, setSelectedStatuses, v) })),
+                ...selectedBadges.map((v) => ({ label: v, remove: () => toggleFilter(selectedBadges, setSelectedBadges, v) })),
+                ...selectedTeams.map((v) => ({ label: v, remove: () => toggleFilter(selectedTeams, setSelectedTeams, v) })),
+                ...selectedLeagues.map((v) => ({ label: v, remove: () => toggleFilter(selectedLeagues, setSelectedLeagues, v) })),
+                ...selectedCollections.map((v) => ({ label: COLLECTION_LABELS[v] ?? v, remove: () => toggleFilter(selectedCollections, setSelectedCollections, v) })),
+              ].map(({ label, remove }) => (
+                <span key={label}
                   className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium"
                   style={{ borderColor: "var(--border-strong)", color: "var(--text-primary)" }}>
-                  {f}
-                  <button type="button" onClick={() => {
-                    if (selectedSizes.includes(f)) toggleFilter(selectedSizes, setSelectedSizes, f);
-                    else if (selectedStatuses.includes(f)) toggleFilter(selectedStatuses, setSelectedStatuses, f);
-                    else if (selectedTeams.includes(f)) toggleFilter(selectedTeams, setSelectedTeams, f);
-                    else if (selectedCollections.includes(f) || Object.values(COLLECTION_LABELS).includes(f)) {
-                      const key = Object.entries(COLLECTION_LABELS).find(([, v]) => v === f)?.[0] ?? f;
-                      toggleFilter(selectedCollections, setSelectedCollections, key);
-                    } else toggleFilter(selectedBadges, setSelectedBadges, f);
-                  }} style={{ color: "var(--text-tertiary)" }}>
-                    ×
-                  </button>
+                  {label}
+                  <button type="button" onClick={remove} style={{ color: "var(--text-tertiary)" }}>×</button>
                 </span>
               ))}
             </div>

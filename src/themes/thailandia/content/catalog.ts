@@ -36,6 +36,7 @@ export type CatalogProduct = {
   region?: string;          // "Europa" | "América do Sul" | "MLS" | "Ásia" | "África" | etc.
   collection?: string;      // "world-cup-2026" | etc. — slug da coleção/campanha
   tags?: string[];          // ["lançamento", "copa", "brasil"]
+  league?: string;          // "Premier League" | "La Liga" | "Brasileirão" | "Copa do Mundo" | etc.
 };
 
 // ─── Categories (7) ──────────────────────────────────────────────────────────
@@ -153,6 +154,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: true,
     isBestseller: true,
     team: "Real Madrid",
+    league: "La Liga",
     description: "A camisa oficial do maior clube do mundo para a temporada 26/27. Tecido importado de alta qualidade, identidade merengue clássica.",
   },
   {
@@ -175,6 +177,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: true,
     isBestseller: false,
     team: "Barcelona",
+    league: "La Liga",
     description: "A camisa blaugrana 26/27 com design que une tradição e modernidade. Importada, acabamento premium.",
   },
   {
@@ -197,6 +200,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: false,
     isBestseller: true,
     team: "Arsenal",
+    league: "Premier League",
     description: "O vermelho clássico dos Gunners na temporada 26/27. Camisa importada com identidade forte.",
   },
   {
@@ -219,6 +223,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: false,
     isBestseller: false,
     team: "Bayern Munich",
+    league: "Bundesliga",
     description: "O vermelho bávaro da maior potência da Alemanha. Camisa da temporada 26/27 com acabamento importado.",
   },
   {
@@ -241,6 +246,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: false,
     isBestseller: false,
     team: "Milan",
+    league: "Serie A",
     description: "O rossonero do Milan na temporada 26/27. Listras icônicas, qualidade de importado.",
   },
   {
@@ -263,6 +269,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: true,
     isBestseller: false,
     team: "PSG",
+    league: "Ligue 1",
     description: "Versão manga longa da camisa do PSG 25/26. Peça premium com identidade parisiense, acabamento importado.",
   },
   {
@@ -286,6 +293,7 @@ export const catalogProducts: CatalogProduct[] = [
     isBestseller: false,
     team: "Inter Miami",
     region: "MLS",
+    league: "MLS",
     tags: ["mls", "americas"],
     description: "A camisa do clube de Messi e Suárez na temporada 26/27. Rosa clássico de Miami, importado.",
   },
@@ -312,6 +320,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: true,
     isBestseller: true,
     team: "Flamengo",
+    league: "Brasileirão",
     description: "A camisa do Mengão 26/27. Preto e vermelho clássico, importada com acabamento premium. Nação Rubro-Negra.",
   },
   {
@@ -334,6 +343,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: true,
     isBestseller: false,
     team: "Corinthians",
+    league: "Brasileirão",
     description: "O manto alvinegro do Corinthians para 2026. Identidade Fiel, qualidade importada.",
   },
   {
@@ -356,6 +366,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: false,
     isBestseller: true,
     team: "Vasco",
+    league: "Brasileirão",
     description: "O manto cruzmaltino da temporada 26/27. Identidade clássica do Vasco, acabamento importado.",
   },
   {
@@ -378,6 +389,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: false,
     isBestseller: false,
     team: "São Paulo",
+    league: "Brasileirão",
     description: "Versão manga longa do Tricolor Paulista 25/26. Peça diferenciada para torcedores exigentes.",
   },
 
@@ -405,6 +417,7 @@ export const catalogProducts: CatalogProduct[] = [
     team: "Brasil",
     region: "América do Sul",
     collection: "world-cup-2026",
+    league: "Copa do Mundo",
     tags: ["copa", "brasil", "lançamento"],
     description: "A camisa canarinho para a Copa do Mundo 2026. Edição comemorativa importada — peça histórica para torcedores e colecionadores.",
   },
@@ -430,6 +443,7 @@ export const catalogProducts: CatalogProduct[] = [
     team: "Argentina",
     region: "América do Sul",
     collection: "world-cup-2026",
+    league: "Copa do Mundo",
     tags: ["copa", "argentina", "manga longa"],
     description: "A celeste y blanca em versão manga longa para a Copa 2026. Peça diferenciada da campeã do mundo.",
   },
@@ -455,6 +469,7 @@ export const catalogProducts: CatalogProduct[] = [
     team: "Croácia",
     region: "Europa",
     collection: "world-cup-2026",
+    league: "Copa do Mundo",
     tags: ["copa", "croácia"],
     description: "O xadrez croata para a Copa 2026. Identidade única, acabamento importado.",
   },
@@ -478,6 +493,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: false,
     isBestseller: false,
     team: "Espanha",
+    league: "Copa do Mundo",
     description: "A camisa da Espanha do ciclo 2022. Peça de colecionador para os fãs da Roja.",
   },
 
@@ -503,6 +519,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: true,
     isBestseller: false,
     team: "Palmeiras",
+    league: "Brasileirão",
     description: "A camisa histórica do Verdão de 1996 — ano do Brasileiro. Peça de colecionador, tecido premium.",
   },
   {
@@ -525,6 +542,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: false,
     isBestseller: false,
     team: "Atlético Madrid",
+    league: "La Liga",
     description: "O listrado rojiblanco da época clássica do Atleti. Para colecionadores e apaixonados pela história.",
   },
   {
@@ -547,6 +565,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: false,
     isBestseller: false,
     team: "Chelsea",
+    league: "Premier League",
     description: "O azul de Stamford Bridge da temporada Champions 20/21. Camisa retrô de alto valor para colecionadores.",
   },
   {
@@ -569,6 +588,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: false,
     isBestseller: false,
     team: "Cruzeiro",
+    league: "Copa Libertadores",
     description: "O manto celeste do Cruzeiro bicampeão da Libertadores 93/94. Relíquia azul para apaixonados.",
   },
   {
@@ -591,6 +611,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: false,
     isBestseller: false,
     team: "PSG",
+    league: "Ligue 1",
     description: "O azul noturno do PSG da era Messi, Neymar e Mbappé. Para quem viveu aquele time.",
   },
   {
@@ -613,6 +634,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: false,
     isBestseller: false,
     team: "Tottenham",
+    league: "Premier League",
     description: "A camisa dos Spurs da final da Champions League 18/19. Peça histórica para fãs do clube londrino.",
   },
   {
@@ -635,6 +657,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: false,
     isBestseller: false,
     team: "Porto",
+    league: "Primeira Liga",
     description: "O azul dragão do Porto da temporada 13/14. Identidade lusa clássica para colecionadores.",
   },
   {
@@ -657,6 +680,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: false,
     isBestseller: false,
     team: "Boca Juniors",
+    league: "Copa Libertadores",
     description: "A camisa xeneize 20/21 — azul e ouro de La Bombonera. Para quem ama o futebol sul-americano.",
   },
 
@@ -682,6 +706,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: true,
     isBestseller: false,
     team: "Bayern Munich",
+    league: "Bundesliga",
     description: "Camisa feminina do Bayern Munich 25/26. Corte e caimento pensados para ela, qualidade importada.",
   },
   {
@@ -704,6 +729,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: false,
     isBestseller: false,
     team: "Grêmio",
+    league: "Brasileirão",
     description: "O tricolor gaúcho em versão feminina 25/26. Para as guerreiras gremistas.",
   },
   {
@@ -726,6 +752,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: false,
     isBestseller: false,
     team: "Bahia",
+    league: "Brasileirão",
     description: "O azul, vermelho e branco do Bahia em versão feminina 24/25.",
   },
   {
@@ -748,6 +775,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: false,
     isBestseller: false,
     team: "Internacional",
+    league: "Brasileirão",
     description: "Baby look do Internacional 26/27 — para torcedoras coloradas estilosas.",
   },
   {
@@ -770,6 +798,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: false,
     isBestseller: false,
     team: "Portugal",
+    league: "Copa do Mundo",
     description: "Baby look da Seleção de Portugal Copa 2026 — vermelho e verde com estilo.",
   },
   {
@@ -792,6 +821,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: false,
     isBestseller: false,
     team: "São Paulo",
+    league: "Brasileirão",
     description: "Baby look do São Paulo 26/27 — para torcedoras que querem representar com estilo.",
   },
 
@@ -817,6 +847,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: true,
     isBestseller: true,
     team: "Flamengo",
+    league: "Brasileirão",
     description: "Kit completo Flamengo 25/26 — camisa + short juntos. Rubro-negro do início ao fim, visual fechado.",
   },
   {
@@ -839,6 +870,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: true,
     isBestseller: false,
     team: "Real Madrid",
+    league: "La Liga",
     description: "Kit completo Real Madrid 25/26 — camisa + short. Visual merengue do início ao fim.",
   },
   {
@@ -861,6 +893,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: false,
     isBestseller: false,
     team: "Barcelona",
+    league: "La Liga",
     description: "Agasalho completo do Barcelona 25/26 — jaqueta + calça. Para os dias frios com identidade blaugrana.",
   },
   {
@@ -883,6 +916,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: false,
     isBestseller: false,
     team: "PSG",
+    league: "Ligue 1",
     description: "Agasalho do PSG 25/26 — identidade parisiense para os dias frios. Importado, acabamento premium.",
   },
   {
@@ -905,6 +939,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: false,
     isBestseller: false,
     team: "Corinthians",
+    league: "Brasileirão",
     description: "Kit de treino alvinegro 25/26 — camiseta + calça. Para treinar com a identidade Fiel.",
   },
   {
@@ -927,6 +962,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: false,
     isBestseller: false,
     team: "Cruzeiro",
+    league: "Brasileirão",
     description: "Kit completo Cruzeiro 25/26 — camisa + short. O celeste estrelado em visual completo.",
   },
   {
@@ -949,6 +985,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: false,
     isBestseller: false,
     team: "Santos",
+    league: "Brasileirão",
     description: "Kit completo Santos 24/25 — camisa + short. O branco do Peixe em visual fechado.",
   },
   {
@@ -971,6 +1008,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: false,
     isBestseller: false,
     team: "Brasil",
+    league: "Copa do Mundo",
     description: "Short oficial da Seleção Brasileira Copa 2026. Composição perfeita com a camisa canarinho.",
   },
   {
@@ -993,6 +1031,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: false,
     isBestseller: false,
     team: "Espanha",
+    league: "Copa do Mundo",
     description: "Short da Espanha Copa 2026. Perfeito com a camisa da Roja ou como peça avulsa.",
   },
 
@@ -1019,6 +1058,7 @@ export const catalogProducts: CatalogProduct[] = [
     isBestseller: false,
     team: "River Plate",
     region: "América do Sul",
+    league: "Copa Libertadores",
     tags: ["argentina", "americas", "conmebol"],
     description: "A camisa do Millonario para a temporada 26/27. Branco e vermelho clássicos do futebol argentino.",
   },
@@ -1043,6 +1083,7 @@ export const catalogProducts: CatalogProduct[] = [
     isBestseller: false,
     team: "Boca Juniors",
     region: "América do Sul",
+    league: "Copa Libertadores",
     tags: ["argentina", "americas", "conmebol"],
     description: "A camisa xeneize 26/27 — azul e ouro de La Bombonera. Paixão argentina, qualidade importada.",
   },
@@ -1067,6 +1108,7 @@ export const catalogProducts: CatalogProduct[] = [
     isBestseller: false,
     team: "Club América",
     region: "México",
+    league: "Liga MX",
     tags: ["mexico", "americas", "liga mx"],
     description: "A camisa do Las Águilas 26/27. Ouro e azul-marinho do maior clube do México.",
   },
@@ -1094,6 +1136,7 @@ export const catalogProducts: CatalogProduct[] = [
     isBestseller: false,
     team: "Al-Nassr",
     region: "Ásia",
+    league: "Saudi Pro League",
     tags: ["arábia saudita", "asia", "cr7"],
     description: "A camisa adulta do Al-Nassr 26/27 — o clube de Cristiano Ronaldo. Identidade árabe, acabamento premium.",
   },
@@ -1118,6 +1161,7 @@ export const catalogProducts: CatalogProduct[] = [
     isBestseller: false,
     team: "Kashima Antlers",
     region: "Ásia",
+    league: "J-League",
     tags: ["japão", "asia", "j-league"],
     description: "O vermelho do Kashima Antlers 26/27 — um dos clubes mais vitoriosos do Japão. Importada, qualidade diferenciada.",
   },
@@ -1142,6 +1186,7 @@ export const catalogProducts: CatalogProduct[] = [
     isBestseller: false,
     team: "Mamelodi Sundowns",
     region: "África",
+    league: "Premier Soccer League",
     tags: ["africa", "sul-africa"],
     description: "O amarelo do Mamelodi Sundowns 26/27 — o maior clube da África do Sul. Peça rara para colecionadores.",
   },
@@ -1168,6 +1213,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: true,
     isBestseller: false,
     team: "Barcelona",
+    league: "La Liga",
     description: "Kit infantil do Barcelona 25/26 — camisa + short. Para os pequenos torcedores blaugranas.",
   },
   {
@@ -1190,6 +1236,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: false,
     isBestseller: false,
     team: "Flamengo",
+    league: "Brasileirão",
     description: "Camisa manga longa do Flamengo infantil 25/26. Para os pequenos rubro-negros com muito estilo.",
   },
   {
@@ -1212,6 +1259,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: false,
     isBestseller: false,
     team: "Al-Nassr",
+    league: "Saudi Pro League",
     description: "Camisa infantil do Al-Nassr 25/26 — o clube de Cristiano Ronaldo. Para os pequenos fãs do CR7.",
   },
   {
@@ -1234,6 +1282,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: false,
     isBestseller: false,
     team: "Itália",
+    league: "Copa do Mundo",
     description: "Kit infantil da Itália Copa 2026 — camisa + short. O azul azzurro para os pequenos.",
   },
   {
@@ -1256,6 +1305,7 @@ export const catalogProducts: CatalogProduct[] = [
     isFeatured: false,
     isBestseller: false,
     team: "São Paulo",
+    league: "Brasileirão",
     description: "Kit infantil do São Paulo 26/27. Para os pequenos tricolores paulistas.",
   },
 ];
@@ -1294,7 +1344,7 @@ export function searchProducts(query: string): CatalogProduct[] {
   if (!query.trim()) return [];
   const q = query.toLowerCase();
   return catalogProducts.filter((p) =>
-    [p.name, p.cardTitle, p.shortName, p.categoryName, p.badge, p.line ?? "", p.season ?? "", p.team ?? ""]
+    [p.name, p.cardTitle, p.shortName, p.categoryName, p.badge, p.line ?? "", p.season ?? "", p.team ?? "", p.league ?? "", p.region ?? ""]
       .some((field) => field.toLowerCase().includes(q))
   );
 }
