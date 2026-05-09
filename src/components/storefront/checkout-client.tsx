@@ -309,7 +309,19 @@ export function CheckoutClient() {
                     ))}
                   </ul>
                   <div className="mt-5 border-t pt-4" style={{ borderColor: "var(--border-subtle)" }}>
-                    <div className="flex justify-between text-sm">
+                    <div className="flex justify-between text-xs">
+                      <span style={{ color: "var(--text-secondary)" }}>Subtotal</span>
+                      <span className="price" style={{ color: "var(--text-secondary)" }}>
+                        {formatBRL(subtotal)}
+                      </span>
+                    </div>
+                    <div className="mt-1.5 flex items-center justify-between text-xs">
+                      <span style={{ color: "var(--text-secondary)" }}>Frete</span>
+                      <span className="font-semibold" style={{ color: "var(--success)" }}>
+                        Grátis
+                      </span>
+                    </div>
+                    <div className="mt-3 flex justify-between text-sm">
                       <span style={{ color: "var(--text-secondary)" }}>Total</span>
                       <span className="price font-bold text-lg"
                         style={{ color: form.payment === "pix" ? "var(--success)" : "var(--text-primary)" }}>

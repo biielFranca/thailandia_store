@@ -237,6 +237,11 @@ export function CartDrawer() {
                 </span>{" "}
                 sem juros
               </p>
+              <div className="mt-2 flex items-center gap-1.5 text-[11px] font-semibold"
+                style={{ color: "var(--success)" }}>
+                <span aria-hidden="true">🚚</span>
+                Frete grátis incluso
+              </div>
             </div>
 
             {/* Checkout CTA */}
