@@ -1,18 +1,20 @@
 import { notFound } from "next/navigation";
 import { StoreShell } from "@/components/storefront/store-shell";
 import { ProductPageClient } from "@/components/storefront/product-page-client";
-import {
-  getCatalogProductBySlug,
-  getCatalogProducts,
-} from "@/core/services/catalog";
+import { getCatalogProductBySlug } from "@/core/services/catalog";
+import { createStaticClient } from "@/lib/supabase/static";
 
 type Props = { params: Promise<{ slug: string }> };
 
-// Build a static path for every active product at the time of build. New
-// products added later are still routable via on-demand rendering.
+// Build a static path for every active product. Runs at build time with no
+// HTTP context, so we go through the cookie-less static client.
 export async function generateStaticParams() {
-  const products = await getCatalogProducts();
-  return products.map((p) => ({ slug: p.slug }));
+  const supabase = createStaticClient();
+  const { data } = await supabase
+    .from("products")
+    .select("slug")
+    .eq("active", true);
+  return (data ?? []).map((p) => ({ slug: p.slug }));
 }
 
 export default async function ProductPage({ params }: Props) {
