@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useStore } from "@/contexts/store";
 import { useAuth } from "@/contexts/auth";
+import { placeOrder } from "@/app/checkout/actions";
 
 function formatBRL(value: number) {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -61,7 +63,9 @@ const inputStyle = { borderColor: "var(--border-subtle)", color: "var(--text-pri
 export function CheckoutClient() {
   const { items, subtotal, clearCart } = useStore();
   const { user } = useAuth();
-  const [submitted, setSubmitted] = useState(false);
+  const router = useRouter();
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   const [form, setForm] = useState({
     name:    user?.name ?? "",
@@ -85,35 +89,40 @@ export function CheckoutClient() {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
-  function handleOrder(e: React.FormEvent) {
+  async function handleOrder(e: React.FormEvent) {
     e.preventDefault();
-    setSubmitted(true);
-    clearCart();
-  }
+    if (submitting) return;
+    setError("");
+    setSubmitting(true);
 
-  if (submitted) {
-    return (
-      <main className="mx-auto flex min-h-[60vh] w-full max-w-[640px] flex-col items-center justify-center gap-6 px-4 py-16 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full text-3xl"
-          style={{ backgroundColor: "rgba(34,197,94,0.15)" }}>
-          ✅
-        </div>
-        <div>
-          <h1 className="font-title text-3xl text-white">PEDIDO RECEBIDO!</h1>
-          <p className="mt-2 text-sm" style={{ color: "var(--text-secondary)" }}>
-            Entraremos em contato em breve para confirmar seu pedido.
-          </p>
-          <p className="mt-1 text-xs" style={{ color: "var(--text-tertiary)" }}>
-            Verifique sua caixa de entrada para o e-mail de confirmação.
-          </p>
-        </div>
-        <Link href="/"
-          className="inline-flex items-center gap-2 rounded-[8px] px-6 py-3 text-sm font-semibold transition-opacity hover:opacity-90"
-          style={{ backgroundColor: "var(--cta)", color: "var(--cta-foreground)" }}>
-          Voltar à loja
-        </Link>
-      </main>
-    );
+    const result = await placeOrder({
+      items: items.map((i) => ({ slug: i.slug, size: i.size, quantity: i.quantity })),
+      customer: {
+        name: form.name,
+        email: form.email,
+        phone: form.phone || undefined,
+        cpf: form.cpf || undefined,
+      },
+      address: {
+        cep: form.cep,
+        street: form.street,
+        number: form.number,
+        complement: form.comp || undefined,
+        city: form.city,
+        state: form.state,
+      },
+      paymentMethod: form.payment,
+    });
+
+    if (!result.ok) {
+      setSubmitting(false);
+      setError(result.error);
+      return;
+    }
+
+    // Only clear the cart after the server confirms the order persisted.
+    clearCart();
+    router.push(`/checkout/sucesso?order=${encodeURIComponent(result.orderId)}`);
   }
 
   if (items.length === 0) {
@@ -316,10 +325,17 @@ export function CheckoutClient() {
                 </div>
               </div>
 
-              <button type="submit"
-                className="mt-4 flex w-full items-center justify-center gap-2 rounded-[8px] py-4 text-sm font-bold transition-opacity hover:opacity-90"
+              {error && (
+                <div className="mt-3 rounded-[8px] border px-4 py-3 text-sm"
+                  style={{ borderColor: "rgba(239,68,68,0.4)", backgroundColor: "rgba(239,68,68,0.08)", color: "var(--danger)" }}>
+                  {error}
+                </div>
+              )}
+
+              <button type="submit" disabled={submitting}
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-[8px] py-4 text-sm font-bold transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                 style={{ backgroundColor: "var(--cta)", color: "var(--cta-foreground)" }}>
-                Confirmar pedido →
+                {submitting ? "Processando..." : "Confirmar pedido →"}
               </button>
 
               <p className="mt-3 text-center text-[11px]" style={{ color: "var(--text-tertiary)" }}>
