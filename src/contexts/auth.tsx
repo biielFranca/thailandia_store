@@ -35,6 +35,7 @@ interface AuthContextValue {
   loading: boolean;
   login: (email: string, password: string) => Promise<AuthResult>;
   register: (name: string, email: string, password: string) => Promise<AuthResult>;
+  loginWithGoogle: (next?: string) => Promise<AuthResult>;
   logout: () => Promise<void>;
   isAdmin: boolean;
 }
@@ -74,6 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const mountedRef = useRef(true);
 
   // Build the AuthUser by fetching role/name from profiles (with safe fallbacks).
+  // First-time OAuth users may not have a profile yet — best-effort upsert.
   const buildAuthUser = useCallback(
     async (authUser: User): Promise<AuthUser> => {
       const { data: profile } = await supabase
@@ -82,11 +84,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq("id", authUser.id)
         .maybeSingle();
 
+      const resolvedName = deriveName(authUser, profile?.full_name);
+
+      if (!profile) {
+        await supabase
+          .from("profiles")
+          .upsert({ id: authUser.id, full_name: resolvedName }, { onConflict: "id" });
+      }
+
       const role: UserRole = profile?.role === "admin" ? "admin" : "customer";
       return {
         id: authUser.id,
         email: authUser.email ?? "",
-        name: deriveName(authUser, profile?.full_name),
+        name: resolvedName,
         role,
       };
     },
@@ -179,14 +189,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [supabase, applySession]
   );
 
+  const loginWithGoogle = useCallback(
+    async (next: string = "/"): Promise<AuthResult> => {
+      const safeNext = next.startsWith("/") && !next.startsWith("//") ? next : "/";
+      const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(safeNext)}`;
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo },
+      });
+      if (error) return { success: false, error: mapAuthError(error.message) };
+      // Browser redirects to Google; nothing else to do.
+      return { success: true };
+    },
+    [supabase]
+  );
+
   const logout = useCallback(async () => {
     await supabase.auth.signOut();
     if (mountedRef.current) setUser(null);
   }, [supabase]);
 
   const value = useMemo<AuthContextValue>(
-    () => ({ user, loading, login, register, logout, isAdmin: user?.role === "admin" }),
-    [user, loading, login, register, logout]
+    () => ({ user, loading, login, register, loginWithGoogle, logout, isAdmin: user?.role === "admin" }),
+    [user, loading, login, register, loginWithGoogle, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
