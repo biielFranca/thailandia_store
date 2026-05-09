@@ -4,16 +4,19 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useStore } from "@/contexts/store";
-import { getProductBySlug } from "@/themes/thailandia/content/catalog";
+import type { CatalogProduct } from "@/themes/thailandia/content/catalog";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type HeroSlide = {
+// Slides carry their resolved product so the client component never has to
+// query the catalog itself. The server (home-page.tsx) prefetches.
+export type HeroSlide = {
   slug: string;
   title: string;
   description: string;
   buttonLabel: string;
   image: string;
+  product: CatalogProduct | null;
 };
 
 type Props = { slides: readonly HeroSlide[] };
@@ -91,7 +94,7 @@ export function HeroCarousel({ slides }: Props) {
   }, [active, paused, go]);
 
   function handleAddToCart(slide: HeroSlide) {
-    const product = getProductBySlug(slide.slug);
+    const product = slide.product;
     if (!product) return;
     addItem({
       slug: product.slug,

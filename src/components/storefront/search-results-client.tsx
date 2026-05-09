@@ -1,17 +1,17 @@
 "use client";
 
-import { useMemo } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { searchProducts } from "@/themes/thailandia/content/catalog";
+import type { CatalogProduct } from "@/themes/thailandia/content/catalog";
 import { ProductCard } from "@/components/storefront/product-card";
 
-export function SearchResultsClient() {
-  const params = useSearchParams();
-  const router = useRouter();
-  const query = params?.get("q") ?? "";
+interface Props {
+  query: string;
+  results: CatalogProduct[];
+}
 
-  const results = useMemo(() => searchProducts(query), [query]);
+export function SearchResultsClient({ query, results }: Props) {
+  const router = useRouter();
 
   return (
     <main className="w-full px-3 pb-20 pt-6 sm:px-6 lg:px-10 xl:px-16 2xl:px-24">
@@ -73,7 +73,7 @@ export function SearchResultsClient() {
       ) : query ? (
         <div className="rounded-[12px] border p-12 text-center" style={{ borderColor: "var(--border-subtle)" }}>
           <p className="text-4xl mb-4">🔍</p>
-          <p className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>Nenhum resultado para "{query}"</p>
+          <p className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>Nenhum resultado para &quot;{query}&quot;</p>
           <p className="mt-2 text-sm" style={{ color: "var(--text-secondary)" }}>Tente termos diferentes: nome do time, país, temporada.</p>
           <Link href="/" className="mt-6 inline-flex rounded-[8px] px-6 py-2.5 text-sm font-semibold"
             style={{ backgroundColor: "var(--cta)", color: "var(--cta-foreground)" }}>

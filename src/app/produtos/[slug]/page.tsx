@@ -2,19 +2,22 @@ import { notFound } from "next/navigation";
 import { StoreShell } from "@/components/storefront/store-shell";
 import { ProductPageClient } from "@/components/storefront/product-page-client";
 import {
-  catalogProducts,
-  getProductBySlug,
-} from "@/themes/thailandia/content/catalog";
+  getCatalogProductBySlug,
+  getCatalogProducts,
+} from "@/core/services/catalog";
 
 type Props = { params: Promise<{ slug: string }> };
 
-export function generateStaticParams() {
-  return catalogProducts.map((p) => ({ slug: p.slug }));
+// Build a static path for every active product at the time of build. New
+// products added later are still routable via on-demand rendering.
+export async function generateStaticParams() {
+  const products = await getCatalogProducts();
+  return products.map((p) => ({ slug: p.slug }));
 }
 
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const product = await getCatalogProductBySlug(slug);
   if (!product) notFound();
 
   return (

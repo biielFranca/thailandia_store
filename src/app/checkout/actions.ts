@@ -3,13 +3,24 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Json } from "@/lib/supabase/database.types";
 import { storeConfig } from "@/config/store";
-import { catalogProducts } from "@/themes/thailandia/content/catalog";
 import {
   applyPaymentTotal,
   round2,
   validatePlaceOrderInput,
   type PlaceOrderInput,
 } from "@/core/validators/checkout";
+
+interface ProductLookup {
+  id: string;
+  slug: string;
+  name: string;
+  price: number;
+  active: boolean;
+  stock_quantity: number;
+  metadata: { sizes?: string[]; status?: string | null } | null;
+  product_images: { url: string; position: number }[];
+  categories: { slug: string } | null;
+}
 
 export type PlaceOrderResult =
   | { ok: true; orderId: string; total: number; paymentMethod: "pix" | "card" }
@@ -58,36 +69,70 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
     name: string;
     unitPrice: number;
     image: string | null;
+    productId: string;
     snapshot: Json;
   };
 
+  // Re-fetch every product the cart references in a single query. Trust nothing
+  // that came from the client — pricing, availability and size validation all
+  // happen here against the database row.
+  const slugs = Array.from(new Set(input.items.map((i) => i.slug)));
+  const { data: rows } = await supabase
+    .from("products")
+    .select("id, slug, name, price, active, stock_quantity, metadata, product_images (url, position), categories (slug)")
+    .eq("store_id", storeId)
+    .in("slug", slugs);
+  const productBySlug = new Map<string, ProductLookup>(
+    ((rows ?? []) as unknown as ProductLookup[]).map((r) => [r.slug, r])
+  );
+
   const resolved: ResolvedItem[] = [];
+  // Aggregate quantity per slug to enforce stock against the line totals,
+  // not just the individual lines.
+  const totalQtyBySlug = new Map<string, number>();
   for (const it of input.items) {
-    const product = catalogProducts.find((p) => p.slug === it.slug);
-    if (!product) return { ok: false, error: `Produto indisponível: ${it.slug}` };
-    if (!product.sizes.includes(it.size)) {
+    totalQtyBySlug.set(it.slug, (totalQtyBySlug.get(it.slug) ?? 0) + it.quantity);
+  }
+
+  for (const it of input.items) {
+    const product = productBySlug.get(it.slug);
+    if (!product || !product.active) {
+      return { ok: false, error: `Produto indisponível: ${it.slug}` };
+    }
+    const sizes = product.metadata?.sizes ?? [];
+    if (sizes.length > 0 && !sizes.includes(it.size)) {
       return { ok: false, error: `Tamanho ${it.size} indisponível para ${product.name}.` };
     }
-    if (product.status === "Sob encomenda") {
-      // Soft block — could be relaxed when we wire real stock per size.
+    if (product.metadata?.status === "Sob encomenda") {
       return { ok: false, error: `${product.name} está sob encomenda; não pode ser finalizado pelo site agora.` };
     }
+    const totalQty = totalQtyBySlug.get(it.slug) ?? it.quantity;
+    if (product.stock_quantity < totalQty) {
+      return {
+        ok: false,
+        error: `Estoque insuficiente para ${product.name} (${product.stock_quantity} disponíveis).`,
+      };
+    }
+
+    const sortedImages = [...product.product_images].sort((a, b) => a.position - b.position);
+    const image = sortedImages[0]?.url ?? null;
+    const unitPrice = Number(product.price);
+
     resolved.push({
       slug: product.slug,
       size: it.size,
       quantity: it.quantity,
       name: product.name,
-      unitPrice: product.priceValue,
-      image: product.image ?? null,
+      unitPrice,
+      image,
+      productId: product.id,
       snapshot: {
         slug: product.slug,
         name: product.name,
         size: it.size,
-        unit_price: product.priceValue,
-        image: product.image ?? null,
-        category_slug: product.categorySlug,
-        team: product.team ?? null,
-        season: product.season ?? null,
+        unit_price: unitPrice,
+        image,
+        category_slug: product.categories?.slug ?? null,
       },
     });
   }
@@ -130,7 +175,7 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
 
   const itemsPayload = resolved.map((r) => ({
     order_id: order.id,
-    product_id: null, // becomes a real UUID after P1 #5
+    product_id: r.productId,
     quantity: r.quantity,
     unit_price: r.unitPrice,
     total_price: round2(r.unitPrice * r.quantity),

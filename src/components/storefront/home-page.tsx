@@ -5,12 +5,12 @@ import { FeaturedProductCarousel } from "@/components/storefront/featured-produc
 import { ProductCard } from "@/components/storefront/product-card";
 import { StoreShell } from "@/components/storefront/store-shell";
 import {
-  catalogCategories,
-  getFeaturedProducts,
-  getBestsellerProducts,
-  getProductsByCollection,
-  catalogProducts,
-} from "@/themes/thailandia/content/catalog";
+  getCatalogCategories,
+  getCatalogProducts,
+  getCatalogProductsByCollection,
+  getFeaturedCatalogProducts,
+  getBestsellerCatalogProducts,
+} from "@/core/services/catalog";
 
 // ─── Category gradient map ─────────────────────────────────────────────────────
 
@@ -60,23 +60,40 @@ const heroSlides = [
   },
 ] as const;
 
-// ─── Computed lists ───────────────────────────────────────────────────────────
-
-const featuredProducts  = getFeaturedProducts().slice(0, 8);
-const dropProducts      = catalogProducts.slice(0, 8);
-const bestsellerList    = getBestsellerProducts().slice(0, 8);
-const worldCupProducts  = getProductsByCollection("world-cup-2026").slice(0, 8);
-
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export function HomePage() {
+export async function HomePage() {
+  // Fetch in parallel — this is a Server Component, so all of these resolve
+  // before the first byte streams to the client.
+  const [allProducts, featuredProducts, bestsellerList, worldCupAll, catalogCategories] =
+    await Promise.all([
+      getCatalogProducts(),
+      getFeaturedCatalogProducts(),
+      getBestsellerCatalogProducts(),
+      getCatalogProductsByCollection("world-cup-2026"),
+      getCatalogCategories(),
+    ]);
+
+  const dropProducts = allProducts.slice(0, 8);
+  const featuredSlice = featuredProducts.slice(0, 8);
+  const bestsellerSlice = bestsellerList.slice(0, 8);
+  const worldCupSlice = worldCupAll.slice(0, 8);
+
+  // Pre-resolve hero slides with product data so the client carousel never
+  // needs to look up the catalog itself.
+  const productBySlug = new Map(allProducts.map((p) => [p.slug, p]));
+  const enrichedHeroSlides = heroSlides.map((s) => ({
+    ...s,
+    product: productBySlug.get(s.slug) ?? null,
+  }));
+
   return (
     <StoreShell>
       <main className="flex w-full min-w-0 flex-1 flex-col overflow-x-hidden">
 
         {/* ── 1. Hero ───────────────────────────────────────────────────── */}
         <div className="w-full px-3 pb-4 pt-3 sm:px-6 sm:pt-5 lg:px-10 xl:px-16 2xl:px-24">
-          <HeroCarousel slides={heroSlides} />
+          <HeroCarousel slides={enrichedHeroSlides} />
         </div>
 
         {/* ── 2. Trust bar ─────────────────────────────────────────────── */}
@@ -116,7 +133,7 @@ export function HomePage() {
           </section>
 
           {/* ── 4. World Cup 2026 banner ──────────────────────────────── */}
-          {worldCupProducts.length > 0 && (
+          {worldCupSlice.length > 0 && (
             <section id="world-cup-2026" className="mt-16">
               <div className="relative overflow-hidden rounded-[16px] border p-6 sm:p-8 lg:p-10"
                 style={{ borderColor: "rgba(232,184,32,0.3)", background: "linear-gradient(135deg, rgba(220,160,0,0.12) 0%, rgba(180,30,30,0.10) 100%)" }}>
@@ -144,7 +161,7 @@ export function HomePage() {
                     Ver coleção completa →
                   </Link>
                 </div>
-                <FeaturedProductCarousel products={worldCupProducts} />
+                <FeaturedProductCarousel products={worldCupSlice} />
               </div>
             </section>
           )}
@@ -226,7 +243,7 @@ export function HomePage() {
               linkHref="/categorias/nacionais"
               linkLabel="Ver todos →"
             />
-            <FeaturedProductCarousel products={bestsellerList} />
+            <FeaturedProductCarousel products={bestsellerSlice} />
           </section>
 
           {/* ── 7. Destaques (mais produtos em grid) ─────────────────────── */}
@@ -238,7 +255,7 @@ export function HomePage() {
               linkLabel="Ver catálogo →"
             />
             <div className="grid gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6">
-              {featuredProducts.slice(0, 12).map((p) => (
+              {featuredSlice.slice(0, 12).map((p) => (
                 <ProductCard key={p.slug} product={p}
                   sizes="(min-width: 1536px) 16vw, (min-width: 1024px) 25vw, (min-width: 640px) 50vw, 50vw" />
               ))}

@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useStore } from "@/contexts/store";
-import { searchProducts } from "@/themes/thailandia/content/catalog";
+import type { CatalogProduct } from "@/themes/thailandia/content/catalog";
+import { searchProductsAction } from "@/app/actions/search";
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
@@ -32,6 +33,7 @@ function XIcon() {
 export function SearchOverlay() {
   const { searchOpen, closeSearch } = useStore();
   const [query, setQuery] = useState("");
+  const [results, setResults] = useState<CatalogProduct[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
@@ -41,6 +43,7 @@ export function SearchOverlay() {
       setTimeout(() => inputRef.current?.focus(), 80);
     } else {
       setQuery("");
+      setResults([]);
     }
   }, [searchOpen]);
 
@@ -58,7 +61,28 @@ export function SearchOverlay() {
     return () => document.removeEventListener("keydown", onKey);
   }, [searchOpen, closeSearch, query, router]);
 
-  const results = searchProducts(query);
+  // Debounced live search against the Server Action.
+  useEffect(() => {
+    const trimmed = query.trim();
+    if (!trimmed) {
+      setResults([]);
+      return;
+    }
+    let cancelled = false;
+    const handle = setTimeout(async () => {
+      try {
+        const r = await searchProductsAction(trimmed);
+        if (!cancelled) setResults(r);
+      } catch {
+        if (!cancelled) setResults([]);
+      }
+    }, 180);
+    return () => {
+      cancelled = true;
+      clearTimeout(handle);
+    };
+  }, [query]);
+
   const hasQuery = query.trim().length > 0;
 
   return (
