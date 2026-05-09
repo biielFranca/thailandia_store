@@ -50,6 +50,7 @@ function LoginForm() {
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
 
   // Redirect if already logged in
   useEffect(() => {
@@ -59,6 +60,7 @@ function LoginForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    setInfo("");
     setLoading(true);
 
     const result =
@@ -73,12 +75,19 @@ function LoginForm() {
       return;
     }
 
+    if (result.needsEmailConfirmation) {
+      setInfo("Cadastro criado. Confirme seu e-mail para entrar.");
+      setTab("login");
+      return;
+    }
+
     // redirect handled by the useEffect above
   }
 
   function switchTab(t: Tab) {
     setTab(t);
     setError("");
+    setInfo("");
     setName("");
     setEmail("");
     setPassword("");
@@ -229,6 +238,14 @@ function LoginForm() {
                   </div>
                 )}
 
+                {/* Info */}
+                {info && (
+                  <div className="rounded-[8px] border px-4 py-3 text-sm"
+                    style={{ borderColor: "rgba(30,107,255,0.4)", backgroundColor: "rgba(30,107,255,0.08)", color: "var(--cta)" }}>
+                    {info}
+                  </div>
+                )}
+
                 {/* Submit */}
                 <button type="submit" disabled={loading}
                   className="mt-1 flex h-11 w-full items-center justify-center rounded-[8px] text-sm font-semibold transition-opacity hover:opacity-90 disabled:opacity-60"
@@ -249,11 +266,6 @@ function LoginForm() {
             </form>
           </div>
 
-          {/* Demo hint */}
-          <div className="mt-4 rounded-[10px] border px-4 py-3 text-center text-[11px]"
-            style={{ borderColor: "var(--border-subtle)", backgroundColor: "var(--surface-1)", color: "var(--text-tertiary)" }}>
-            Acesso admin demo: <span style={{ color: "var(--text-secondary)" }}>admin@ts.com</span> / <span style={{ color: "var(--text-secondary)" }}>admin123</span>
-          </div>
         </div>
       </main>
     </div>
