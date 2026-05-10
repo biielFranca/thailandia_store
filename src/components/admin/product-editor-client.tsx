@@ -2,12 +2,17 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import {
   createProduct,
   updateProduct,
   type ProductInput,
 } from "@/app/admin/produtos/actions";
+import { createClient } from "@/lib/supabase/client";
+
+const STORAGE_BUCKET = "product-images";
+const MAX_UPLOAD_BYTES = 5 * 1024 * 1024; // 5 MB
+const ALLOWED_MIMES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -118,7 +123,9 @@ export function ProductEditorClient({ product, categories }: Props) {
   const [form, setForm] = useState<FormState>(() => buildInitial(product, categories));
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [uploading, setUploading] = useState(false);
   const [pending, startTransition] = useTransition();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -150,6 +157,42 @@ export function ProductEditorClient({ product, categories }: Props) {
     if (target < 0 || target >= next.length) return;
     [next[idx], next[target]] = [next[target], next[idx]];
     set("imageUrls", next);
+  }
+
+  async function handleFileUpload(files: FileList | null) {
+    if (!files || files.length === 0) return;
+    setError("");
+    setSuccess("");
+    setUploading(true);
+    const supabase = createClient();
+    const slugBase = (form.slug.trim() || slugify(form.name) || "produto").slice(0, 60);
+    const uploaded: string[] = [];
+    try {
+      for (const file of Array.from(files)) {
+        if (!ALLOWED_MIMES.has(file.type)) {
+          throw new Error(`Formato não suportado: ${file.name}. Use JPG, PNG, WebP ou AVIF.`);
+        }
+        if (file.size > MAX_UPLOAD_BYTES) {
+          throw new Error(`Imagem ${file.name} excede 5 MB.`);
+        }
+        const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
+        const path = `${slugBase}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const { error: upErr } = await supabase.storage.from(STORAGE_BUCKET).upload(path, file, {
+          contentType: file.type,
+          cacheControl: "3600",
+          upsert: false,
+        });
+        if (upErr) throw new Error(upErr.message);
+        const { data } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(path);
+        uploaded.push(data.publicUrl);
+      }
+      set("imageUrls", [...form.imageUrls, ...uploaded]);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Falha no upload da imagem.");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
   }
 
   function buildPayload(): ProductInput {
@@ -363,17 +406,23 @@ export function ProductEditorClient({ product, categories }: Props) {
               )}
             </Section>
 
-            <Section title="Imagens (URLs)">
-              <div className="flex flex-col gap-2">
+            <Section title="Imagens">
+              <div className="flex flex-col gap-3">
                 {form.imageUrls.length === 0 && (
                   <p className="text-xs" style={{ color: "var(--text-tertiary)" }}>
-                    Nenhuma imagem ainda. Cole o caminho público do arquivo (ex: /catalog/produto/1.jpg).
+                    Nenhuma imagem ainda. Faça upload abaixo ou cole uma URL externa.
                   </p>
                 )}
                 {form.imageUrls.map((url, i) => (
                   <div key={i} className="flex items-center gap-2">
                     <span className="font-mono text-[10px]" style={{ color: "var(--text-tertiary)", width: 22 }}>{i + 1}</span>
-                    <input type="text" className={`${inputCls} flex-1`} style={inputStyle}
+                    <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-[6px]" style={{ backgroundColor: "var(--surface-2)" }}>
+                      {url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={url} alt="" className="h-full w-full object-cover" />
+                      ) : null}
+                    </div>
+                    <input type="text" className={`${inputCls} flex-1 min-w-0`} style={inputStyle}
                       placeholder="/catalog/produto/1.jpg ou https://..."
                       value={url} onChange={(e) => setImageAt(i, e.target.value)} />
                     <button type="button" onClick={() => moveImage(i, -1)} disabled={i === 0}
@@ -387,11 +436,26 @@ export function ProductEditorClient({ product, categories }: Props) {
                       style={{ borderColor: "var(--border-subtle)", color: "var(--danger)" }}>×</button>
                   </div>
                 ))}
-                <button type="button" onClick={addImage}
-                  className="mt-2 self-start rounded-[8px] border border-dashed px-3 py-2 text-xs font-medium transition-colors hover:[border-color:var(--border-strong)]"
-                  style={{ borderColor: "var(--border-subtle)", color: "var(--text-secondary)" }}>
-                  + Adicionar imagem
-                </button>
+
+                <div className="mt-1 flex flex-wrap items-center gap-2">
+                  <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/avif"
+                    multiple className="hidden"
+                    onChange={(e) => handleFileUpload(e.target.files)} />
+                  <button type="button" disabled={uploading}
+                    onClick={() => fileInputRef.current?.click()}
+                    className="rounded-[8px] border px-3 py-2 text-xs font-medium transition-colors hover:[border-color:var(--border-strong)] disabled:opacity-60"
+                    style={{ borderColor: "var(--border-subtle)", color: "var(--text-primary)" }}>
+                    {uploading ? "Enviando..." : "📤 Upload de arquivo"}
+                  </button>
+                  <button type="button" onClick={addImage}
+                    className="rounded-[8px] border border-dashed px-3 py-2 text-xs font-medium transition-colors hover:[border-color:var(--border-strong)]"
+                    style={{ borderColor: "var(--border-subtle)", color: "var(--text-secondary)" }}>
+                    + URL externa
+                  </button>
+                </div>
+                <p className="text-[10px]" style={{ color: "var(--text-tertiary)" }}>
+                  JPG/PNG/WebP/AVIF, até 5 MB. Arquivos vão para o bucket público <code>product-images</code>.
+                </p>
               </div>
             </Section>
           </div>

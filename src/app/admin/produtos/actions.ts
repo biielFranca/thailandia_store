@@ -1,8 +1,8 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/auth/require-admin";
+import { revalidateCatalog } from "@/lib/cache";
 import { storeConfig } from "@/config/store";
 import type { Json } from "@/lib/supabase/database.types";
 
@@ -123,13 +123,6 @@ async function syncImages(productId: string, urls: string[]) {
   await supabase.from("product_images").insert(rows);
 }
 
-function revalidate() {
-  // Storefront pages that read from Supabase
-  revalidatePath("/");
-  revalidatePath("/categorias", "layout");
-  revalidatePath("/produtos", "layout");
-  revalidatePath("/admin/produtos");
-}
 
 // ─── Actions ──────────────────────────────────────────────────────────────────
 
@@ -168,7 +161,7 @@ export async function createProduct(input: ProductInput): Promise<ActionResult<{
   }
 
   await syncImages(data.id, input.imageUrls);
-  revalidate();
+  revalidateCatalog();
   return { ok: true, data };
 }
 
@@ -205,8 +198,7 @@ export async function updateProduct(id: string, input: ProductInput): Promise<Ac
   }
 
   await syncImages(id, input.imageUrls);
-  revalidate();
-  revalidatePath(`/produtos/${input.slug}`);
+  revalidateCatalog();
   return { ok: true };
 }
 
@@ -215,7 +207,7 @@ export async function setProductActive(id: string, active: boolean): Promise<Act
   const supabase = await createClient();
   const { error } = await supabase.from("products").update({ active }).eq("id", id);
   if (error) return { ok: false, error: "Falha ao atualizar." };
-  revalidate();
+  revalidateCatalog();
   return { ok: true };
 }
 
@@ -224,7 +216,7 @@ export async function setProductFeatured(id: string, featured: boolean): Promise
   const supabase = await createClient();
   const { error } = await supabase.from("products").update({ featured }).eq("id", id);
   if (error) return { ok: false, error: "Falha ao atualizar." };
-  revalidate();
+  revalidateCatalog();
   return { ok: true };
 }
 
@@ -242,6 +234,6 @@ export async function deleteProduct(id: string): Promise<ActionResult> {
   }
   const { error } = await supabase.from("products").delete().eq("id", id);
   if (error) return { ok: false, error: "Falha ao excluir." };
-  revalidate();
+  revalidateCatalog();
   return { ok: true };
 }
