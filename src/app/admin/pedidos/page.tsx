@@ -1,76 +1,161 @@
-"use client";
 import Link from "next/link";
-export default function PedidosPage() {
-  const mockOrders = [
-    { id: "#1042", customer: "João Silva", items: 2, total: "R$ 259,80", status: "Pago", date: "07/05/2026" },
-    { id: "#1041", customer: "Maria Souza", items: 1, total: "R$ 129,90", status: "Enviado", date: "06/05/2026" },
-    { id: "#1040", customer: "Carlos Lima", items: 3, total: "R$ 379,70", status: "Pago", date: "06/05/2026" },
-    { id: "#1039", customer: "Ana Costa", items: 1, total: "R$ 139,90", status: "Pendente", date: "05/05/2026" },
-    { id: "#1038", customer: "Pedro Nunes", items: 2, total: "R$ 249,80", status: "Entregue", date: "04/05/2026" },
-    { id: "#1037", customer: "Lucia Ferreira", items: 1, total: "R$ 119,90", status: "Entregue", date: "03/05/2026" },
-  ];
-  const statusStyles: Record<string, { bg: string; color: string }> = {
-    "Pago":     { bg: "rgba(30,107,255,0.15)", color: "var(--cta)" },
-    "Enviado":  { bg: "rgba(245,158,11,0.15)", color: "var(--warning)" },
-    "Entregue": { bg: "rgba(34,197,94,0.15)",  color: "var(--success)" },
-    "Pendente": { bg: "var(--surface-2)",       color: "var(--text-secondary)" },
-  };
+import { requireAdmin } from "@/lib/auth/require-admin";
+import { createClient } from "@/lib/supabase/server";
+import type { OrderStatus } from "@/app/admin/pedidos/actions";
+import {
+  ORDER_STATUS_LABEL,
+  StatusBadge,
+  formatBRL,
+  formatDateTime,
+  shortRef,
+} from "@/components/admin/orders-shared";
+
+interface PageProps {
+  searchParams: Promise<{ status?: string }>;
+}
+
+export default async function AdminOrdersPage({ searchParams }: PageProps) {
+  await requireAdmin();
+  const { status: statusFilter } = await searchParams;
+  const supabase = await createClient();
+
+  // Single query — RLS already restricts to admin via "orders: admin all".
+  let query = supabase
+    .from("orders")
+    .select("id, customer_name, customer_email, total, status, created_at, order_items(id)")
+    .order("created_at", { ascending: false })
+    .limit(200);
+  if (statusFilter) query = query.eq("status", statusFilter as OrderStatus);
+
+  const { data: orders } = await query;
+
+  // Status counters — one cheap aggregate query per dashboard render.
+  const { data: statusCounts } = await supabase
+    .from("orders")
+    .select("status");
+  const counts = new Map<string, number>();
+  for (const o of statusCounts ?? []) {
+    counts.set(o.status, (counts.get(o.status) ?? 0) + 1);
+  }
+  const total = statusCounts?.length ?? 0;
+
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: "var(--cta)" }}>Gestão</p>
-        <h1 className="font-title mt-1 text-3xl text-white">PEDIDOS</h1>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: "var(--cta)" }}>
+          Gestão
+        </p>
+        <h1 className="font-title mt-1 text-3xl text-white sm:text-4xl">PEDIDOS</h1>
+        <p className="mt-1 text-sm" style={{ color: "var(--text-tertiary)" }}>
+          {total} pedido{total === 1 ? "" : "s"} no total
+        </p>
       </div>
-      <div className="grid gap-4 sm:grid-cols-4">
-        {[
-          { label: "Total pedidos", value: "47", color: "var(--text-primary)" },
-          { label: "Aguardando", value: "3", color: "var(--warning)" },
-          { label: "Enviados", value: "12", color: "var(--cta)" },
-          { label: "Entregues", value: "32", color: "var(--success)" },
-        ].map((s) => (
-          <div key={s.label} className="rounded-[12px] border p-5" style={{ borderColor: "var(--border-subtle)", backgroundColor: "var(--surface-1)" }}>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--text-tertiary)" }}>{s.label}</p>
-            <p className="mt-2 text-3xl font-bold" style={{ color: s.color }}>{s.value}</p>
-          </div>
+
+      {/* Stat cards */}
+      <div className="grid gap-3 grid-cols-2 sm:grid-cols-4">
+        <StatCard label="Aguardando" value={counts.get("pending_payment") ?? 0} color="var(--text-secondary)" />
+        <StatCard label="Em separação" value={counts.get("processing") ?? 0} color="var(--warning)" />
+        <StatCard label="Enviados" value={counts.get("shipped") ?? 0} color="var(--cta)" />
+        <StatCard label="Entregues" value={counts.get("delivered") ?? 0} color="var(--success)" />
+      </div>
+
+      {/* Status filter */}
+      <div className="flex flex-wrap gap-2">
+        <FilterChip active={!statusFilter} href="/admin/pedidos" label={`Todos (${total})`} />
+        {(Object.keys(ORDER_STATUS_LABEL) as OrderStatus[]).map((s) => (
+          <FilterChip
+            key={s}
+            active={statusFilter === s}
+            href={`/admin/pedidos?status=${s}`}
+            label={`${ORDER_STATUS_LABEL[s]} (${counts.get(s) ?? 0})`}
+          />
         ))}
       </div>
+
+      {/* Table */}
       <div className="overflow-hidden rounded-[12px] border" style={{ borderColor: "var(--border-subtle)" }}>
-        <div className="border-b px-5 py-4" style={{ borderColor: "var(--border-subtle)", backgroundColor: "var(--surface-1)" }}>
-          <h2 className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Pedidos recentes</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b text-[10px] font-semibold uppercase tracking-[0.14em]"
+                style={{ borderColor: "var(--border-subtle)", backgroundColor: "var(--surface-1)", color: "var(--text-tertiary)" }}>
+                <th className="px-4 py-3 text-left">Pedido</th>
+                <th className="hidden px-4 py-3 text-left md:table-cell">Cliente</th>
+                <th className="hidden px-4 py-3 text-center sm:table-cell">Itens</th>
+                <th className="px-4 py-3 text-right">Total</th>
+                <th className="px-4 py-3 text-center">Status</th>
+                <th className="hidden px-4 py-3 text-left lg:table-cell">Data</th>
+                <th className="px-4 py-3 text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {!orders || orders.length === 0 ? (
+                <tr><td colSpan={7} className="px-4 py-12 text-center text-sm" style={{ color: "var(--text-tertiary)" }}>
+                  Nenhum pedido {statusFilter ? `com status "${ORDER_STATUS_LABEL[statusFilter as OrderStatus]}"` : ""}.
+                </td></tr>
+              ) : (
+                orders.map((o) => (
+                  <tr key={o.id}
+                    className="border-b transition-colors hover:[background-color:var(--surface-1)]"
+                    style={{ borderColor: "var(--border-subtle)" }}>
+                    <td className="px-4 py-3">
+                      <Link href={`/admin/pedidos/${o.id}`}
+                        className="font-mono text-xs font-semibold transition-colors hover:[color:var(--cta)]"
+                        style={{ color: "var(--text-primary)" }}>
+                        #{shortRef(o.id)}
+                      </Link>
+                    </td>
+                    <td className="hidden px-4 py-3 text-xs md:table-cell">
+                      <p style={{ color: "var(--text-primary)" }}>{o.customer_name ?? "—"}</p>
+                      <p className="text-[10px]" style={{ color: "var(--text-tertiary)" }}>{o.customer_email ?? ""}</p>
+                    </td>
+                    <td className="hidden px-4 py-3 text-center text-xs sm:table-cell" style={{ color: "var(--text-secondary)" }}>
+                      {o.order_items.length}
+                    </td>
+                    <td className="px-4 py-3 text-right text-xs font-bold tabular-nums" style={{ color: "var(--text-primary)" }}>
+                      {formatBRL(Number(o.total))}
+                    </td>
+                    <td className="px-4 py-3"><div className="flex justify-center"><StatusBadge status={o.status} /></div></td>
+                    <td className="hidden px-4 py-3 text-xs lg:table-cell" style={{ color: "var(--text-tertiary)" }}>
+                      {formatDateTime(o.created_at)}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex justify-end">
+                        <Link href={`/admin/pedidos/${o.id}`}
+                          className="rounded-[6px] border px-2.5 py-1 text-[11px] font-medium transition-colors hover:[border-color:var(--border-strong)]"
+                          style={{ borderColor: "var(--border-subtle)", color: "var(--text-primary)" }}>
+                          Detalhes →
+                        </Link>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b text-[10px] font-semibold uppercase tracking-[0.14em]" style={{ borderColor: "var(--border-subtle)", backgroundColor: "var(--surface-1)", color: "var(--text-tertiary)" }}>
-              <th className="px-4 py-3 text-left">Pedido</th>
-              <th className="hidden px-4 py-3 text-left md:table-cell">Cliente</th>
-              <th className="hidden px-4 py-3 text-center sm:table-cell">Itens</th>
-              <th className="px-4 py-3 text-right">Total</th>
-              <th className="px-4 py-3 text-center">Status</th>
-              <th className="hidden px-4 py-3 text-right md:table-cell">Data</th>
-            </tr>
-          </thead>
-          <tbody>
-            {mockOrders.map((o, i) => {
-              const s = statusStyles[o.status] ?? statusStyles["Pendente"];
-              return (
-                <tr key={o.id} className="border-b" style={{ borderColor: "var(--border-subtle)", backgroundColor: i % 2 === 0 ? "transparent" : "var(--surface-1)" }}>
-                  <td className="px-4 py-3 text-xs font-mono font-semibold" style={{ color: "var(--cta)" }}>{o.id}</td>
-                  <td className="hidden px-4 py-3 text-xs md:table-cell" style={{ color: "var(--text-primary)" }}>{o.customer}</td>
-                  <td className="hidden px-4 py-3 text-center text-xs sm:table-cell" style={{ color: "var(--text-tertiary)" }}>{o.items}</td>
-                  <td className="px-4 py-3 text-right text-xs font-semibold" style={{ color: "var(--text-primary)" }}>{o.total}</td>
-                  <td className="px-4 py-3 text-center">
-                    <span className="rounded-[4px] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em]" style={{ backgroundColor: s.bg, color: s.color }}>{o.status}</span>
-                  </td>
-                  <td className="hidden px-4 py-3 text-right text-xs md:table-cell" style={{ color: "var(--text-tertiary)" }}>{o.date}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-      <div className="rounded-[12px] border p-5 text-center" style={{ borderColor: "var(--border-subtle)", backgroundColor: "var(--surface-1)" }}>
-        <p className="text-xs" style={{ color: "var(--text-tertiary)" }}>Integração com backend — dados reais serão puxados via API quando configurado.</p>
       </div>
     </div>
+  );
+}
+
+function StatCard({ label, value, color }: { label: string; value: number; color: string }) {
+  return (
+    <div className="rounded-[10px] border p-4" style={{ borderColor: "var(--border-subtle)", backgroundColor: "var(--surface-1)" }}>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.16em]" style={{ color: "var(--text-tertiary)" }}>{label}</p>
+      <p className="mt-1 text-2xl font-bold tabular-nums" style={{ color }}>{value}</p>
+    </div>
+  );
+}
+
+function FilterChip({ active, href, label }: { active: boolean; href: string; label: string }) {
+  return (
+    <Link href={href}
+      className="rounded-[6px] border px-3 py-1.5 text-xs font-medium transition-colors"
+      style={active
+        ? { backgroundColor: "var(--cta)", borderColor: "var(--cta)", color: "var(--cta-foreground)" }
+        : { borderColor: "var(--border-subtle)", color: "var(--text-secondary)" }}>
+      {label}
+    </Link>
   );
 }
