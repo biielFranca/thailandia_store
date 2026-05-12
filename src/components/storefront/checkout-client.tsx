@@ -122,7 +122,11 @@ export function CheckoutClient() {
 
     // Only clear the cart after the server confirms the order persisted.
     clearCart();
-    router.push(`/checkout/sucesso?order=${encodeURIComponent(result.orderId)}`);
+    if (result.paymentMethod === "pix") {
+      router.push(`/checkout/pix/${result.orderId}`);
+    } else {
+      router.push(`/checkout/pagamento/${result.orderId}`);
+    }
   }
 
   if (items.length === 0) {
