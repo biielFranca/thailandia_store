@@ -2,6 +2,7 @@ import { revalidatePath } from "next/cache";
 import { createHmac } from "crypto";
 import { getMpPaymentClient } from "@/lib/mercadopago";
 import { createServiceClient } from "@/lib/supabase/service";
+import { decrementStockForOrder } from "@/lib/stock";
 
 /** Maps Mercado Pago payment.status → our payment_status enum. */
 function toPaymentStatus(mpStatus: string): "pending" | "confirmed" | "failed" | "refunded" {
@@ -112,6 +113,12 @@ export async function POST(req: Request) {
           status: newOrderStatus,
           note: `Webhook Mercado Pago — status: ${mpStatus} (MP #${mpPaymentId})`,
         });
+
+        // Decrement stock only on approval (not on refund/cancel — stock
+        // management for those cases is handled manually by the admin).
+        if (mpStatus === "approved") {
+          await decrementStockForOrder(orderId);
+        }
 
         revalidatePath("/admin/pedidos");
         revalidatePath(`/admin/pedidos/${orderId}`);

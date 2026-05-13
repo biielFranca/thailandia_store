@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getMpPaymentClient } from "@/lib/mercadopago";
+import { decrementStockForOrder } from "@/lib/stock";
 import type { Json } from "@/lib/supabase/database.types";
 import { storeConfig } from "@/config/store";
 import {
@@ -316,6 +317,7 @@ export async function processCardPayment(
         status: "payment_confirmed",
         note: `Cartão aprovado — ${installments}x (MP #${mpResult.id})`,
       });
+      await decrementStockForOrder(orderId);
       revalidatePath("/admin/pedidos");
       revalidatePath(`/admin/pedidos/${orderId}`);
       return { ok: true, orderId };
