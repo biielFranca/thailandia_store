@@ -12,6 +12,46 @@ function formatBRL(value: number) {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+// ─── Input masks ──────────────────────────────────────────────────────────────
+
+function maskCep(v: string) {
+  const d = v.replace(/\D/g, "").slice(0, 8);
+  return d.length > 5 ? `${d.slice(0, 5)}-${d.slice(5)}` : d;
+}
+
+function maskPhone(v: string) {
+  const d = v.replace(/\D/g, "").slice(0, 11);
+  if (d.length <= 2)  return d;
+  if (d.length <= 6)  return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+  if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+}
+
+function maskCpf(v: string) {
+  const d = v.replace(/\D/g, "").slice(0, 11);
+  if (d.length <= 3) return d;
+  if (d.length <= 6) return `${d.slice(0, 3)}.${d.slice(3)}`;
+  if (d.length <= 9) return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6)}`;
+  return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6, 9)}-${d.slice(9)}`;
+}
+
+// ─── Field validators ────────────────────────────────────────────────────────
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function validateField(key: string, value: string): string {
+  switch (key) {
+    case "name":   return value.trim().length < 2 ? "Informe seu nome completo." : "";
+    case "email":  return !EMAIL_RE.test(value.trim()) ? "E-mail inválido." : "";
+    case "cep":    return !/^\d{5}-\d{3}$/.test(value) ? "CEP inválido." : "";
+    case "street": return value.trim().length < 2 ? "Informe o logradouro." : "";
+    case "number": return !value.trim() ? "Informe o número." : "";
+    case "city":   return value.trim().length < 2 ? "Informe a cidade." : "";
+    case "state":  return !value ? "Selecione o estado." : "";
+    default:       return "";
+  }
+}
+
 // ─── Step indicator ───────────────────────────────────────────────────────────
 
 function Steps({ current }: { current: number }) {
@@ -21,8 +61,7 @@ function Steps({ current }: { current: number }) {
       {steps.map((s, i) => (
         <div key={s} className="flex items-center">
           <div className="flex items-center gap-2">
-            <div
-              className="flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold"
+            <div className="flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold"
               style={i < current
                 ? { backgroundColor: "var(--success)", color: "#000" }
                 : i === current
@@ -55,8 +94,34 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-const inputCls = "h-11 w-full rounded-[8px] border bg-transparent px-4 text-sm outline-none transition-colors focus:[border-color:var(--cta)] placeholder:[color:var(--text-tertiary)]";
-const inputStyle = { borderColor: "var(--border-subtle)", color: "var(--text-primary)" };
+// ─── Shared field styles ──────────────────────────────────────────────────────
+
+const inputBase = "h-11 w-full rounded-[8px] border bg-transparent px-4 text-sm outline-none transition-colors focus:[border-color:var(--cta)] placeholder:[color:var(--text-tertiary)]";
+
+function Field({
+  label,
+  error,
+  required,
+  children,
+}: {
+  label: string;
+  error?: string;
+  required?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label className="text-[11px] font-semibold uppercase tracking-[0.12em]"
+        style={{ color: error ? "var(--danger)" : "var(--text-tertiary)" }}>
+        {label}{required && <span style={{ color: "var(--danger)" }}> *</span>}
+      </label>
+      {children}
+      {error && (
+        <p className="text-[11px]" style={{ color: "var(--danger)" }}>{error}</p>
+      )}
+    </div>
+  );
+}
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -65,62 +130,131 @@ export function CheckoutClient() {
   const { user } = useAuth();
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
+  const [submitError, setSubmitError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [cepLoading, setCepLoading] = useState(false);
 
   const [form, setForm] = useState({
-    name:    user?.name ?? "",
-    email:   user?.email ?? "",
-    phone:   "",
-    cpf:     "",
-    cep:     "",
-    street:  "",
-    number:  "",
-    comp:    "",
-    city:    "",
-    state:   "",
-    payment: "pix" as "pix" | "card",
+    name:         user?.name ?? "",
+    email:        user?.email ?? "",
+    phone:        "",
+    cpf:          "",
+    cep:          "",
+    street:       "",
+    number:       "",
+    comp:         "",
+    neighborhood: "",
+    city:         "",
+    state:        "",
+    payment:      "pix" as "pix" | "card",
   });
 
-  const pixTotal         = subtotal;
-  const cardTotal        = subtotal * 1.08;
-  const installment      = cardTotal / 3;
+  const pixTotal    = subtotal;
+  const cardTotal   = subtotal * 1.08;
+  const installment = cardTotal / 3;
 
   function set<K extends keyof typeof form>(key: K, value: typeof form[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
+  function setErr(key: string, msg: string) {
+    setFieldErrors((prev) => ({ ...prev, [key]: msg }));
+  }
+
+  function handleBlur(key: string) {
+    const value = form[key as keyof typeof form] as string;
+    setErr(key, validateField(key, value));
+  }
+
+  // ── CEP auto-fill (ViaCEP) ────────────────────────────────────────────────
+
+  async function handleCepChange(raw: string) {
+    const masked = maskCep(raw);
+    set("cep", masked);
+    setErr("cep", "");
+
+    const digits = raw.replace(/\D/g, "");
+    if (digits.length !== 8) return;
+
+    setCepLoading(true);
+    try {
+      const res  = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
+      const data = await res.json() as {
+        erro?: boolean;
+        logradouro?: string;
+        bairro?: string;
+        localidade?: string;
+        uf?: string;
+      };
+      if (data.erro) {
+        setErr("cep", "CEP não encontrado.");
+      } else {
+        setForm((prev) => ({
+          ...prev,
+          street:       data.logradouro   || prev.street,
+          neighborhood: data.bairro       || prev.neighborhood,
+          city:         data.localidade   || prev.city,
+          state:        data.uf           || prev.state,
+        }));
+        setErr("cep", "");
+      }
+    } catch {
+      // ViaCEP offline — silently skip, user can fill manually
+    } finally {
+      setCepLoading(false);
+    }
+  }
+
+  // ── Submit ────────────────────────────────────────────────────────────────
+
   async function handleOrder(e: React.FormEvent) {
     e.preventDefault();
     if (submitting) return;
-    setError("");
+
+    // Validate all required fields before hitting the server
+    const required = ["name", "email", "cep", "street", "number", "city", "state"] as const;
+    const newErrors: Record<string, string> = {};
+    let hasError = false;
+    for (const key of required) {
+      const msg = validateField(key, form[key]);
+      if (msg) { newErrors[key] = msg; hasError = true; }
+    }
+    if (hasError) {
+      setFieldErrors((prev) => ({ ...prev, ...newErrors }));
+      // Scroll to first error
+      document.querySelector("[data-field-error]")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+
+    setSubmitError("");
     setSubmitting(true);
 
     const result = await placeOrder({
       items: items.map((i) => ({ slug: i.slug, size: i.size, quantity: i.quantity })),
       customer: {
-        name: form.name,
+        name:  form.name,
         email: form.email,
         phone: form.phone || undefined,
-        cpf: form.cpf || undefined,
+        cpf:   form.cpf   || undefined,
       },
       address: {
-        cep: form.cep,
-        street: form.street,
-        number: form.number,
-        complement: form.comp || undefined,
-        city: form.city,
-        state: form.state,
+        cep:          form.cep,
+        street:       form.street,
+        number:       form.number,
+        complement:   form.comp         || undefined,
+        neighborhood: form.neighborhood || undefined,
+        city:         form.city,
+        state:        form.state,
       },
       paymentMethod: form.payment,
     });
 
     if (!result.ok) {
       setSubmitting(false);
-      setError(result.error);
+      setSubmitError(result.error);
       return;
     }
 
-    // Only clear the cart after the server confirms the order persisted.
     clearCart();
     if (result.paymentMethod === "pix") {
       router.push(`/checkout/pix/${result.orderId}`);
@@ -128,6 +262,8 @@ export function CheckoutClient() {
       router.push(`/checkout/pagamento/${result.orderId}`);
     }
   }
+
+  // ── Empty cart ────────────────────────────────────────────────────────────
 
   if (items.length === 0) {
     return (
@@ -146,6 +282,11 @@ export function CheckoutClient() {
     );
   }
 
+  const inp = (hasErr: boolean) =>
+    `${inputBase} ${hasErr ? "[border-color:var(--danger)]" : "[border-color:var(--border-subtle)]"}`;
+
+  // ── Render ────────────────────────────────────────────────────────────────
+
   return (
     <main className="mx-auto w-full max-w-[1280px] px-4 pb-16 pt-6 sm:px-6 lg:px-8">
       <div className="mb-8">
@@ -153,96 +294,145 @@ export function CheckoutClient() {
           Compra segura
         </p>
         <h1 className="font-title mt-1 text-3xl text-white sm:text-4xl">CHECKOUT</h1>
-        <div className="mt-4">
-          <Steps current={1} />
-        </div>
+        <div className="mt-4"><Steps current={1} /></div>
       </div>
 
-      <form onSubmit={handleOrder}>
+      <form onSubmit={handleOrder} noValidate>
         <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
           <div className="flex flex-col gap-6">
 
+            {/* Dados pessoais */}
             <Section title="Dados pessoais">
               <div className="grid gap-4 sm:grid-cols-2">
-                <div className="flex flex-col gap-1.5 sm:col-span-2">
-                  <label className="text-[11px] font-semibold uppercase tracking-[0.12em]"
-                    style={{ color: "var(--text-tertiary)" }}>Nome completo</label>
-                  <input type="text" required className={inputCls} style={inputStyle}
-                    placeholder="Seu nome" value={form.name} onChange={(e) => set("name", e.target.value)} />
+                <div className="sm:col-span-2" data-field-error={fieldErrors.name ? true : undefined}>
+                  <Field label="Nome completo" required error={fieldErrors.name}>
+                    <input type="text" className={inp(!!fieldErrors.name)}
+                      style={{ color: "var(--text-primary)" }}
+                      placeholder="Seu nome" value={form.name}
+                      onChange={(e) => set("name", e.target.value)}
+                      onBlur={() => handleBlur("name")} />
+                  </Field>
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-semibold uppercase tracking-[0.12em]"
-                    style={{ color: "var(--text-tertiary)" }}>E-mail</label>
-                  <input type="email" required className={inputCls} style={inputStyle}
-                    placeholder="seu@email.com" value={form.email} onChange={(e) => set("email", e.target.value)} />
+                <div data-field-error={fieldErrors.email ? true : undefined}>
+                  <Field label="E-mail" required error={fieldErrors.email}>
+                    <input type="email" className={inp(!!fieldErrors.email)}
+                      style={{ color: "var(--text-primary)" }}
+                      placeholder="seu@email.com" value={form.email}
+                      onChange={(e) => set("email", e.target.value)}
+                      onBlur={() => handleBlur("email")} />
+                  </Field>
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-semibold uppercase tracking-[0.12em]"
-                    style={{ color: "var(--text-tertiary)" }}>Telefone</label>
-                  <input type="tel" className={inputCls} style={inputStyle}
-                    placeholder="(11) 99999-9999" value={form.phone} onChange={(e) => set("phone", e.target.value)} />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-semibold uppercase tracking-[0.12em]"
-                    style={{ color: "var(--text-tertiary)" }}>CPF</label>
-                  <input type="text" className={inputCls} style={inputStyle}
-                    placeholder="000.000.000-00" value={form.cpf} onChange={(e) => set("cpf", e.target.value)} />
-                </div>
+                <Field label="Telefone">
+                  <input type="tel" className={inp(false)}
+                    style={{ color: "var(--text-primary)" }}
+                    placeholder="(11) 99999-9999" value={form.phone}
+                    onChange={(e) => set("phone", maskPhone(e.target.value))} />
+                </Field>
+                <Field label="CPF">
+                  <input type="text" inputMode="numeric" className={inp(false)}
+                    style={{ color: "var(--text-primary)" }}
+                    placeholder="000.000.000-00" value={form.cpf}
+                    onChange={(e) => set("cpf", maskCpf(e.target.value))} />
+                </Field>
               </div>
             </Section>
 
+            {/* Endereço */}
             <Section title="Endereço de entrega">
               <div className="grid gap-4 sm:grid-cols-2">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-semibold uppercase tracking-[0.12em]"
-                    style={{ color: "var(--text-tertiary)" }}>CEP</label>
-                  <input type="text" required className={inputCls} style={inputStyle}
-                    placeholder="00000-000" value={form.cep} onChange={(e) => set("cep", e.target.value)} />
+                {/* CEP */}
+                <div data-field-error={fieldErrors.cep ? true : undefined}>
+                  <Field label="CEP" required error={fieldErrors.cep}>
+                    <div className="relative">
+                      <input type="text" inputMode="numeric"
+                        className={inp(!!fieldErrors.cep)}
+                        style={{ color: "var(--text-primary)" }}
+                        placeholder="00000-000" value={form.cep}
+                        onChange={(e) => handleCepChange(e.target.value)}
+                        onBlur={() => handleBlur("cep")} />
+                      {cepLoading && (
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs"
+                          style={{ color: "var(--text-tertiary)" }}>
+                          buscando...
+                        </span>
+                      )}
+                    </div>
+                  </Field>
                 </div>
-                <div className="flex flex-col gap-1.5 sm:col-span-2">
-                  <label className="text-[11px] font-semibold uppercase tracking-[0.12em]"
-                    style={{ color: "var(--text-tertiary)" }}>Rua / Endereço</label>
-                  <input type="text" required className={inputCls} style={inputStyle}
-                    placeholder="Rua, Avenida..." value={form.street} onChange={(e) => set("street", e.target.value)} />
+
+                {/* Street */}
+                <div className="sm:col-span-2" data-field-error={fieldErrors.street ? true : undefined}>
+                  <Field label="Logradouro" required error={fieldErrors.street}>
+                    <input type="text" className={inp(!!fieldErrors.street)}
+                      style={{ color: "var(--text-primary)" }}
+                      placeholder="Rua, Avenida..." value={form.street}
+                      onChange={(e) => set("street", e.target.value)}
+                      onBlur={() => handleBlur("street")} />
+                  </Field>
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-semibold uppercase tracking-[0.12em]"
-                    style={{ color: "var(--text-tertiary)" }}>Número</label>
-                  <input type="text" required className={inputCls} style={inputStyle}
-                    placeholder="123" value={form.number} onChange={(e) => set("number", e.target.value)} />
+
+                {/* Number */}
+                <div data-field-error={fieldErrors.number ? true : undefined}>
+                  <Field label="Número" required error={fieldErrors.number}>
+                    <input type="text" className={inp(!!fieldErrors.number)}
+                      style={{ color: "var(--text-primary)" }}
+                      placeholder="123" value={form.number}
+                      onChange={(e) => set("number", e.target.value)}
+                      onBlur={() => handleBlur("number")} />
+                  </Field>
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-semibold uppercase tracking-[0.12em]"
-                    style={{ color: "var(--text-tertiary)" }}>Complemento</label>
-                  <input type="text" className={inputCls} style={inputStyle}
-                    placeholder="Apto, Bloco..." value={form.comp} onChange={(e) => set("comp", e.target.value)} />
+
+                {/* Complement */}
+                <Field label="Complemento">
+                  <input type="text" className={inp(false)}
+                    style={{ color: "var(--text-primary)" }}
+                    placeholder="Apto, Bloco..." value={form.comp}
+                    onChange={(e) => set("comp", e.target.value)} />
+                </Field>
+
+                {/* Neighborhood */}
+                <Field label="Bairro">
+                  <input type="text" className={inp(false)}
+                    style={{ color: "var(--text-primary)" }}
+                    placeholder="Bairro" value={form.neighborhood}
+                    onChange={(e) => set("neighborhood", e.target.value)} />
+                </Field>
+
+                {/* City */}
+                <div data-field-error={fieldErrors.city ? true : undefined}>
+                  <Field label="Cidade" required error={fieldErrors.city}>
+                    <input type="text" className={inp(!!fieldErrors.city)}
+                      style={{ color: "var(--text-primary)" }}
+                      placeholder="São Paulo" value={form.city}
+                      onChange={(e) => set("city", e.target.value)}
+                      onBlur={() => handleBlur("city")} />
+                  </Field>
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-semibold uppercase tracking-[0.12em]"
-                    style={{ color: "var(--text-tertiary)" }}>Cidade</label>
-                  <input type="text" required className={inputCls} style={inputStyle}
-                    placeholder="São Paulo" value={form.city} onChange={(e) => set("city", e.target.value)} />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-semibold uppercase tracking-[0.12em]"
-                    style={{ color: "var(--text-tertiary)" }}>Estado</label>
-                  <select required
-                    className="h-11 w-full rounded-[8px] border bg-transparent px-4 text-sm outline-none"
-                    style={{ borderColor: "var(--border-subtle)", color: form.state ? "var(--text-primary)" : "var(--text-tertiary)", backgroundColor: "var(--surface-1)" }}
-                    value={form.state} onChange={(e) => set("state", e.target.value)}>
-                    <option value="">Selecione</option>
-                    {["AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"].map((uf) => (
-                      <option key={uf} value={uf}>{uf}</option>
-                    ))}
-                  </select>
+
+                {/* State */}
+                <div data-field-error={fieldErrors.state ? true : undefined}>
+                  <Field label="Estado" required error={fieldErrors.state}>
+                    <select className={`${inp(!!fieldErrors.state)} appearance-none`}
+                      style={{
+                        color: form.state ? "var(--text-primary)" : "var(--text-tertiary)",
+                        backgroundColor: "var(--surface-1)",
+                      }}
+                      value={form.state}
+                      onChange={(e) => { set("state", e.target.value); setErr("state", ""); }}>
+                      <option value="">Selecione</option>
+                      {["AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG",
+                        "PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"]
+                        .map((uf) => <option key={uf} value={uf}>{uf}</option>)}
+                    </select>
+                  </Field>
                 </div>
               </div>
             </Section>
 
+            {/* Pagamento */}
             <Section title="Pagamento">
               <div className="flex flex-col gap-3">
-                <label
-                  className="flex cursor-pointer items-start gap-3 rounded-[10px] border p-4 transition-colors"
+                <label className="flex cursor-pointer items-start gap-3 rounded-[10px] border p-4 transition-colors"
                   style={{
                     borderColor: form.payment === "pix" ? "var(--success)" : "var(--border-subtle)",
                     backgroundColor: form.payment === "pix" ? "rgba(34,197,94,0.06)" : "transparent",
@@ -258,8 +448,7 @@ export function CheckoutClient() {
                   </div>
                 </label>
 
-                <label
-                  className="flex cursor-pointer items-start gap-3 rounded-[10px] border p-4 transition-colors"
+                <label className="flex cursor-pointer items-start gap-3 rounded-[10px] border p-4 transition-colors"
                   style={{
                     borderColor: form.payment === "card" ? "var(--cta)" : "var(--border-subtle)",
                     backgroundColor: form.payment === "card" ? "rgba(30,107,255,0.06)" : "transparent",
@@ -312,6 +501,7 @@ export function CheckoutClient() {
                       </li>
                     ))}
                   </ul>
+
                   <div className="mt-5 border-t pt-4" style={{ borderColor: "var(--border-subtle)" }}>
                     <div className="flex justify-between text-xs">
                       <span style={{ color: "var(--text-secondary)" }}>Subtotal</span>
@@ -321,9 +511,7 @@ export function CheckoutClient() {
                     </div>
                     <div className="mt-1.5 flex items-center justify-between text-xs">
                       <span style={{ color: "var(--text-secondary)" }}>Frete</span>
-                      <span className="font-semibold" style={{ color: "var(--success)" }}>
-                        Grátis
-                      </span>
+                      <span className="font-semibold" style={{ color: "var(--success)" }}>Grátis</span>
                     </div>
                     <div className="mt-3 flex justify-between text-sm">
                       <span style={{ color: "var(--text-secondary)" }}>Total</span>
@@ -341,10 +529,14 @@ export function CheckoutClient() {
                 </div>
               </div>
 
-              {error && (
+              {submitError && (
                 <div className="mt-3 rounded-[8px] border px-4 py-3 text-sm"
-                  style={{ borderColor: "rgba(239,68,68,0.4)", backgroundColor: "rgba(239,68,68,0.08)", color: "var(--danger)" }}>
-                  {error}
+                  style={{
+                    borderColor: "rgba(239,68,68,0.4)",
+                    backgroundColor: "rgba(239,68,68,0.08)",
+                    color: "var(--danger)",
+                  }}>
+                  {submitError}
                 </div>
               )}
 

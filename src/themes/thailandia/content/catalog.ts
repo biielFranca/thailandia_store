@@ -32,6 +32,7 @@ export type CatalogProduct = {
   season?: string;
   isFeatured?: boolean;
   isBestseller?: boolean;
+  stockQuantity?: number;   // undefined = não controlado; 0 = esgotado
   team?: string;
   region?: string;          // "Europa" | "América do Sul" | "MLS" | "Ásia" | "África" | etc.
   collection?: string;      // "world-cup-2026" | etc. — slug da coleção/campanha

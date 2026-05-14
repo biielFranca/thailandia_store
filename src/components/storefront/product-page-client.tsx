@@ -154,13 +154,24 @@ export function ProductPageClient({ product }: { product: CatalogProduct }) {
   const [selectedSize, setSelectedSize] = useState<string>(product.sizes[0] ?? "");
   const [buying, setBuying] = useState(false);
   const [added, setAdded] = useState(false);
+  const [sizeError, setSizeError] = useState(false);
+
+  const isOutOfStock = typeof product.stockQuantity === "number" && product.stockQuantity === 0;
+  const isLowStock   = typeof product.stockQuantity === "number" && product.stockQuantity > 0 && product.stockQuantity <= 5;
 
   const statusStyle = product.status
     ? (STATUS_STYLES[product.status] ?? STATUS_STYLES["Sob encomenda"])
     : null;
 
+  function requireSize(): boolean {
+    if (selectedSize) return true;
+    setSizeError(true);
+    setTimeout(() => setSizeError(false), 1200);
+    return false;
+  }
+
   function handleBuyNow() {
-    if (!selectedSize) return;
+    if (!requireSize() || isOutOfStock) return;
     addItem({
       slug: product.slug,
       name: product.name,
@@ -176,7 +187,7 @@ export function ProductPageClient({ product }: { product: CatalogProduct }) {
   }
 
   function handleAddToCart() {
-    if (!selectedSize) return;
+    if (!requireSize() || isOutOfStock) return;
     addItem({
       slug: product.slug,
       name: product.name,
@@ -249,26 +260,42 @@ export function ProductPageClient({ product }: { product: CatalogProduct }) {
           {/* Price */}
           <PriceBlock priceValue={product.priceValue} />
 
+          {/* Stock indicator */}
+          {isOutOfStock && (
+            <div className="rounded-[8px] border px-4 py-2.5 text-sm font-medium"
+              style={{ borderColor: "rgba(239,68,68,0.35)", backgroundColor: "rgba(239,68,68,0.07)", color: "var(--danger)" }}>
+              😞 Produto esgotado — em breve voltará ao estoque
+            </div>
+          )}
+          {isLowStock && (
+            <div className="rounded-[8px] border px-4 py-2.5 text-sm font-medium"
+              style={{ borderColor: "rgba(245,158,11,0.35)", backgroundColor: "rgba(245,158,11,0.07)", color: "var(--warning)" }}>
+              ⚡ Últimas {product.stockQuantity} unidade{product.stockQuantity === 1 ? "" : "s"} em estoque!
+            </div>
+          )}
+
           {/* Size selector */}
           <div>
             <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.14em]"
-              style={{ color: "var(--text-secondary)" }}>
+              style={{ color: sizeError ? "var(--danger)" : "var(--text-secondary)" }}>
               Tamanho
-              {selectedSize && (
-                <span className="ml-2 font-bold" style={{ color: "var(--cta)" }}>
-                  — {selectedSize}
-                </span>
-              )}
+              {selectedSize
+                ? <span className="ml-2 font-bold" style={{ color: "var(--cta)" }}>— {selectedSize}</span>
+                : sizeError
+                ? <span className="ml-2 font-normal normal-case tracking-normal" style={{ color: "var(--danger)" }}> — selecione um tamanho</span>
+                : null}
             </p>
-            <div className="flex flex-wrap gap-2">
+            <div className={`flex flex-wrap gap-2 transition-all ${sizeError ? "animate-shake" : ""}`}>
               {product.sizes.map((size) => (
                 <button key={size} type="button"
-                  onClick={() => setSelectedSize(size)}
+                  onClick={() => { setSelectedSize(size); setSizeError(false); }}
                   aria-pressed={selectedSize === size}
                   className="rounded-[6px] border px-3 py-1.5 text-sm font-semibold tracking-[0.06em] transition-all duration-150"
                   style={
                     selectedSize === size
                       ? { borderColor: "var(--cta)", backgroundColor: "var(--cta)", color: "var(--cta-foreground)" }
+                      : sizeError
+                      ? { borderColor: "var(--danger)", backgroundColor: "rgba(239,68,68,0.07)", color: "var(--danger)" }
                       : { borderColor: "var(--border-subtle)", backgroundColor: "transparent", color: "var(--text-secondary)" }
                   }>
                   {size}
@@ -280,16 +307,16 @@ export function ProductPageClient({ product }: { product: CatalogProduct }) {
           {/* CTAs */}
           <div className="flex flex-col gap-2.5">
             {/* Primary — Comprar agora */}
-            <button type="button" onClick={handleBuyNow} disabled={buying}
-              className="flex items-center justify-center gap-2 rounded-[8px] py-3.5 text-sm font-semibold transition-opacity hover:opacity-90 disabled:opacity-70"
+            <button type="button" onClick={handleBuyNow} disabled={buying || isOutOfStock}
+              className="flex items-center justify-center gap-2 rounded-[8px] py-3.5 text-sm font-semibold transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ backgroundColor: "var(--cta)", color: "var(--cta-foreground)" }}>
               <BuyNowIcon />
-              {buying ? "Adicionado ao carrinho ✓" : "Comprar agora"}
+              {isOutOfStock ? "Esgotado" : buying ? "Adicionado ao carrinho ✓" : "Comprar agora"}
             </button>
 
             {/* Secondary — Adicionar ao carrinho */}
-            <button type="button" onClick={handleAddToCart} disabled={added}
-              className="flex items-center justify-center gap-2 rounded-[8px] border py-3 text-sm font-medium transition-colors duration-200 hover:[border-color:var(--border-strong)] disabled:opacity-60"
+            <button type="button" onClick={handleAddToCart} disabled={added || isOutOfStock}
+              className="flex items-center justify-center gap-2 rounded-[8px] border py-3 text-sm font-medium transition-colors duration-200 hover:[border-color:var(--border-strong)] disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ borderColor: "var(--border-subtle)", color: "var(--text-primary)" }}>
               <CartIcon />
               {added ? "Adicionado ✓" : "Adicionar ao carrinho"}

@@ -93,6 +93,16 @@
 
   /* Custom breakpoint for ultrawide monitors (default tw goes up to 2xl=1536px) */
   --breakpoint-3xl: 1920px;
+
+  /* Shake animation — used for size-selector error feedback */
+  --animate-shake: shake 0.4s ease-in-out;
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%       { transform: translateX(-5px); }
+    40%       { transform: translateX(5px); }
+    60%       { transform: translateX(-4px); }
+    80%       { transform: translateX(4px); }
+  }
 }
 
 * {

@@ -102,6 +102,7 @@ function mapProduct(row: ProductRow): CatalogProduct {
     season: meta.season ?? undefined,
     isFeatured: row.featured,
     isBestseller: meta.isBestseller ?? false,
+    stockQuantity: row.stock_quantity,
     team: meta.team ?? undefined,
     region: meta.region ?? undefined,
     collection: meta.collection ?? undefined,
