@@ -41,13 +41,14 @@ interface ProductRow {
   price: number;
   featured: boolean;
   active: boolean;
+  stock_quantity: number;
   metadata: unknown;
   product_images: { url: string; position: number }[];
   categories: { slug: string; name: string } | null;
 }
 
 const PRODUCT_SELECT = `
-  id, slug, name, description, price, featured, active, metadata,
+  id, slug, name, description, price, featured, active, stock_quantity, metadata,
   product_images (url, position),
   categories (slug, name)
 `;
