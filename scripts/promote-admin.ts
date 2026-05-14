@@ -11,7 +11,29 @@
  */
 
 import { createClient } from "@supabase/supabase-js";
+import { readFileSync } from "fs";
+import { resolve } from "path";
 import type { Database } from "../src/lib/supabase/database.types";
+
+// Load .env from the project root if env vars aren't already set in the shell.
+// Keeps the script ergonomic without pulling in a full dotenv dependency.
+function loadDotenv() {
+  try {
+    const raw = readFileSync(resolve(process.cwd(), ".env"), "utf-8");
+    for (const line of raw.split(/\r?\n/)) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith("#")) continue;
+      const eq = trimmed.indexOf("=");
+      if (eq < 0) continue;
+      const key = trimmed.slice(0, eq).trim();
+      const val = trimmed.slice(eq + 1).trim().replace(/^["']|["']$/g, "");
+      if (!process.env[key]) process.env[key] = val;
+    }
+  } catch {
+    // No .env file — fall back to shell-only env vars.
+  }
+}
+loadDotenv();
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
