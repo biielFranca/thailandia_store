@@ -57,13 +57,13 @@ export function ShippingCalculator() {
           value={cep}
           onChange={(event) => setCep(event.target.value)}
           placeholder="Digite seu CEP"
-          className="h-12 flex-1 rounded-full border border-white/10 bg-[#090d22] px-5 text-sm text-white outline-none transition placeholder:text-white/28 focus:border-[#4f46e5]"
+          className="h-12 flex-1 rounded-full border border-white/10 bg-[#090d22] px-5 text-sm text-[#fff] outline-none transition placeholder:text-white/28 focus:border-[#4f46e5]"
         />
         <button
           type="button"
           disabled={!canCalculate}
           onClick={() => setHasCalculated(true)}
-          className="button-pop rounded-full bg-[#4f46e5] px-5 py-3 text-sm font-bold uppercase tracking-[0.08em] text-white disabled:cursor-not-allowed disabled:opacity-50"
+          className="button-pop rounded-full bg-[#4f46e5] px-5 py-3 text-sm font-bold uppercase tracking-[0.08em] text-[#fff] disabled:cursor-not-allowed disabled:opacity-50"
         >
           Calcular
         </button>
@@ -71,7 +71,7 @@ export function ShippingCalculator() {
 
       {hasCalculated && result ? (
         <div className="mt-4 rounded-[1.25rem] border border-[#4f46e5]/25 bg-[#4f46e5]/8 p-4 text-sm text-white/82">
-          <p className="font-semibold uppercase tracking-[0.12em] text-white">
+          <p className="font-semibold uppercase tracking-[0.12em] text-[#fff]">
             {result.service}
           </p>
           <p className="mt-2">

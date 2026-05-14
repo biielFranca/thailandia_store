@@ -131,7 +131,7 @@ function LoginForm() {
       {/* Top bar */}
       <nav className="flex items-center justify-between px-6 py-4">
         <Link href="/" className="inline-flex items-center gap-2.5">
-          <Image src={brand.logo.src} alt="" width={32} height={32} className="h-8 w-auto" />
+          <Image src={brand.logo.src} alt="" width={32} height={32} className="theme-logo h-8 w-auto" />
           <span className="font-title text-base text-white" style={{ textShadow: "1px 2px 0 rgba(0,0,0,0.6)" }}>
             {brand.name}
           </span>

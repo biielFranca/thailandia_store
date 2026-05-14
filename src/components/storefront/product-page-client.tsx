@@ -82,12 +82,12 @@ function Gallery({ name, images }: { name: string; images: string[] }) {
           <>
             <button type="button" aria-label="Imagem anterior"
               onClick={() => setActive((a) => (a - 1 + images.length) % images.length)}
-              className="absolute left-3 top-1/2 -translate-y-1/2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition hover:bg-black/70">
+              className="absolute left-3 top-1/2 -translate-y-1/2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-[#fff] backdrop-blur-sm transition hover:bg-black/70">
               <ChevLeft />
             </button>
             <button type="button" aria-label="Próxima imagem"
               onClick={() => setActive((a) => (a + 1) % images.length)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition hover:bg-black/70">
+              className="absolute right-3 top-1/2 -translate-y-1/2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-[#fff] backdrop-blur-sm transition hover:bg-black/70">
               <ChevRight />
             </button>
           </>

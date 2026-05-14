@@ -69,6 +69,19 @@
   --sale: #dc2626;
 }
 
+/* Light theme: hardcoded `text-white` should follow the primary text token so
+   headings/labels don't vanish on white surfaces. Opt-outs use arbitrary
+   Tailwind values like `text-[#fff]` (different generated class) or `text-white/XX`
+   alpha variants, which are kept as-is for elements over dark surfaces. */
+[data-theme="light"] .text-white {
+  color: var(--text-primary);
+}
+
+/* Logo is a white-foreground PNG — invert it in light theme so it stays visible. */
+[data-theme="light"] img.theme-logo {
+  filter: brightness(0);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--text-primary);

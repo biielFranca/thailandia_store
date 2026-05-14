@@ -146,7 +146,7 @@ export function StoreHeader() {
               alt=""
               width={(brand.logo.headerHeight * brand.logo.width) / brand.logo.height}
               height={brand.logo.headerHeight}
-              className="h-9 w-auto sm:h-10"
+              className="theme-logo h-9 w-auto sm:h-10"
             />
             <span
               className="font-title hidden text-lg sm:block"

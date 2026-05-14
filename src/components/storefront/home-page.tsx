@@ -214,7 +214,7 @@ export async function HomePage() {
                           <p className="text-[9px] sm:text-[10px] font-medium uppercase tracking-[0.14em]" style={{ color: isWorldCup ? "#e8b820" : "var(--text-tertiary)" }}>
                             {category.accent}
                           </p>
-                          <h3 className="font-title mt-0.5 text-base sm:text-lg text-white leading-tight">
+                          <h3 className="font-title mt-0.5 text-base sm:text-lg text-[#fff] leading-tight">
                             {category.name}
                           </h3>
                         </div>

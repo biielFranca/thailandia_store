@@ -44,7 +44,7 @@ export function StoreFooter() {
             <img src={brand.logo.src} alt={brand.name}
               width={(brand.logo.footerHeight * brand.logo.width) / brand.logo.height}
               height={brand.logo.footerHeight}
-              className="h-14 w-auto" />
+              className="theme-logo h-14 w-auto" />
             <p className="mt-4 text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
               {brand.tagline}
             </p>

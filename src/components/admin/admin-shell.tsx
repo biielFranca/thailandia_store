@@ -187,7 +187,7 @@ function AdminShellInner({ children, initialUser }: AdminShellProps) {
         {/* Logo */}
         <div className="flex h-14 items-center gap-2.5 border-b px-5"
           style={{ borderColor: "var(--border-subtle)" }}>
-          <Image src={brand.logo.src} alt="" width={28} height={28} className="h-7 w-auto" />
+          <Image src={brand.logo.src} alt="" width={28} height={28} className="theme-logo h-7 w-auto" />
           <div>
             <p className="text-xs font-bold" style={{ color: "var(--text-primary)" }}>{brand.name}</p>
             <p className="text-[10px] uppercase tracking-[0.12em]" style={{ color: "var(--cta)" }}>Admin</p>

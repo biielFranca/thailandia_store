@@ -134,7 +134,7 @@ export function HeroCarousel({ slides }: Props) {
                 <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/50">
                   Importado selecionado
                 </p>
-                <h2 className="font-title mt-3 text-[clamp(2.2rem,4vw,3.4rem)] leading-[1.02] text-white"
+                <h2 className="font-title mt-3 text-[clamp(2.2rem,4vw,3.4rem)] leading-[1.02] text-[#fff]"
                   style={{ whiteSpace: "pre-line" }}>
                   {slide.title}
                 </h2>
@@ -148,7 +148,7 @@ export function HeroCarousel({ slides }: Props) {
                     Comprar agora
                   </Link>
                   <button type="button" onClick={() => handleAddToCart(slide)}
-                    className="inline-flex items-center gap-2 rounded-[8px] border px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-white/10"
+                    className="inline-flex items-center gap-2 rounded-[8px] border px-5 py-3 text-sm font-medium text-[#fff] transition-colors hover:bg-white/10"
                     style={{ borderColor: "rgba(255,255,255,0.25)" }}>
                     <CartIcon />
                     {addedSlug === slide.slug ? "Adicionado ✓" : "Adicionar ao carrinho"}
@@ -205,7 +205,7 @@ export function HeroCarousel({ slides }: Props) {
                 <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/50">
                   Importado selecionado
                 </p>
-                <h2 className="font-title mt-2 text-[2rem] leading-[1.03] text-white"
+                <h2 className="font-title mt-2 text-[2rem] leading-[1.03] text-[#fff]"
                   style={{ whiteSpace: "pre-line" }}>
                   {slide.title}
                 </h2>
@@ -219,7 +219,7 @@ export function HeroCarousel({ slides }: Props) {
                     Comprar agora
                   </Link>
                   <button type="button" onClick={() => handleAddToCart(slide)}
-                    className="inline-flex items-center gap-2 rounded-[8px] border px-4 py-2.5 text-sm font-medium text-white"
+                    className="inline-flex items-center gap-2 rounded-[8px] border px-4 py-2.5 text-sm font-medium text-[#fff]"
                     style={{ borderColor: "rgba(255,255,255,0.25)" }}>
                     <CartIcon />
                     {addedSlug === slide.slug ? "✓" : "Adicionar"}
@@ -236,12 +236,12 @@ export function HeroCarousel({ slides }: Props) {
       <div className="absolute right-4 top-4 z-20 flex gap-2">
         <button type="button" aria-label="Slide anterior"
           onClick={() => { setPaused(true); go(active - 1); }}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm transition-colors hover:bg-black/65">
+          className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-black/45 text-[#fff] backdrop-blur-sm transition-colors hover:bg-black/65">
           <ChevronLeft />
         </button>
         <button type="button" aria-label="Próximo slide"
           onClick={() => { setPaused(true); go(active + 1); }}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm transition-colors hover:bg-black/65">
+          className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-black/45 text-[#fff] backdrop-blur-sm transition-colors hover:bg-black/65">
           <ChevronRight />
         </button>
       </div>
