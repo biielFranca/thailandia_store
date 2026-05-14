@@ -4,8 +4,9 @@
 import type { OrderStatus } from "@/app/admin/pedidos/actions";
 
 export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
-  pending_payment: "Aguardando pagamento",
-  payment_confirmed: "Pagamento confirmado",
+  pending_payment:    "Aguardando pagamento",
+  payment_processing: "Processando pagamento",
+  payment_confirmed:  "Pagamento confirmado",
   processing: "Em separação",
   shipped: "Enviado",
   delivered: "Entregue",
@@ -14,8 +15,9 @@ export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
 };
 
 export const ORDER_STATUS_STYLE: Record<OrderStatus, { bg: string; color: string }> = {
-  pending_payment: { bg: "var(--surface-2)", color: "var(--text-secondary)" },
-  payment_confirmed: { bg: "rgba(30,107,255,0.15)", color: "var(--cta)" },
+  pending_payment:    { bg: "var(--surface-2)", color: "var(--text-secondary)" },
+  payment_processing: { bg: "rgba(245,158,11,0.10)", color: "var(--warning)" },
+  payment_confirmed:  { bg: "rgba(30,107,255,0.15)", color: "var(--cta)" },
   processing: { bg: "rgba(245,158,11,0.15)", color: "var(--warning)" },
   shipped: { bg: "rgba(245,158,11,0.20)", color: "var(--warning)" },
   delivered: { bg: "rgba(34,197,94,0.15)", color: "var(--success)" },

@@ -13,13 +13,21 @@ export default async function CardPaymentPage({ params }: Props) {
   const { orderId } = await params;
   const supabase = await createClient();
 
+  const { data: authData } = await supabase.auth.getUser();
+  const callerId = authData.user?.id ?? null;
+
   const { data: order } = await supabase
     .from("orders")
-    .select("id, total, status, customer_email")
+    .select("id, total, status, customer_email, profile_id")
     .eq("id", orderId)
     .maybeSingle();
 
   if (!order) redirect("/");
+
+  // Ownership: allow logged-in owner or guest orders (profile_id null).
+  // Redirect away silently to avoid leaking order existence.
+  if (order.profile_id !== null && order.profile_id !== callerId) redirect("/");
+
   if (order.status === "payment_confirmed") redirect(`/checkout/sucesso?order=${orderId}`);
 
   const publicKey = process.env.NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY ?? "";

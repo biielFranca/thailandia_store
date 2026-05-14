@@ -504,10 +504,31 @@ export type Database = {
     }
     Functions: {
       is_admin: { Args: never; Returns: boolean }
+      decrement_stock_for_order: {
+        Args: { p_order_id: string }
+        Returns: undefined
+      }
+      create_order_atomic: {
+        Args: {
+          p_store_id: string
+          p_profile_id: string | null
+          p_subtotal: number
+          p_shipping_cost: number
+          p_total: number
+          p_shipping_address: unknown
+          p_customer_name: string
+          p_customer_email: string
+          p_customer_phone: string | null
+          p_notes: string | null
+          p_items: unknown
+        }
+        Returns: { order_id: string }
+      }
     }
     Enums: {
       order_status:
         | "pending_payment"
+        | "payment_processing"
         | "payment_confirmed"
         | "processing"
         | "shipped"
@@ -541,6 +562,7 @@ export const Constants = {
     Enums: {
       order_status: [
         "pending_payment",
+        "payment_processing",
         "payment_confirmed",
         "processing",
         "shipped",

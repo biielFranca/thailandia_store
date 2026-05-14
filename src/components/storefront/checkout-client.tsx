@@ -177,8 +177,11 @@ export function CheckoutClient() {
     if (digits.length !== 8) return;
 
     setCepLoading(true);
+    const controller = new AbortController();
+    const timeoutId  = setTimeout(() => controller.abort(), 5000);
     try {
-      const res  = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
+      const res  = await fetch(`https://viacep.com.br/ws/${digits}/json/`, { signal: controller.signal });
+      if (!res.ok) throw new Error("http_error");
       const data = await res.json() as {
         erro?: boolean;
         logradouro?: string;
@@ -186,7 +189,7 @@ export function CheckoutClient() {
         localidade?: string;
         uf?: string;
       };
-      if (data.erro) {
+      if (!data || typeof data !== "object" || data.erro) {
         setErr("cep", "CEP não encontrado.");
       } else {
         setForm((prev) => ({
@@ -199,8 +202,9 @@ export function CheckoutClient() {
         setErr("cep", "");
       }
     } catch {
-      // ViaCEP offline — silently skip, user can fill manually
+      // ViaCEP offline or timed out — user can fill address manually
     } finally {
+      clearTimeout(timeoutId);
       setCepLoading(false);
     }
   }

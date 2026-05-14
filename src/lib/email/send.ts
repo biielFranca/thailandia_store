@@ -59,7 +59,7 @@ async function loadOrderForEmail(orderId: string) {
   });
 
   return {
-    email: o.customer_email,
+    email: o.customer_email as string,
     ref: shortRef(o.id),
     customerName: o.customer_name ?? "Cliente",
     total: Number(o.total),

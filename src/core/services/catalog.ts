@@ -239,16 +239,31 @@ export async function getCatalogProductsByCollection(collection: string): Promis
   return ((data ?? []) as ProductRow[]).map(mapProduct);
 }
 
+// Escapes characters that PostgREST interprets as filter syntax so that raw
+// user input cannot alter the structure of .or() / .ilike() expressions.
+function escapePostgrestLike(value: string): string {
+  return value
+    .replaceAll("\\", "\\\\")
+    .replaceAll("%", "\\%")
+    .replaceAll("_", "\\_")
+    .replaceAll(",", "\\,")
+    .replaceAll(".", "\\.")
+    .replaceAll("(", "\\(")
+    .replaceAll(")", "\\)")
+    .replaceAll("*", "\\*");
+}
+
 export async function searchCatalogProducts(query: string): Promise<CatalogProduct[]> {
   const q = query.trim();
   if (!q) return [];
+  const escaped = escapePostgrestLike(q);
   const supabase = await createClient();
   // ilike on name/description; UI-side matching extends to team/league/etc.
   const { data, error } = await supabase
     .from("products")
     .select(PRODUCT_SELECT)
     .eq("active", true)
-    .or(`name.ilike.%${q}%,description.ilike.%${q}%,slug.ilike.%${q}%`)
+    .or(`name.ilike.%${escaped}%,description.ilike.%${escaped}%,slug.ilike.%${escaped}%`)
     .order("featured", { ascending: false })
     .limit(50);
   if (error) throw error;

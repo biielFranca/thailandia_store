@@ -2,8 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
 import { getMpPaymentClient } from "@/lib/mercadopago";
-import { decrementStockForOrder } from "@/lib/stock";
 import { sendOrderReceivedEmail, sendPaymentConfirmedEmail } from "@/lib/email/send";
 import type { Json } from "@/lib/supabase/database.types";
 import { storeConfig } from "@/config/store";
@@ -159,29 +159,7 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
     country: "BR",
   };
 
-  const { data: order, error: orderError } = await supabase
-    .from("orders")
-    .insert({
-      store_id: storeId,
-      profile_id: profileId,
-      subtotal,
-      shipping_cost: shippingCost,
-      total,
-      shipping_address: shippingAddress,
-      customer_name: input.customer.name.trim(),
-      customer_email: input.customer.email.trim().toLowerCase(),
-      customer_phone: input.customer.phone?.trim() || null,
-      notes: input.notes?.trim() || null,
-    })
-    .select("id")
-    .single();
-
-  if (orderError || !order) {
-    return { ok: false, error: "Não foi possível criar o pedido. Tente novamente." };
-  }
-
   const itemsPayload = resolved.map((r) => ({
-    order_id: order.id,
     product_id: r.productId,
     quantity: r.quantity,
     unit_price: r.unitPrice,
@@ -189,11 +167,38 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
     product_snapshot: r.snapshot,
   }));
 
-  const { error: itemsError } = await supabase.from("order_items").insert(itemsPayload);
-  if (itemsError) {
-    await supabase.from("orders").delete().eq("id", order.id);
-    return { ok: false, error: "Falha ao salvar itens do pedido. Tente novamente." };
+  // Use the service client so the SECURITY DEFINER RPC (execute revoked from
+  // anon/authenticated) can be reached from a trusted server context. The
+  // RPC runs in a single transaction: SELECT FOR UPDATE → stock check →
+  // INSERT order → INSERT order_items → UPDATE stock. This eliminates the
+  // race condition where two concurrent requests both pass the stock check
+  // before either decrements.
+  const service = createServiceClient();
+  const { data: rpcResult, error: rpcError } = await service.rpc(
+    "create_order_atomic",
+    {
+      p_store_id:         storeId,
+      p_profile_id:       profileId,
+      p_subtotal:         subtotal,
+      p_shipping_cost:    shippingCost,
+      p_total:            total,
+      p_shipping_address: shippingAddress as unknown as Json,
+      p_customer_name:    input.customer.name.trim(),
+      p_customer_email:   input.customer.email.trim().toLowerCase(),
+      p_customer_phone:   input.customer.phone?.trim() || null,
+      p_notes:            input.notes?.trim() || null,
+      p_items:            itemsPayload as unknown as Json,
+    },
+  );
+
+  if (rpcError || !rpcResult) {
+    // Surface stock-related messages to the user; mask internal errors.
+    const msg = rpcError?.message ?? "";
+    if (msg.includes("Estoque insuficiente")) return { ok: false, error: msg };
+    return { ok: false, error: "Não foi possível criar o pedido. Tente novamente." };
   }
+
+  const order = { id: (rpcResult as { order_id: string }).order_id };
 
   // ── PIX: create payment immediately and return QR code data ─────────────────
   if (input.paymentMethod === "pix") {
@@ -245,8 +250,9 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
       };
     } catch {
       // MP failed — clean up the order so the user can retry cleanly.
-      await supabase.from("order_items").delete().eq("order_id", order.id);
-      await supabase.from("orders").delete().eq("id", order.id);
+      // Use service client because RLS may block deletes for the caller's role.
+      await service.from("order_items").delete().eq("order_id", order.id);
+      await service.from("orders").delete().eq("id", order.id);
       return { ok: false, error: "Não foi possível gerar o PIX. Tente novamente em instantes." };
     }
   }
@@ -271,15 +277,42 @@ export async function processCardPayment(
 ): Promise<CardPaymentResult> {
   const supabase = await createClient();
 
+  // ── Task 5: ownership check ───────────────────────────────────────────────
+  const { data: authData } = await supabase.auth.getUser();
+  const callerId = authData.user?.id ?? null;
+
   const { data: order } = await supabase
     .from("orders")
-    .select("id, total, status, customer_email")
+    .select("id, total, status, customer_email, profile_id")
     .eq("id", orderId)
     .maybeSingle();
 
   if (!order) return { ok: false, error: "Pedido não encontrado." };
+
+  // Allow payment if: logged-in user owns the order, OR it's a guest order
+  // (profile_id is null). Deny if another authenticated user tries to pay.
+  if (order.profile_id !== null && order.profile_id !== callerId) {
+    return { ok: false, error: "Acesso negado." };
+  }
+
   if (order.status !== "pending_payment") {
     return { ok: false, error: "Este pedido já foi processado." };
+  }
+
+  // ── Task 6: atomic status transition to prevent double-charge ────────────
+  // UPDATE returns the row only if status is still 'pending_payment'.
+  // A concurrent request will see 0 rows and abort before reaching MP.
+  const { data: locked } = await supabase
+    .from("orders")
+    .update({ status: "payment_processing" })
+    .eq("id", orderId)
+    .eq("status", "pending_payment")
+    .select("id")
+    .maybeSingle();
+
+  if (!locked) {
+    // Another request already moved this order out of pending_payment.
+    return { ok: false, error: "Este pedido já está sendo processado." };
   }
 
   try {
@@ -291,7 +324,7 @@ export async function processCardPayment(
         installments,
         payment_method_id: paymentMethodId,
         issuer_id: issuerId ? Number(issuerId) : undefined,
-        payer: { email: payerEmail || order.customer_email },
+        payer: { email: payerEmail || order.customer_email || "" },
         description: `Pedido #${orderId.slice(0, 8).toUpperCase()} — Thailandia Store`,
         external_reference: orderId,
       },
@@ -322,7 +355,7 @@ export async function processCardPayment(
         status: "payment_confirmed",
         note: `Cartão aprovado — ${installments}x (MP #${mpResult.id})`,
       });
-      await decrementStockForOrder(orderId);
+      // Stock was already decremented atomically at order creation (create_order_atomic RPC).
       void sendPaymentConfirmedEmail(orderId);
       revalidatePath("/admin/pedidos");
       revalidatePath(`/admin/pedidos/${orderId}`);
@@ -330,12 +363,25 @@ export async function processCardPayment(
     }
 
     if (mpStatus === "rejected") {
+      // Roll back so the user can retry with different card details.
+      await supabase
+        .from("orders")
+        .update({ status: "pending_payment" })
+        .eq("id", orderId);
       return { ok: false, error: "Pagamento recusado. Verifique os dados do cartão e tente novamente." };
     }
 
     // in_process — e.g. debit with 3DS
     return { ok: true, orderId };
   } catch {
+    // MP threw an unexpected error — roll back to pending_payment so the user
+    // can retry. This does NOT restore stock (already pre-decremented at
+    // order creation) — that requires an admin action or a cancellation flow.
+    await supabase
+      .from("orders")
+      .update({ status: "pending_payment" })
+      .eq("id", orderId)
+      .eq("status", "payment_processing");
     return { ok: false, error: "Erro ao processar o pagamento. Tente novamente." };
   }
 }

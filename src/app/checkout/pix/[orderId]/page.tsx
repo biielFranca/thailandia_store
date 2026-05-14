@@ -9,10 +9,13 @@ export default async function PixPaymentPage({ params }: Props) {
   const { orderId } = await params;
   const supabase = await createClient();
 
+  const { data: authData } = await supabase.auth.getUser();
+  const callerId = authData.user?.id ?? null;
+
   const [{ data: order }, { data: payment }] = await Promise.all([
     supabase
       .from("orders")
-      .select("id, total, status")
+      .select("id, total, status, profile_id")
       .eq("id", orderId)
       .maybeSingle(),
     supabase
@@ -26,6 +29,9 @@ export default async function PixPaymentPage({ params }: Props) {
   ]);
 
   if (!order) redirect("/");
+
+  // Ownership: allow logged-in owner or guest orders (profile_id null).
+  if (order.profile_id !== null && order.profile_id !== callerId) redirect("/");
 
   // Already paid — go straight to success
   if (order.status === "payment_confirmed") {

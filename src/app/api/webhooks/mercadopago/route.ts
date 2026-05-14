@@ -2,7 +2,6 @@ import { revalidatePath } from "next/cache";
 import { createHmac } from "crypto";
 import { getMpPaymentClient } from "@/lib/mercadopago";
 import { createServiceClient } from "@/lib/supabase/service";
-import { decrementStockForOrder } from "@/lib/stock";
 import { sendPaymentConfirmedEmail } from "@/lib/email/send";
 
 /** Maps Mercado Pago payment.status → our payment_status enum. */
@@ -16,8 +15,10 @@ function toPaymentStatus(mpStatus: string): "pending" | "confirmed" | "failed" |
   }
 }
 
+type OrderStatus = "pending_payment" | "payment_processing" | "payment_confirmed" | "processing" | "shipped" | "delivered" | "cancelled" | "refunded";
+
 /** Maps Mercado Pago payment.status → our order_status enum. */
-function toOrderStatus(mpStatus: string): string | null {
+function toOrderStatus(mpStatus: string): OrderStatus | null {
   switch (mpStatus) {
     case "approved":  return "payment_confirmed";
     case "refunded":  return "refunded";
@@ -29,7 +30,17 @@ function toOrderStatus(mpStatus: string): string | null {
 
 function verifySignature(req: Request, body: string): boolean {
   const secret = process.env.MERCADO_PAGO_WEBHOOK_SECRET;
-  if (!secret) return true; // skip validation if not configured (dev mode)
+  if (!secret) {
+    // Fail closed in production — never accept unsigned webhooks.
+    if (process.env.NODE_ENV === "production") {
+      console.error("[MP Webhook] MERCADO_PAGO_WEBHOOK_SECRET is not set — rejecting request");
+      return false;
+    }
+    // In non-production environments log a warning but allow through so
+    // local development doesn't require a live secret.
+    console.warn("[MP Webhook] MERCADO_PAGO_WEBHOOK_SECRET not set — skipping signature check (dev only)");
+    return true;
+  }
 
   const xSignature = req.headers.get("x-signature") ?? "";
   const xRequestId = req.headers.get("x-request-id") ?? "";
@@ -115,10 +126,10 @@ export async function POST(req: Request) {
           note: `Webhook Mercado Pago — status: ${mpStatus} (MP #${mpPaymentId})`,
         });
 
-        // Decrement stock + send payment confirmed email only on approval
-        // (not on refund/cancel — those are handled manually by the admin).
+        // Send payment confirmed email only on approval.
+        // Stock was already decremented atomically at order creation
+        // (create_order_atomic RPC) — no further decrement needed here.
         if (mpStatus === "approved") {
-          await decrementStockForOrder(orderId);
           void sendPaymentConfirmedEmail(orderId);
         }
 
