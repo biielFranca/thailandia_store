@@ -86,6 +86,7 @@ export function CartDrawer() {
           borderColor: "var(--border-subtle)",
           backgroundColor: "var(--surface-1)",
           transform: cartOpen ? "translateX(0)" : "translateX(100%)",
+          pointerEvents: cartOpen ? "auto" : "none",
         }}
       >
         {/* Header */}

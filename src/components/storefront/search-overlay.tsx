@@ -101,7 +101,10 @@ export function SearchOverlay() {
         aria-modal="true"
         aria-label="Buscar produtos"
         className="fixed inset-x-0 top-0 z-[70] transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
-        style={{ transform: searchOpen ? "translateY(0)" : "translateY(-100%)" }}
+        style={{
+          transform: searchOpen ? "translateY(0)" : "translateY(-100%)",
+          pointerEvents: searchOpen ? "auto" : "none",
+        }}
       >
         <div
           className="border-b shadow-2xl"
