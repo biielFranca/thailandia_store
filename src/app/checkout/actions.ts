@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getMpPaymentClient } from "@/lib/mercadopago";
 import { decrementStockForOrder } from "@/lib/stock";
+import { sendOrderReceivedEmail, sendPaymentConfirmedEmail } from "@/lib/email/send";
 import type { Json } from "@/lib/supabase/database.types";
 import { storeConfig } from "@/config/store";
 import {
@@ -232,6 +233,9 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
         metadata: { qr_code: qrCode, qr_code_base64: qrCodeBase64, expires_at: expiresAt } as Json,
       });
 
+      // Fire-and-forget email confirmation (never blocks the flow).
+      void sendOrderReceivedEmail(order.id, "pix");
+
       return {
         ok: true,
         orderId: order.id,
@@ -248,6 +252,7 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
   }
 
   // ── Card: order created; payment happens on the next page via Brick ──────────
+  void sendOrderReceivedEmail(order.id, "card");
   return { ok: true, orderId: order.id, total, paymentMethod: "card" };
 }
 
@@ -318,6 +323,7 @@ export async function processCardPayment(
         note: `Cartão aprovado — ${installments}x (MP #${mpResult.id})`,
       });
       await decrementStockForOrder(orderId);
+      void sendPaymentConfirmedEmail(orderId);
       revalidatePath("/admin/pedidos");
       revalidatePath(`/admin/pedidos/${orderId}`);
       return { ok: true, orderId };

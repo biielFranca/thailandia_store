@@ -3,6 +3,7 @@ import { createHmac } from "crypto";
 import { getMpPaymentClient } from "@/lib/mercadopago";
 import { createServiceClient } from "@/lib/supabase/service";
 import { decrementStockForOrder } from "@/lib/stock";
+import { sendPaymentConfirmedEmail } from "@/lib/email/send";
 
 /** Maps Mercado Pago payment.status → our payment_status enum. */
 function toPaymentStatus(mpStatus: string): "pending" | "confirmed" | "failed" | "refunded" {
@@ -114,10 +115,11 @@ export async function POST(req: Request) {
           note: `Webhook Mercado Pago — status: ${mpStatus} (MP #${mpPaymentId})`,
         });
 
-        // Decrement stock only on approval (not on refund/cancel — stock
-        // management for those cases is handled manually by the admin).
+        // Decrement stock + send payment confirmed email only on approval
+        // (not on refund/cancel — those are handled manually by the admin).
         if (mpStatus === "approved") {
           await decrementStockForOrder(orderId);
+          void sendPaymentConfirmedEmail(orderId);
         }
 
         revalidatePath("/admin/pedidos");
