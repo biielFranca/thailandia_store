@@ -1,3 +1,6 @@
+import "server-only";
+
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 
 export type CurrentUserRole = "customer" | "admin";
@@ -15,7 +18,7 @@ export interface CurrentUser {
  * resolve it through this helper inside Server Components / Server Actions /
  * Route Handlers.
  */
-export async function getCurrentUser(): Promise<CurrentUser | null> {
+export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
   const supabase = await createClient();
   const { data, error } = await supabase.auth.getUser();
   if (error || !data.user) return null;
@@ -34,10 +37,17 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
   const fallbackName = data.user.email?.split("@")[0] ?? "Cliente";
   const name = (profile?.full_name || metaName || fallbackName).toString().trim();
 
+  if (!profile) {
+    await supabase.from("profiles").insert({
+      id: data.user.id,
+      full_name: name,
+    });
+  }
+
   return {
     id: data.user.id,
     email: data.user.email ?? "",
     name,
     role: profile?.role === "admin" ? "admin" : "customer",
   };
-}
+});

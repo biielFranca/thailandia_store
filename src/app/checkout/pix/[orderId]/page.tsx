@@ -15,7 +15,7 @@ export default async function PixPaymentPage({ params }: Props) {
   const [{ data: order }, { data: payment }] = await Promise.all([
     supabase
       .from("orders")
-      .select("id, total, status, profile_id")
+      .select("id, total, status, profile_id, created_at")
       .eq("id", orderId)
       .maybeSingle(),
     supabase
@@ -43,6 +43,9 @@ export default async function PixPaymentPage({ params }: Props) {
     qr_code_base64?: string;
     expires_at?: string;
   };
+  const fallbackExpiresAt = new Date(
+    new Date(order.created_at).getTime() + 30 * 60 * 1000
+  ).toISOString();
 
   return (
     <StoreShell>
@@ -50,7 +53,7 @@ export default async function PixPaymentPage({ params }: Props) {
         orderId={orderId}
         qrCode={meta.qr_code ?? ""}
         qrCodeBase64={meta.qr_code_base64 ?? ""}
-        expiresAt={meta.expires_at ?? new Date(Date.now() + 30 * 60 * 1000).toISOString()}
+        expiresAt={meta.expires_at ?? fallbackExpiresAt}
         total={Number(order.total)}
       />
     </StoreShell>

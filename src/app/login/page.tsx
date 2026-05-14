@@ -46,6 +46,12 @@ function ShieldIcon() {
 
 type Tab = "login" | "cadastro";
 
+function getOAuthErrorMessage(error: string | null): string {
+  if (error === "oauth_failed") return "Falha ao entrar com Google. Tente novamente.";
+  if (error === "missing_code") return "Login com Google não concluído.";
+  return "";
+}
+
 function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
@@ -60,7 +66,7 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(() => getOAuthErrorMessage(params?.get("error") ?? null));
   const [info, setInfo] = useState("");
 
   // Redirect if already logged in
@@ -115,13 +121,6 @@ function LoginForm() {
     }
     // On success, browser navigates away to Google's consent screen.
   }
-
-  // Surface OAuth callback errors in the URL (?error=oauth_failed)
-  useEffect(() => {
-    const oauthError = params?.get("error");
-    if (oauthError === "oauth_failed") setError("Falha ao entrar com Google. Tente novamente.");
-    else if (oauthError === "missing_code") setError("Login com Google não concluído.");
-  }, [params]);
 
   return (
     <div

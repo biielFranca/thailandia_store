@@ -42,8 +42,11 @@ export function SearchOverlay() {
     if (searchOpen) {
       setTimeout(() => inputRef.current?.focus(), 80);
     } else {
-      setQuery("");
-      setResults([]);
+      const id = setTimeout(() => {
+        setQuery("");
+        setResults([]);
+      }, 0);
+      return () => clearTimeout(id);
     }
   }, [searchOpen]);
 
@@ -64,10 +67,7 @@ export function SearchOverlay() {
   // Debounced live search against the Server Action.
   useEffect(() => {
     const trimmed = query.trim();
-    if (!trimmed) {
-      setResults([]);
-      return;
-    }
+    if (!trimmed) return;
     let cancelled = false;
     const handle = setTimeout(async () => {
       try {
@@ -82,6 +82,11 @@ export function SearchOverlay() {
       clearTimeout(handle);
     };
   }, [query]);
+
+  function handleQueryChange(value: string) {
+    setQuery(value);
+    if (!value.trim()) setResults([]);
+  }
 
   const hasQuery = query.trim().length > 0;
 
@@ -120,7 +125,7 @@ export function SearchOverlay() {
               type="search"
               placeholder="Buscar por time, seleção, temporada..."
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => handleQueryChange(e.target.value)}
               className="flex-1 bg-transparent text-lg outline-none placeholder:[color:var(--text-tertiary)]"
               style={{ color: "var(--text-primary)" }}
               autoComplete="off"
@@ -213,7 +218,7 @@ export function SearchOverlay() {
                   <button
                     key={hint}
                     type="button"
-                    onClick={() => setQuery(hint)}
+                    onClick={() => handleQueryChange(hint)}
                     className="rounded-full border px-3 py-1 text-xs font-medium transition-colors duration-150 hover:[border-color:var(--border-strong)]"
                     style={{ borderColor: "var(--border-subtle)", color: "var(--text-secondary)" }}
                   >

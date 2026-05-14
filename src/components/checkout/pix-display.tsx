@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
 
 interface Props {
@@ -149,11 +150,11 @@ export function PixDisplay({ orderId, qrCode, qrCodeBase64, expiresAt, total }: 
           <p className="text-xs" style={{ color: "var(--text-tertiary)" }}>
             Volte ao início e faça o pedido novamente.
           </p>
-          <a href="/"
+          <Link href="/"
             className="mt-1 inline-flex items-center gap-2 rounded-[8px] px-5 py-2.5 text-sm font-semibold transition-opacity hover:opacity-90"
             style={{ backgroundColor: "var(--cta)", color: "var(--cta-foreground)" }}>
             Voltar à loja
-          </a>
+          </Link>
         </div>
       )}
 

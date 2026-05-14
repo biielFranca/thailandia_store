@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useStore } from "@/contexts/store";
 import { useAuth } from "@/contexts/auth";
@@ -88,6 +88,7 @@ function ChevronDown({ open }: { open: boolean }) {
 
 export function StoreHeader() {
   const pathname = usePathname();
+  const router = useRouter();
   const { cartCount, openCart, openSearch } = useStore();
   const { user, logout, isAdmin } = useAuth();
   const [categoriesOpen, setCategoriesOpen] = useState(false);
@@ -97,22 +98,39 @@ export function StoreHeader() {
   const headerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem("ts-theme") as "dark" | "light" | null;
-    if (saved) { setTheme(saved); document.documentElement.setAttribute("data-theme", saved); }
+    const id = window.setTimeout(() => {
+      const saved = localStorage.getItem("ts-theme") as "dark" | "light" | null;
+      if (saved) setTheme(saved);
+    }, 0);
+    return () => window.clearTimeout(id);
   }, []);
 
-  function toggleTheme() {
-    const next = theme === "dark" ? "light" : "dark";
-    setTheme(next);
-    localStorage.setItem("ts-theme", next);
-    if (next === "light") {
+  useEffect(() => {
+    localStorage.setItem("ts-theme", theme);
+    if (theme === "light") {
       document.documentElement.setAttribute("data-theme", "light");
     } else {
       document.documentElement.removeAttribute("data-theme");
     }
+  }, [theme]);
+
+  function toggleTheme() {
+    const next = theme === "dark" ? "light" : "dark";
+    setTheme(next);
   }
 
-  useEffect(() => { setCategoriesOpen(false); setMobileOpen(false); }, [pathname]);
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      setCategoriesOpen(false);
+      setMobileOpen(false);
+    }, 0);
+    return () => window.clearTimeout(id);
+  }, [pathname]);
+
+  async function handleLogout() {
+    await logout();
+    router.refresh();
+  }
 
   useEffect(() => {
     if (!categoriesOpen) return;
@@ -248,7 +266,7 @@ export function StoreHeader() {
                             Painel Admin →
                           </Link>
                         )}
-                        <button type="button" onClick={() => { setUserMenuOpen(false); logout(); }}
+                        <button type="button" onClick={() => { setUserMenuOpen(false); void handleLogout(); }}
                           className="flex w-full items-center gap-2 rounded-[6px] px-3 py-2 text-xs font-medium transition-colors hover:[background-color:var(--surface-2)] hover:[color:var(--danger)]"
                           style={{ color: "var(--text-secondary)" }}>
                           Sair da conta
@@ -336,7 +354,7 @@ export function StoreHeader() {
               <SearchIcon /> Buscar
             </button>
             {user ? (
-              <button type="button" onClick={() => { setMobileOpen(false); logout(); }}
+              <button type="button" onClick={() => { setMobileOpen(false); void handleLogout(); }}
                 className="flex flex-1 items-center justify-center gap-2 rounded-[8px] border py-2.5 text-sm font-semibold"
                 style={{ borderColor: "var(--border-subtle)", color: "var(--text-primary)" }}>
                 <UserIcon /> Sair

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AuthProvider, useAuth } from "@/contexts/auth";
 import { brand } from "@/themes/thailandia/content/brand";
@@ -159,12 +159,22 @@ interface AdminShellProps {
 function AdminShellInner({ children, initialUser }: AdminShellProps) {
   const { user, logout } = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Display the server-resolved user until the client AuthProvider hydrates.
   const display = user ?? { name: initialUser.name, email: initialUser.email };
 
-  useEffect(() => { setSidebarOpen(false); }, [pathname]);
+  useEffect(() => {
+    const id = window.setTimeout(() => setSidebarOpen(false), 0);
+    return () => window.clearTimeout(id);
+  }, [pathname]);
+
+  async function handleLogout() {
+    await logout();
+    router.replace("/login");
+    router.refresh();
+  }
 
   return (
     <div className="flex min-h-screen" style={{ backgroundColor: "var(--background)" }}>
@@ -225,7 +235,7 @@ function AdminShellInner({ children, initialUser }: AdminShellProps) {
             <StoreIcon />
             Ver loja
           </Link>
-          <button type="button" onClick={() => { void logout(); }}
+          <button type="button" onClick={() => { void handleLogout(); }}
             className="flex w-full items-center gap-2.5 rounded-[8px] px-3 py-2.5 text-sm transition-colors duration-150 hover:[background-color:var(--surface-2)] hover:[color:var(--danger)]"
             style={{ color: "var(--text-secondary)" }}>
             <LogoutIcon />
