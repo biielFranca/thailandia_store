@@ -11,6 +11,7 @@ import {
 } from "@/app/admin/vitrine/actions";
 import type { HeroSlideRow } from "@/core/services/catalog";
 import type { VitrineProduct } from "@/components/admin/vitrine-client";
+import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 
 interface Props {
   initialSlides: HeroSlideRow[];
@@ -175,6 +176,8 @@ export function HeroSlidesManager({ initialSlides, products }: Props) {
   const [creating, setCreating] = useState(false);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState("");
+  // Slide pending deletion confirmation — null means no dialog open.
+  const [pendingDelete, setPendingDelete] = useState<HeroSlideRow | null>(null);
 
   function refresh(next: HeroSlideRow[]) {
     setSlides(next.slice().sort((a, b) => a.position - b.position));
@@ -237,13 +240,19 @@ export function HeroSlidesManager({ initialSlides, products }: Props) {
     });
   }
 
-  function remove(s: HeroSlideRow) {
-    if (!window.confirm(`Excluir o slide "${s.title.split("\n")[0]}"?`)) return;
+  function confirmRemove() {
+    if (!pendingDelete) return;
+    const target = pendingDelete;
     setError("");
     startTransition(async () => {
-      const r = await deleteHeroSlide(s.id);
-      if (!r.ok) return setError(r.error);
-      refresh(slides.filter((x) => x.id !== s.id));
+      const r = await deleteHeroSlide(target.id);
+      if (!r.ok) {
+        setError(r.error);
+        setPendingDelete(null);
+        return;
+      }
+      refresh(slides.filter((x) => x.id !== target.id));
+      setPendingDelete(null);
     });
   }
 
@@ -362,7 +371,7 @@ export function HeroSlidesManager({ initialSlides, products }: Props) {
                   style={{ borderColor: "var(--border-subtle)", color: "var(--text-primary)" }}>
                   Editar
                 </button>
-                <button type="button" onClick={() => remove(s)} disabled={pending}
+                <button type="button" onClick={() => setPendingDelete(s)} disabled={pending}
                   className="rounded-[6px] border px-2 py-1 text-xs transition-colors hover:[border-color:var(--danger)] hover:[color:var(--danger)]"
                   style={{ borderColor: "var(--border-subtle)", color: "var(--text-tertiary)" }}>×</button>
               </div>
@@ -370,6 +379,21 @@ export function HeroSlidesManager({ initialSlides, products }: Props) {
           );
         })}
       </ol>
+
+      <ConfirmDialog
+        open={!!pendingDelete}
+        title="Excluir slide"
+        message={
+          pendingDelete
+            ? `Tem certeza que deseja excluir o slide "${pendingDelete.title.split("\n")[0]}"? Esta ação não pode ser desfeita.`
+            : ""
+        }
+        confirmLabel="Excluir"
+        variant="danger"
+        busy={pending}
+        onConfirm={confirmRemove}
+        onCancel={() => setPendingDelete(null)}
+      />
     </div>
   );
 }

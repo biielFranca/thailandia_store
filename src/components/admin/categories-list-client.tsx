@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useTransition, useState } from "react";
 import { setCategoryActive, deleteCategory } from "@/app/admin/categorias/actions";
+import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 
 export interface AdminCategoryRow {
   id: string;
@@ -22,6 +23,8 @@ interface Props {
 export function CategoriesListClient({ categories }: Props) {
   const [error, setError] = useState("");
   const [pending, startTransition] = useTransition();
+  // Category awaiting deletion confirmation — null = dialog closed.
+  const [pendingDelete, setPendingDelete] = useState<AdminCategoryRow | null>(null);
 
   function toggleActive(c: AdminCategoryRow) {
     setError("");
@@ -32,11 +35,17 @@ export function CategoriesListClient({ categories }: Props) {
   }
 
   function handleDelete(c: AdminCategoryRow) {
-    if (!confirm(`Excluir categoria "${c.name}"?`)) return;
+    setPendingDelete(c);
+  }
+
+  function confirmDelete() {
+    if (!pendingDelete) return;
+    const target = pendingDelete;
     setError("");
     startTransition(async () => {
-      const r = await deleteCategory(c.id);
+      const r = await deleteCategory(target.id);
       if (!r.ok) setError(r.error);
+      setPendingDelete(null);
     });
   }
 
@@ -142,6 +151,23 @@ export function CategoriesListClient({ categories }: Props) {
           </table>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={!!pendingDelete}
+        title="Excluir categoria"
+        message={
+          pendingDelete
+            ? pendingDelete.productCount > 0
+              ? `A categoria "${pendingDelete.name}" tem ${pendingDelete.productCount} produto(s). Reatribua ou desative-os antes de excluir.`
+              : `Tem certeza que deseja excluir a categoria "${pendingDelete.name}"? Esta ação não pode ser desfeita.`
+            : ""
+        }
+        confirmLabel="Excluir"
+        variant="danger"
+        busy={pending}
+        onConfirm={confirmDelete}
+        onCancel={() => setPendingDelete(null)}
+      />
     </div>
   );
 }
