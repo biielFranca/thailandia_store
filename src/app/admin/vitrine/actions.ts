@@ -85,7 +85,10 @@ export async function createHeroSlide(
     .select("id")
     .single();
 
-  if (error || !data) return { ok: false, error: "Não foi possível criar o slide." };
+  if (error || !data) {
+    console.error("[vitrine] createHeroSlide failed:", error?.message, error?.code);
+    return { ok: false, error: error?.message ?? "Não foi possível criar o slide." };
+  }
   revalidateCatalog();
   return { ok: true, data: { id: data.id } };
 }
@@ -112,7 +115,10 @@ export async function updateHeroSlide(
     })
     .eq("id", id);
 
-  if (error) return { ok: false, error: "Falha ao salvar." };
+  if (error) {
+    console.error("[vitrine] updateHeroSlide failed:", error.message, error.code);
+    return { ok: false, error: error.message || "Falha ao salvar." };
+  }
   revalidateCatalog();
   return { ok: true };
 }
@@ -121,7 +127,10 @@ export async function setHeroSlideActive(id: string, active: boolean): Promise<A
   await requireAdmin();
   const supabase = await createClient();
   const { error } = await supabase.from("hero_slides").update({ active }).eq("id", id);
-  if (error) return { ok: false, error: "Falha ao atualizar." };
+  if (error) {
+    console.error("[vitrine] setHeroSlideActive failed:", error.message, error.code);
+    return { ok: false, error: error.message || "Falha ao atualizar." };
+  }
   revalidateCatalog();
   return { ok: true };
 }
@@ -130,7 +139,10 @@ export async function deleteHeroSlide(id: string): Promise<ActionResult> {
   await requireAdmin();
   const supabase = await createClient();
   const { error } = await supabase.from("hero_slides").delete().eq("id", id);
-  if (error) return { ok: false, error: "Falha ao excluir." };
+  if (error) {
+    console.error("[vitrine] deleteHeroSlide failed:", error.message, error.code);
+    return { ok: false, error: error.message || "Falha ao excluir." };
+  }
   revalidateCatalog();
   return { ok: true };
 }

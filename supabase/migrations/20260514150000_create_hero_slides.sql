@@ -21,6 +21,8 @@ create index if not exists hero_slides_store_position_idx
 
 alter table public.hero_slides enable row level security;
 
+-- NOTE: superseded by 20260514160000_fix_hero_slides_admin_helper.sql, which
+-- swaps these policies to use security.is_admin() (the private helper).
 create policy "hero_slides: public read"
   on public.hero_slides for select
   using (active = true or public.is_admin());
