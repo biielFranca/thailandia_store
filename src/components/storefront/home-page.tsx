@@ -106,16 +106,19 @@ export async function HomePage() {
         <div className="w-full flex-1 flex-col px-3 pb-20 sm:px-6 lg:px-10 xl:px-16 2xl:px-24">
 
           {/* ── 3. Drop da semana ───────────────────────────────────────── */}
-          <section id="lancamentos" className="mt-14">
-            <SectionHeader
-              overline="Novidades de hoje"
-              title="Drop da semana"
-              subtitle="Estoque muda rápido. Garanta antes de acabar."
-              linkHref="/categorias/europeias"
-              linkLabel="Ver tudo →"
-            />
-            <FeaturedProductCarousel products={dropProducts} />
-          </section>
+          {/* Hidden when the admin has not pinned any product to the drop. */}
+          {dropProducts.length > 0 && (
+            <section id="lancamentos" className="mt-14">
+              <SectionHeader
+                overline="Novidades de hoje"
+                title="Drop da semana"
+                subtitle="Estoque muda rápido. Garanta antes de acabar."
+                linkHref="/categorias/europeias"
+                linkLabel="Ver tudo →"
+              />
+              <FeaturedProductCarousel products={dropProducts} />
+            </section>
+          )}
 
           {/* ── 4. World Cup 2026 banner ──────────────────────────────── */}
           {worldCupSlice.length > 0 && (
@@ -221,31 +224,37 @@ export async function HomePage() {
           </section>
 
           {/* ── 6. Mais vendidos ─────────────────────────────────────────── */}
-          <section id="destaques" className="mt-16">
-            <SectionHeader
-              overline="Mais procurados"
-              title="Os mantos mais pedidos"
-              linkHref="/categorias/nacionais"
-              linkLabel="Ver todos →"
-            />
-            <FeaturedProductCarousel products={bestsellerSlice} />
-          </section>
+          {/* Hidden when the admin has no bestseller-flagged products. */}
+          {bestsellerSlice.length > 0 && (
+            <section id="destaques" className="mt-16">
+              <SectionHeader
+                overline="Mais procurados"
+                title="Os mantos mais pedidos"
+                linkHref="/categorias/nacionais"
+                linkLabel="Ver todos →"
+              />
+              <FeaturedProductCarousel products={bestsellerSlice} />
+            </section>
+          )}
 
           {/* ── 7. Destaques (mais produtos em grid) ─────────────────────── */}
-          <section className="mt-16">
-            <SectionHeader
-              overline="Curadoria importada"
-              title="Destaques da loja"
-              linkHref="/categorias/europeias"
-              linkLabel="Ver catálogo →"
-            />
-            <div className="grid gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6">
-              {featuredSlice.slice(0, 12).map((p) => (
-                <ProductCard key={p.slug} product={p}
-                  sizes="(min-width: 1536px) 16vw, (min-width: 1024px) 25vw, (min-width: 640px) 50vw, 50vw" />
-              ))}
-            </div>
-          </section>
+          {/* Hidden when the admin has no featured products. */}
+          {featuredSlice.length > 0 && (
+            <section className="mt-16">
+              <SectionHeader
+                overline="Curadoria importada"
+                title="Destaques da loja"
+                linkHref="/categorias/europeias"
+                linkLabel="Ver catálogo →"
+              />
+              <div className="grid gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6">
+                {featuredSlice.slice(0, 12).map((p) => (
+                  <ProductCard key={p.slug} product={p}
+                    sizes="(min-width: 1536px) 16vw, (min-width: 1024px) 25vw, (min-width: 640px) 50vw, 50vw" />
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* ── 8. Sobre a TS ───────────────────────────────────────────── */}
           <section className="mt-16">

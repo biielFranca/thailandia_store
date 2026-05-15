@@ -234,40 +234,27 @@ export async function getBestsellerCatalogProducts(): Promise<CatalogProduct[]> 
 
 /**
  * "Drop da semana" carousel: products the admin pinned via
- * metadata.dropPosition (number). Ordered by that position. When no product
- * is pinned, falls back to the 8 most-recent active products so the section
- * never goes empty.
+ * metadata.dropPosition (number), ordered by that position. When no product
+ * is pinned, returns an empty array so the home can hide the entire section.
  */
 export async function getDropCatalogProducts(): Promise<CatalogProduct[]> {
   const supabase = await createClient();
 
-  const { data: pinned } = await supabase
-    .from("products")
-    .select(PRODUCT_SELECT)
-    .eq("active", true)
-    .not("metadata->>dropPosition", "is", null);
-
-  const pinnedRows = (pinned ?? []) as ProductRow[];
-  if (pinnedRows.length > 0) {
-    return pinnedRows
-      .slice()
-      .sort((a, b) => {
-        const aPos = Number(asMetadata(a.metadata).dropPosition ?? 999);
-        const bPos = Number(asMetadata(b.metadata).dropPosition ?? 999);
-        return aPos - bPos;
-      })
-      .map(mapProduct);
-  }
-
-  // Fallback: 8 most-recent active products (legacy behavior).
   const { data, error } = await supabase
     .from("products")
     .select(PRODUCT_SELECT)
     .eq("active", true)
-    .order("created_at", { ascending: false })
-    .limit(8);
+    .not("metadata->>dropPosition", "is", null);
   if (error) return [];
-  return ((data ?? []) as ProductRow[]).map(mapProduct);
+
+  return ((data ?? []) as ProductRow[])
+    .slice()
+    .sort((a, b) => {
+      const aPos = Number(asMetadata(a.metadata).dropPosition ?? 999);
+      const bPos = Number(asMetadata(b.metadata).dropPosition ?? 999);
+      return aPos - bPos;
+    })
+    .map(mapProduct);
 }
 
 // ─── Hero slides ──────────────────────────────────────────────────────────────

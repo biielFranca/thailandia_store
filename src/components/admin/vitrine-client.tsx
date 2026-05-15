@@ -305,7 +305,7 @@ function DropManager({ products }: { products: VitrineProduct[] }) {
           <div>
             <h2 className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Drop da semana</h2>
             <p className="mt-0.5 text-xs" style={{ color: "var(--text-tertiary)" }}>
-              Ordem dos produtos no carrossel da home. Se vazio, mostra os 8 mais novos automaticamente.
+              Ordem dos produtos no carrossel da home. Quando vazio, a seção inteira não aparece na loja.
             </p>
           </div>
           <button type="button" onClick={persistOrder} disabled={pending}
