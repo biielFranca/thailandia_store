@@ -57,6 +57,14 @@ function StockIcon() {
   );
 }
 
+function ShowcaseIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4.5 w-4.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 2l3 6 6 .9-4.5 4.4 1 6.2L12 16.8 6.5 19.5l1-6.2L3 8.9 9 8z" />
+    </svg>
+  );
+}
+
 function UsersIcon() {
   return (
     <svg viewBox="0 0 24 24" className="h-4.5 w-4.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -129,6 +137,7 @@ const navSections = [
   {
     label: "Catálogo",
     links: [
+      { label: "Vitrine", href: "/admin/vitrine", icon: <ShowcaseIcon /> },
       { label: "Produtos", href: "/admin/produtos", icon: <ProductsIcon /> },
       { label: "Categorias", href: "/admin/categorias", icon: <CategoryIcon /> },
       { label: "Estoque", href: "/admin/estoque", icon: <StockIcon /> },

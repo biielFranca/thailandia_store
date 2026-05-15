@@ -9,6 +9,7 @@
 // cardTitle, priceLabel, displayPrice) live in `products.metadata` JSON.
 
 import { createClient } from "@/lib/supabase/server";
+import { storeConfig } from "@/config/store";
 import type {
   CatalogCategory,
   CatalogProduct,
@@ -31,6 +32,10 @@ type ProductMetadata = {
   cardTitle?: string;
   priceLabel?: string;
   displayPrice?: string;
+  /** Position in the "Drop da semana" carousel. When set, the product is
+   *  pinned and ordered by this value. When absent, the product is not in
+   *  the drop. */
+  dropPosition?: number | null;
 };
 
 interface ProductRow {
@@ -225,6 +230,127 @@ export async function getBestsellerCatalogProducts(): Promise<CatalogProduct[]> 
     .order("created_at", { ascending: false });
   if (error) throw error;
   return ((data ?? []) as ProductRow[]).map(mapProduct);
+}
+
+/**
+ * "Drop da semana" carousel: products the admin pinned via
+ * metadata.dropPosition (number). Ordered by that position. When no product
+ * is pinned, falls back to the 8 most-recent active products so the section
+ * never goes empty.
+ */
+export async function getDropCatalogProducts(): Promise<CatalogProduct[]> {
+  const supabase = await createClient();
+
+  const { data: pinned } = await supabase
+    .from("products")
+    .select(PRODUCT_SELECT)
+    .eq("active", true)
+    .not("metadata->>dropPosition", "is", null);
+
+  const pinnedRows = (pinned ?? []) as ProductRow[];
+  if (pinnedRows.length > 0) {
+    return pinnedRows
+      .slice()
+      .sort((a, b) => {
+        const aPos = Number(asMetadata(a.metadata).dropPosition ?? 999);
+        const bPos = Number(asMetadata(b.metadata).dropPosition ?? 999);
+        return aPos - bPos;
+      })
+      .map(mapProduct);
+  }
+
+  // Fallback: 8 most-recent active products (legacy behavior).
+  const { data, error } = await supabase
+    .from("products")
+    .select(PRODUCT_SELECT)
+    .eq("active", true)
+    .order("created_at", { ascending: false })
+    .limit(8);
+  if (error) return [];
+  return ((data ?? []) as ProductRow[]).map(mapProduct);
+}
+
+// ─── Hero slides ──────────────────────────────────────────────────────────────
+
+export interface HeroSlideRow {
+  id: string;
+  position: number;
+  title: string;
+  description: string;
+  buttonLabel: string;
+  imageUrl: string;
+  productSlug: string | null;
+  active: boolean;
+}
+
+async function resolveStoreId(): Promise<string | null> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("stores")
+    .select("id")
+    .eq("slug", storeConfig.slug)
+    .maybeSingle();
+  return data?.id ?? null;
+}
+
+interface RawHeroSlide {
+  id: string;
+  position: number;
+  title: string;
+  description: string;
+  button_label: string;
+  image_url: string;
+  product_slug: string | null;
+  active: boolean;
+}
+
+function mapHeroSlide(r: RawHeroSlide): HeroSlideRow {
+  return {
+    id: r.id,
+    position: r.position,
+    title: r.title,
+    description: r.description,
+    buttonLabel: r.button_label,
+    imageUrl: r.image_url,
+    productSlug: r.product_slug,
+    active: r.active,
+  };
+}
+
+/**
+ * Active hero slides ordered by position. Used by the public storefront.
+ */
+export async function getHeroSlides(): Promise<HeroSlideRow[]> {
+  const supabase = await createClient();
+  const storeId = await resolveStoreId();
+  if (!storeId) return [];
+
+  const { data, error } = await supabase
+    .from("hero_slides")
+    .select("id, position, title, description, button_label, image_url, product_slug, active")
+    .eq("store_id", storeId)
+    .eq("active", true)
+    .order("position", { ascending: true });
+  if (error) return [];
+  return (data ?? []).map(mapHeroSlide);
+}
+
+/**
+ * Admin-only: returns every slide (including inactive). Used by /admin/vitrine.
+ * RLS still enforces admin gating.
+ */
+export async function getAllHeroSlides(): Promise<HeroSlideRow[]> {
+  const supabase = await createClient();
+  const storeId = await resolveStoreId();
+  if (!storeId) return [];
+
+  const { data, error } = await supabase
+    .from("hero_slides")
+    .select("id, position, title, description, button_label, image_url, product_slug, active")
+    .eq("store_id", storeId)
+    .order("position", { ascending: true });
+  if (error) return [];
+  return (data ?? []).map(mapHeroSlide);
 }
 
 export async function getCatalogProductsByCollection(collection: string): Promise<CatalogProduct[]> {

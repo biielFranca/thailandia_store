@@ -8,8 +8,10 @@ import {
   getCatalogCategories,
   getCatalogProducts,
   getCatalogProductsByCollection,
+  getDropCatalogProducts,
   getFeaturedCatalogProducts,
   getBestsellerCatalogProducts,
+  getHeroSlides,
 } from "@/core/services/catalog";
 
 // ─── Category gradient map ─────────────────────────────────────────────────────
@@ -27,64 +29,45 @@ const CATEGORY_GRADIENTS: Record<string, string> = {
   "world-cup-2026": "linear-gradient(135deg, rgba(220,160,0,0.65) 0%, rgba(180,30,30,0.45) 100%)",
 };
 
-// ─── Hero slides ──────────────────────────────────────────────────────────────
-
-const heroSlides = [
-  {
-    slug: "flamengo-home-26-27",
-    title: "CAMISAS DOS\nMAIORES CLUBES",
-    description: "Produtos importados selecionados. Estoque limitado e novidades chegando toda semana.",
-    buttonLabel: "Ver Lançamentos",
-    image: "/catalog/flamengo-home-26-27/1.jpg",
-  },
-  {
-    slug: "brazil-home-2026",
-    title: "COPA DO MUNDO\n2026",
-    description: "Coleção oficial da Copa. Camisas da Seleção, Argentina, Croácia e muito mais.",
-    buttonLabel: "Ver Seleções",
-    image: "/catalog/brazil-home-2026/1.jpg",
-  },
-  {
-    slug: "kit-flamengo-adulto-25-26",
-    title: "KIT COMPLETO\nCAMISA + SHORT",
-    description: "Conjuntos prontos, visual fechado. Estoque limitado — garanta o seu antes de acabar.",
-    buttonLabel: "Ver Kits",
-    image: "/catalog/kit-flamengo-adulto-25-26/1.jpg",
-  },
-  {
-    slug: "real-madrid-home-26-27",
-    title: "EUROPEIAS\nDE PRIMEIRA",
-    description: "Real Madrid, Barcelona, Arsenal, Bayern e mais. Qualidade importada, entrega em todo o Brasil.",
-    buttonLabel: "Ver Europeias",
-    image: "/catalog/real-madrid-home-26-27/1.jpg",
-  },
-] as const;
-
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export async function HomePage() {
   // Fetch in parallel — this is a Server Component, so all of these resolve
   // before the first byte streams to the client.
-  const [allProducts, featuredProducts, bestsellerList, worldCupAll, catalogCategories] =
-    await Promise.all([
-      getCatalogProducts(),
-      getFeaturedCatalogProducts(),
-      getBestsellerCatalogProducts(),
-      getCatalogProductsByCollection("world-cup-2026"),
-      getCatalogCategories(),
-    ]);
+  const [
+    allProducts,
+    dropList,
+    featuredProducts,
+    bestsellerList,
+    worldCupAll,
+    catalogCategories,
+    heroSlideRows,
+  ] = await Promise.all([
+    getCatalogProducts(),
+    getDropCatalogProducts(),
+    getFeaturedCatalogProducts(),
+    getBestsellerCatalogProducts(),
+    getCatalogProductsByCollection("world-cup-2026"),
+    getCatalogCategories(),
+    getHeroSlides(),
+  ]);
 
-  const dropProducts = allProducts.slice(0, 8);
+  const dropProducts = dropList.slice(0, 8);
   const featuredSlice = featuredProducts.slice(0, 8);
   const bestsellerSlice = bestsellerList.slice(0, 8);
   const worldCupSlice = worldCupAll.slice(0, 8);
 
   // Pre-resolve hero slides with product data so the client carousel never
-  // needs to look up the catalog itself.
+  // needs to look up the catalog itself. The `slug` field used by HeroCarousel
+  // points to the linked product — falls back to "/" when none.
   const productBySlug = new Map(allProducts.map((p) => [p.slug, p]));
-  const enrichedHeroSlides = heroSlides.map((s) => ({
-    ...s,
-    product: productBySlug.get(s.slug) ?? null,
+  const enrichedHeroSlides = heroSlideRows.map((s) => ({
+    slug: s.productSlug ?? "",
+    title: s.title,
+    description: s.description,
+    buttonLabel: s.buttonLabel,
+    image: s.imageUrl,
+    product: s.productSlug ? productBySlug.get(s.productSlug) ?? null : null,
   }));
 
   return (
@@ -92,9 +75,11 @@ export async function HomePage() {
       <main className="flex w-full min-w-0 flex-1 flex-col overflow-x-hidden">
 
         {/* ── 1. Hero ───────────────────────────────────────────────────── */}
-        <div className="w-full px-3 pb-4 pt-3 sm:px-6 sm:pt-5 lg:px-10 xl:px-16 2xl:px-24">
-          <HeroCarousel slides={enrichedHeroSlides} />
-        </div>
+        {enrichedHeroSlides.length > 0 && (
+          <div className="w-full px-3 pb-4 pt-3 sm:px-6 sm:pt-5 lg:px-10 xl:px-16 2xl:px-24">
+            <HeroCarousel slides={enrichedHeroSlides} />
+          </div>
+        )}
 
         {/* ── 2. Trust bar ─────────────────────────────────────────────── */}
         <div className="border-y" style={{ borderColor: "var(--border-subtle)", backgroundColor: "var(--surface-1)" }}>

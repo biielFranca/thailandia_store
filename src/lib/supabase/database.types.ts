@@ -125,6 +125,56 @@ export type Database = {
           },
         ]
       }
+      hero_slides: {
+        Row: {
+          active: boolean
+          button_label: string
+          created_at: string
+          description: string
+          id: string
+          image_url: string
+          position: number
+          product_slug: string | null
+          store_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          button_label?: string
+          created_at?: string
+          description?: string
+          id?: string
+          image_url: string
+          position?: number
+          product_slug?: string | null
+          store_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          button_label?: string
+          created_at?: string
+          description?: string
+          id?: string
+          image_url?: string
+          position?: number
+          product_slug?: string | null
+          store_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hero_slides_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_items: {
         Row: {
           created_at: string
