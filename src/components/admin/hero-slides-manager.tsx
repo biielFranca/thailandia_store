@@ -42,20 +42,23 @@ function SlideForm({
   const [description, setDescription] = useState(initial?.description ?? "");
   const [buttonLabel, setButtonLabel] = useState(initial?.buttonLabel ?? "Comprar agora");
   const [imageUrl, setImageUrl] = useState(initial?.imageUrl ?? "");
-  const [productSlug, setProductSlug] = useState<string>(initial?.productSlug ?? "");
+  const activeProducts = products.filter((p) => p.active);
+  const defaultSlug = initial?.productSlug ?? activeProducts[0]?.slug ?? "";
+  const [productSlug, setProductSlug] = useState<string>(defaultSlug);
   const [active, setActive] = useState(initial?.active ?? true);
   const [err, setErr] = useState("");
 
   function submit() {
     setErr("");
     if (!title.trim()) return setErr("Informe o título.");
+    if (!productSlug) return setErr("Selecione um produto.");
     if (!imageUrl.trim()) return setErr("Informe a URL da imagem.");
     onSubmit({
       title,
       description,
       buttonLabel,
       imageUrl,
-      productSlug: productSlug || null,
+      productSlug,
       active,
       position: initial?.position ?? position,
     });
@@ -66,7 +69,7 @@ function SlideForm({
     setProductSlug(slug);
     if (!slug) return;
     const p = products.find((x) => x.slug === slug);
-    if (p?.image && !imageUrl) setImageUrl(p.image);
+    if (p?.image) setImageUrl(p.image);
   };
 
   return (
@@ -117,13 +120,15 @@ function SlideForm({
 
         <div>
           <label className="text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: "var(--text-tertiary)" }}>
-            Produto vinculado
+            Produto vinculado <span style={{ color: "var(--danger)" }}>*</span>
           </label>
           <select value={productSlug} onChange={(e) => pickProduct(e.target.value)}
             className={`mt-1 ${inputBase}`}
-            style={{ borderColor: "var(--border-subtle)", color: "var(--text-primary)", backgroundColor: "var(--surface-1)" }}>
-            <option value="">— nenhum —</option>
-            {products.filter((p) => p.active).map((p) => (
+            style={{ borderColor: productSlug ? "var(--border-subtle)" : "rgba(239,68,68,0.5)", color: "var(--text-primary)", backgroundColor: "var(--surface-1)" }}>
+            {activeProducts.length === 0 && (
+              <option value="" disabled>Nenhum produto ativo cadastrado</option>
+            )}
+            {activeProducts.map((p) => (
               <option key={p.slug} value={p.slug}>{p.name}</option>
             ))}
           </select>

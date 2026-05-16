@@ -17,7 +17,7 @@ export interface HeroSlideInput {
   description: string;
   buttonLabel: string;
   imageUrl: string;
-  productSlug: string | null;
+  productSlug: string;
   active: boolean;
   position: number;
 }
@@ -38,6 +38,7 @@ function validateHeroInput(input: HeroSlideInput): string | null {
   if (!input.title.trim()) return "Informe o título do slide.";
   if (input.title.length > 200) return "Título muito longo (máx 200).";
   if (input.description.length > 500) return "Descrição muito longa (máx 500).";
+  if (!input.productSlug?.trim()) return "Selecione um produto para o slide.";
   if (!input.imageUrl.trim()) return "Informe a URL da imagem.";
   if (!/^(https?:\/\/|\/)/.test(input.imageUrl.trim())) {
     return "URL de imagem inválida (use http(s):// ou caminho /).";
