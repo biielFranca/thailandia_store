@@ -271,6 +271,7 @@ export type Database = {
           customer_email: string | null
           customer_name: string | null
           customer_phone: string | null
+          coupon_code: string | null
           discount: number
           id: string
           notes: string | null
@@ -285,6 +286,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          coupon_code?: string | null
           customer_email?: string | null
           customer_name?: string | null
           customer_phone?: string | null
@@ -302,6 +304,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          coupon_code?: string | null
           customer_email?: string | null
           customer_name?: string | null
           customer_phone?: string | null

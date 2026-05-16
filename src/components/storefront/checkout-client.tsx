@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useStore } from "@/contexts/store";
 import { useAuth } from "@/contexts/auth";
-import { placeOrder } from "@/app/checkout/actions";
+import { placeOrder, validateCoupon, type CouponPreview } from "@/app/checkout/actions";
 
 function formatBRL(value: number) {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -134,6 +134,11 @@ export function CheckoutClient() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [cepLoading, setCepLoading] = useState(false);
 
+  const [couponInput, setCouponInput] = useState("");
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<CouponPreview | null>(null);
+
   const [form, setForm] = useState({
     name:         user?.name ?? "",
     email:        user?.email ?? "",
@@ -149,9 +154,31 @@ export function CheckoutClient() {
     payment:      "pix" as "pix" | "card",
   });
 
-  const pixTotal    = subtotal;
-  const cardTotal   = subtotal * 1.08;
+  const discount    = appliedCoupon?.discountAmount ?? 0;
+  const pixTotal    = Math.max(0, subtotal - discount);
+  const cardTotal   = Math.max(0, subtotal - discount) * 1.08;
   const installment = cardTotal / 3;
+
+  async function handleApplyCoupon() {
+    if (!couponInput.trim()) return;
+    setCouponLoading(true);
+    setCouponError("");
+    const res = await validateCoupon(couponInput.trim(), subtotal);
+    setCouponLoading(false);
+    if (!res.ok) {
+      setCouponError(res.error);
+      setAppliedCoupon(null);
+    } else {
+      setAppliedCoupon(res.coupon);
+      setCouponError("");
+    }
+  }
+
+  function handleRemoveCoupon() {
+    setAppliedCoupon(null);
+    setCouponInput("");
+    setCouponError("");
+  }
 
   function set<K extends keyof typeof form>(key: K, value: typeof form[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -251,6 +278,7 @@ export function CheckoutClient() {
         state:        form.state,
       },
       paymentMethod: form.payment,
+      couponCode: appliedCoupon?.code,
     });
 
     if (!result.ok) {
@@ -506,13 +534,61 @@ export function CheckoutClient() {
                     ))}
                   </ul>
 
-                  <div className="mt-5 border-t pt-4" style={{ borderColor: "var(--border-subtle)" }}>
+                  {/* Cupom */}
+                  <div className="mt-4 border-t pt-4" style={{ borderColor: "var(--border-subtle)" }}>
+                    {appliedCoupon ? (
+                      <div className="flex items-center justify-between rounded-[8px] px-3 py-2"
+                        style={{ backgroundColor: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.3)" }}>
+                        <div>
+                          <p className="text-[11px] font-bold font-mono" style={{ color: "var(--success)" }}>
+                            {appliedCoupon.code}
+                          </p>
+                          <p className="text-[10px]" style={{ color: "var(--text-tertiary)" }}>
+                            −{formatBRL(appliedCoupon.discountAmount)}
+                          </p>
+                        </div>
+                        <button onClick={handleRemoveCoupon} className="text-xs" style={{ color: "var(--text-tertiary)" }}>✕</button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={couponInput}
+                          onChange={(e) => { setCouponInput(e.target.value.toUpperCase()); setCouponError(""); }}
+                          onKeyDown={(e) => e.key === "Enter" && handleApplyCoupon()}
+                          placeholder="Código do cupom"
+                          className="h-9 flex-1 rounded-[8px] border bg-transparent px-3 text-xs font-mono uppercase"
+                          style={{ borderColor: couponError ? "var(--danger)" : "var(--border-subtle)", color: "var(--text-primary)" }}
+                        />
+                        <button
+                          type="button"
+                          onClick={handleApplyCoupon}
+                          disabled={couponLoading || !couponInput.trim()}
+                          className="h-9 rounded-[8px] px-3 text-xs font-semibold transition-opacity disabled:opacity-50"
+                          style={{ backgroundColor: "var(--surface-2)", color: "var(--text-secondary)", border: "1px solid var(--border-subtle)" }}
+                        >{couponLoading ? "…" : "Aplicar"}</button>
+                      </div>
+                    )}
+                    {couponError && (
+                      <p className="mt-1.5 text-[11px]" style={{ color: "var(--danger)" }}>{couponError}</p>
+                    )}
+                  </div>
+
+                  <div className="mt-3 border-t pt-4" style={{ borderColor: "var(--border-subtle)" }}>
                     <div className="flex justify-between text-xs">
                       <span style={{ color: "var(--text-secondary)" }}>Subtotal</span>
                       <span className="price" style={{ color: "var(--text-secondary)" }}>
                         {formatBRL(subtotal)}
                       </span>
                     </div>
+                    {appliedCoupon && (
+                      <div className="mt-1.5 flex justify-between text-xs">
+                        <span style={{ color: "var(--success)" }}>Desconto ({appliedCoupon.code})</span>
+                        <span className="font-semibold" style={{ color: "var(--success)" }}>
+                          −{formatBRL(appliedCoupon.discountAmount)}
+                        </span>
+                      </div>
+                    )}
                     <div className="mt-1.5 flex items-center justify-between text-xs">
                       <span style={{ color: "var(--text-secondary)" }}>Frete</span>
                       <span className="font-semibold" style={{ color: "var(--success)" }}>Grátis</span>

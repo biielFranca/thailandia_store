@@ -14,6 +14,70 @@ import {
   type PlaceOrderInput,
 } from "@/core/validators/checkout";
 
+// ─── Coupon validation ────────────────────────────────────────────────────────
+
+export interface CouponPreview {
+  code: string;
+  type: "percentage" | "fixed" | "free_shipping";
+  discountValue: number | null;
+  discountAmount: number;   // computed against the subtotal
+  minOrderValue: number;
+}
+
+export type ValidateCouponResult =
+  | { ok: true; coupon: CouponPreview }
+  | { ok: false; error: string };
+
+/** Called client-side before submitting — returns a preview of the discount. */
+export async function validateCoupon(
+  code: string,
+  subtotal: number,
+): Promise<ValidateCouponResult> {
+  if (!code.trim()) return { ok: false, error: "Informe o código do cupom." };
+
+  const supabase = await createClient();
+  const storeId  = await resolveStoreId();
+  if (!storeId) return { ok: false, error: "Loja não configurada." };
+
+  const { data: coupon } = await supabase
+    .from("coupons")
+    .select("id, code, type, discount_value, min_order_value, max_uses, uses_count, active, expires_at")
+    .eq("store_id", storeId)
+    .eq("code", code.trim().toUpperCase())
+    .maybeSingle();
+
+  if (!coupon) return { ok: false, error: "Cupom inválido." };
+  if (!coupon.active) return { ok: false, error: "Este cupom está inativo." };
+  if (coupon.expires_at && new Date(coupon.expires_at) < new Date())
+    return { ok: false, error: "Este cupom está expirado." };
+  if (coupon.max_uses !== null && coupon.uses_count >= coupon.max_uses)
+    return { ok: false, error: "Este cupom atingiu o limite de usos." };
+  if (subtotal < Number(coupon.min_order_value))
+    return {
+      ok: false,
+      error: `Pedido mínimo de ${Number(coupon.min_order_value).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} para este cupom.`,
+    };
+
+  let discountAmount = 0;
+  const type = coupon.type as "percentage" | "fixed" | "free_shipping";
+  if (type === "percentage" && coupon.discount_value) {
+    discountAmount = round2(subtotal * (Number(coupon.discount_value) / 100));
+  } else if (type === "fixed" && coupon.discount_value) {
+    discountAmount = Math.min(round2(Number(coupon.discount_value)), subtotal);
+  }
+
+  return {
+    ok: true,
+    coupon: {
+      code: coupon.code,
+      type,
+      discountValue: coupon.discount_value !== null ? Number(coupon.discount_value) : null,
+      discountAmount,
+      minOrderValue: Number(coupon.min_order_value),
+    },
+  };
+}
+
 interface ProductLookup {
   id: string;
   slug: string;
@@ -145,8 +209,21 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
   }
 
   const subtotal = round2(resolved.reduce((sum, r) => sum + r.unitPrice * r.quantity, 0));
-  const total = applyPaymentTotal(subtotal, input.paymentMethod);
   const shippingCost = 0;
+
+  // ── Coupon discount ───────────────────────────────────────────────────────
+  let discountAmount = 0;
+  let appliedCouponCode: string | null = null;
+
+  if (input.couponCode?.trim()) {
+    const couponResult = await validateCoupon(input.couponCode.trim(), subtotal);
+    if (!couponResult.ok) return { ok: false, error: couponResult.error };
+    discountAmount = couponResult.coupon.discountAmount;
+    appliedCouponCode = couponResult.coupon.code;
+  }
+
+  const discountedSubtotal = round2(subtotal - discountAmount);
+  const total = applyPaymentTotal(discountedSubtotal, input.paymentMethod);
 
   const shippingAddress = {
     cep: input.address.cep.replace(/\D/g, ""),
@@ -179,7 +256,7 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
     {
       p_store_id:         storeId,
       p_profile_id:       profileId ?? "",
-      p_subtotal:         subtotal,
+      p_subtotal:         discountedSubtotal,
       p_shipping_cost:    shippingCost,
       p_total:            total,
       p_shipping_address: shippingAddress as unknown as Json,
@@ -199,6 +276,28 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
   }
 
   const order = { id: (rpcResult as { order_id: string }).order_id };
+
+  // ── Persist coupon usage ──────────────────────────────────────────────────
+  if (appliedCouponCode && discountAmount > 0) {
+    // Save discount on the order
+    await service
+      .from("orders")
+      .update({ coupon_code: appliedCouponCode, discount: discountAmount })
+      .eq("id", order.id);
+    // Increment uses_count (read-then-write; acceptable given low concurrency)
+    const { data: cp } = await service
+      .from("coupons")
+      .select("id, uses_count")
+      .eq("code", appliedCouponCode)
+      .eq("store_id", storeId)
+      .maybeSingle();
+    if (cp) {
+      await service
+        .from("coupons")
+        .update({ uses_count: cp.uses_count + 1 })
+        .eq("id", cp.id);
+    }
+  }
 
   // ── PIX: create payment immediately and return QR code data ─────────────────
   if (input.paymentMethod === "pix") {

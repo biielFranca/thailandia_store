@@ -32,6 +32,7 @@ export interface PlaceOrderInput {
   address: CheckoutAddressInput;
   paymentMethod: PaymentMethod;
   notes?: string;
+  couponCode?: string;
 }
 
 const BR_STATES = new Set([
