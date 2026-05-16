@@ -18,7 +18,7 @@ function WhatsAppIcon() {
 }
 
 export function StoreFooter() {
-  const waLink = `https://wa.me/${brand.whatsappNumber}?text=${encodeURIComponent(brand.whatsappDefaultMessage)}`;
+  const waLink = `https://wa.me/55${brand.whatsappNumber}?text=${encodeURIComponent(brand.whatsappDefaultMessage)}`;
 
   return (
     <footer className="border-t" style={{ borderColor: "var(--border-subtle)", backgroundColor: "var(--surface-1)" }}>
