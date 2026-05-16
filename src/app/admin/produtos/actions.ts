@@ -223,8 +223,6 @@ export async function setProductFeatured(id: string, featured: boolean): Promise
 export async function deleteProduct(id: string): Promise<ActionResult> {
   await requireAdmin();
   const supabase = await createClient();
-  // Block deletion if the product is referenced by any order_items so we don't
-  // break order history. Soft-delete (active=false) is the recommended path.
   const { count } = await supabase
     .from("order_items")
     .select("id", { count: "exact", head: true })
@@ -236,4 +234,26 @@ export async function deleteProduct(id: string): Promise<ActionResult> {
   if (error) return { ok: false, error: "Falha ao excluir." };
   revalidateCatalog();
   return { ok: true };
+}
+
+export async function deleteProductsBulk(
+  ids: string[]
+): Promise<ActionResult<{ skipped: string[] }>> {
+  await requireAdmin();
+  if (!Array.isArray(ids) || ids.length === 0) return { ok: false, error: "Nenhum produto selecionado." };
+
+  const supabase = await createClient();
+  const skipped: string[] = [];
+
+  for (const id of ids) {
+    const { count } = await supabase
+      .from("order_items")
+      .select("id", { count: "exact", head: true })
+      .eq("product_id", id);
+    if ((count ?? 0) > 0) { skipped.push(id); continue; }
+    await supabase.from("products").delete().eq("id", id);
+  }
+
+  revalidateCatalog();
+  return { ok: true, data: { skipped } };
 }

@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
-import { setProductActive, setProductFeatured } from "@/app/admin/produtos/actions";
+import { useRouter } from "next/navigation";
+import { setProductActive, setProductFeatured, deleteProduct, deleteProductsBulk } from "@/app/admin/produtos/actions";
 
 // ─── Shared types (re-exported for the server page) ──────────────────────────
 
@@ -52,6 +53,17 @@ function PlusIcon() {
   );
 }
 
+function TrashIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <polyline points="3 6 5 6 21 6" />
+      <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+      <path d="M10 11v6M14 11v6" />
+      <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
+    </svg>
+  );
+}
+
 function StatusBadge({ status }: { status: string | null }) {
   const styles: Record<string, { bg: string; color: string }> = {
     "Novo":             { bg: "rgba(30,107,255,0.15)", color: "var(--cta)" },
@@ -73,15 +85,78 @@ function formatBRL(v: number) {
   return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+// ─── Delete confirmation modal ────────────────────────────────────────────────
+
+function DeleteModal({
+  names,
+  onConfirm,
+  onCancel,
+  loading,
+}: {
+  names: string[];
+  onConfirm: () => void;
+  onCancel: () => void;
+  loading: boolean;
+}) {
+  const isBulk = names.length > 1;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ backgroundColor: "rgba(0,0,0,0.7)" }}
+      onClick={(e) => { if (e.target === e.currentTarget) onCancel(); }}>
+      <div className="w-full max-w-sm rounded-[12px] border p-6"
+        style={{ backgroundColor: "var(--surface-1)", borderColor: "var(--border-subtle)" }}>
+        <h2 className="font-title text-xl text-white">
+          {isBulk ? `EXCLUIR ${names.length} PRODUTOS` : "EXCLUIR PRODUTO"}
+        </h2>
+        <p className="mt-3 text-sm" style={{ color: "var(--text-secondary)" }}>
+          {isBulk
+            ? `Tem certeza que deseja excluir ${names.length} produtos? Esta ação não pode ser desfeita.`
+            : <>Tem certeza que deseja excluir <strong style={{ color: "var(--text-primary)" }}>{names[0]}</strong>? Esta ação não pode ser desfeita.</>}
+        </p>
+        {isBulk && (
+          <ul className="mt-3 max-h-32 overflow-y-auto rounded-[8px] border px-3 py-2"
+            style={{ borderColor: "var(--border-subtle)" }}>
+            {names.map((n, i) => (
+              <li key={i} className="truncate py-0.5 text-xs" style={{ color: "var(--text-tertiary)" }}>
+                {n}
+              </li>
+            ))}
+          </ul>
+        )}
+        <div className="mt-5 flex gap-3">
+          <button type="button" onClick={onCancel} disabled={loading}
+            className="flex-1 rounded-[8px] border py-2 text-sm font-semibold transition-opacity hover:opacity-80 disabled:opacity-50"
+            style={{ borderColor: "var(--border-subtle)", color: "var(--text-primary)" }}>
+            Cancelar
+          </button>
+          <button type="button" onClick={onConfirm} disabled={loading}
+            className="flex-1 rounded-[8px] py-2 text-sm font-semibold transition-opacity hover:opacity-90 disabled:opacity-50"
+            style={{ backgroundColor: "var(--danger)", color: "#fff" }}>
+            {loading ? "Excluindo..." : "Excluir"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function ProductsListClient({ products, categories }: Props) {
+  const router = useRouter();
   const [query, setQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [activeFilter, setActiveFilter] = useState<"all" | "active" | "inactive">("all");
   const [sort, setSort] = useState("name-asc");
   const [error, setError] = useState("");
   const [pending, startTransition] = useTransition();
+
+  // Selection state
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  // Delete modal: holds the ids+names to be deleted (single or bulk)
+  const [deleteModal, setDeleteModal] = useState<{ ids: string[]; names: string[] } | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const filtered = useMemo(() => {
     let list = [...products];
@@ -106,6 +181,25 @@ export function ProductsListClient({ products, categories }: Props) {
     return list;
   }, [products, query, categoryFilter, activeFilter, sort]);
 
+  const allVisibleSelected = filtered.length > 0 && filtered.every((p) => selectedIds.has(p.id));
+  const someSelected = selectedIds.size > 0;
+
+  function toggleSelectAll() {
+    if (allVisibleSelected) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filtered.map((p) => p.id)));
+    }
+  }
+
+  function toggleSelect(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
+
   function toggleActive(p: AdminProductRow) {
     setError("");
     startTransition(async () => {
@@ -120,6 +214,38 @@ export function ProductsListClient({ products, categories }: Props) {
       const r = await setProductFeatured(p.id, !p.featured);
       if (!r.ok) setError(r.error);
     });
+  }
+
+  function openDeleteSingle(p: AdminProductRow) {
+    setDeleteModal({ ids: [p.id], names: [p.name] });
+  }
+
+  function openDeleteBulk() {
+    const selected = filtered.filter((p) => selectedIds.has(p.id));
+    setDeleteModal({ ids: selected.map((p) => p.id), names: selected.map((p) => p.name) });
+  }
+
+  async function confirmDelete() {
+    if (!deleteModal) return;
+    setDeleteLoading(true);
+    setError("");
+
+    if (deleteModal.ids.length === 1) {
+      const r = await deleteProduct(deleteModal.ids[0]);
+      if (!r.ok) setError(r.error);
+    } else {
+      const r = await deleteProductsBulk(deleteModal.ids);
+      if (!r.ok) {
+        setError(r.error);
+      } else if (r.data && r.data.skipped.length > 0) {
+        setError(`${r.data.skipped.length} produto(s) com pedidos vinculados não foram excluídos.`);
+      }
+    }
+
+    setDeleteLoading(false);
+    setDeleteModal(null);
+    setSelectedIds(new Set());
+    router.refresh();
   }
 
   return (
@@ -186,6 +312,29 @@ export function ProductsListClient({ products, categories }: Props) {
         </select>
       </div>
 
+      {/* Bulk action bar */}
+      {someSelected && (
+        <div className="flex items-center justify-between rounded-[8px] border px-4 py-2.5"
+          style={{ borderColor: "rgba(239,68,68,0.35)", backgroundColor: "rgba(239,68,68,0.06)" }}>
+          <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+            {selectedIds.size} produto{selectedIds.size !== 1 ? "s" : ""} selecionado{selectedIds.size !== 1 ? "s" : ""}
+          </span>
+          <div className="flex items-center gap-3">
+            <button type="button" onClick={() => setSelectedIds(new Set())}
+              className="text-xs transition-opacity hover:opacity-70"
+              style={{ color: "var(--text-tertiary)" }}>
+              Limpar seleção
+            </button>
+            <button type="button" onClick={openDeleteBulk}
+              className="inline-flex items-center gap-1.5 rounded-[6px] px-3 py-1.5 text-xs font-semibold transition-opacity hover:opacity-90"
+              style={{ backgroundColor: "var(--danger)", color: "#fff" }}>
+              <TrashIcon />
+              Excluir selecionados ({selectedIds.size})
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Table */}
       <div className="overflow-hidden rounded-[12px] border" style={{ borderColor: "var(--border-subtle)" }}>
         <div className="overflow-x-auto">
@@ -193,6 +342,13 @@ export function ProductsListClient({ products, categories }: Props) {
             <thead>
               <tr className="border-b text-[10px] font-semibold uppercase tracking-[0.14em]"
                 style={{ borderColor: "var(--border-subtle)", backgroundColor: "var(--surface-1)", color: "var(--text-tertiary)" }}>
+                <th className="px-4 py-3 text-center w-10">
+                  <input type="checkbox"
+                    checked={allVisibleSelected}
+                    onChange={toggleSelectAll}
+                    className="h-3.5 w-3.5 cursor-pointer rounded accent-blue-500"
+                    title="Selecionar todos" />
+                </th>
                 <th className="px-4 py-3 text-left">Produto</th>
                 <th className="hidden px-4 py-3 text-left lg:table-cell">Categoria</th>
                 <th className="hidden px-4 py-3 text-center sm:table-cell">Estoque</th>
@@ -205,14 +361,24 @@ export function ProductsListClient({ products, categories }: Props) {
             </thead>
             <tbody>
               {filtered.length === 0 ? (
-                <tr><td colSpan={8} className="px-4 py-12 text-center text-sm" style={{ color: "var(--text-tertiary)" }}>
+                <tr><td colSpan={9} className="px-4 py-12 text-center text-sm" style={{ color: "var(--text-tertiary)" }}>
                   Nenhum produto encontrado
                 </td></tr>
               ) : (
                 filtered.map((p) => (
                   <tr key={p.id}
                     className="border-b transition-colors hover:[background-color:var(--surface-1)]"
-                    style={{ borderColor: "var(--border-subtle)", opacity: p.active ? 1 : 0.5 }}>
+                    style={{
+                      borderColor: "var(--border-subtle)",
+                      opacity: p.active ? 1 : 0.5,
+                      backgroundColor: selectedIds.has(p.id) ? "rgba(30,107,255,0.05)" : undefined,
+                    }}>
+                    <td className="px-4 py-3 text-center">
+                      <input type="checkbox"
+                        checked={selectedIds.has(p.id)}
+                        onChange={() => toggleSelect(p.id)}
+                        className="h-3.5 w-3.5 cursor-pointer rounded accent-blue-500" />
+                    </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-[6px]" style={{ backgroundColor: "var(--surface-2)" }}>
@@ -255,6 +421,12 @@ export function ProductsListClient({ products, categories }: Props) {
                         <Link href={`/admin/produtos/${p.slug}`}
                           className="rounded-[6px] border px-2.5 py-1 text-[11px] font-medium transition-colors hover:[border-color:var(--border-strong)]"
                           style={{ borderColor: "var(--border-subtle)", color: "var(--text-primary)" }}>Editar</Link>
+                        <button type="button" onClick={() => openDeleteSingle(p)}
+                          className="inline-flex items-center gap-1 rounded-[6px] border px-2.5 py-1 text-[11px] font-medium transition-colors hover:[border-color:rgba(239,68,68,0.6)]"
+                          style={{ borderColor: "rgba(239,68,68,0.3)", color: "var(--danger)" }}>
+                          <TrashIcon />
+                          Excluir
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -264,6 +436,16 @@ export function ProductsListClient({ products, categories }: Props) {
           </table>
         </div>
       </div>
+
+      {/* Delete modal */}
+      {deleteModal && (
+        <DeleteModal
+          names={deleteModal.names}
+          onConfirm={confirmDelete}
+          onCancel={() => setDeleteModal(null)}
+          loading={deleteLoading}
+        />
+      )}
     </div>
   );
 }
