@@ -41,9 +41,10 @@ function SlideForm({
   const [title, setTitle] = useState(initial?.title ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
   const [buttonLabel, setButtonLabel] = useState(initial?.buttonLabel ?? "Comprar agora");
-  const [imageUrl, setImageUrl] = useState(initial?.imageUrl ?? "");
   const activeProducts = products.filter((p) => p.active);
   const defaultSlug = initial?.productSlug ?? activeProducts[0]?.slug ?? "";
+  const defaultImage = initial?.imageUrl || activeProducts.find((p) => p.slug === defaultSlug)?.image || "";
+  const [imageUrl, setImageUrl] = useState(defaultImage);
   const [productSlug, setProductSlug] = useState<string>(defaultSlug);
   const [active, setActive] = useState(initial?.active ?? true);
   const [err, setErr] = useState("");
