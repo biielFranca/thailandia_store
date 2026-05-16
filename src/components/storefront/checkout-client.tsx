@@ -54,10 +54,26 @@ function maskCpf(v: string) {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+function validateCpf(cpf: string): boolean {
+  const d = cpf.replace(/\D/g, "");
+  if (d.length !== 11 || /^(\d)\1{10}$/.test(d)) return false;
+  let sum = 0;
+  for (let i = 0; i < 9; i++) sum += parseInt(d[i]) * (10 - i);
+  let r = (sum * 10) % 11;
+  if (r === 10 || r === 11) r = 0;
+  if (r !== parseInt(d[9])) return false;
+  sum = 0;
+  for (let i = 0; i < 10; i++) sum += parseInt(d[i]) * (11 - i);
+  r = (sum * 10) % 11;
+  if (r === 10 || r === 11) r = 0;
+  return r === parseInt(d[10]);
+}
+
 function validateField(key: string, value: string): string {
   switch (key) {
     case "name":   return value.trim().length < 2 ? "Informe seu nome completo." : "";
     case "email":  return !EMAIL_RE.test(value.trim()) ? "E-mail inválido." : "";
+    case "cpf":    return !validateCpf(value) ? "CPF inválido." : "";
     case "cep":    return !/^\d{5}-\d{3}$/.test(value) ? "CEP inválido." : "";
     case "street": return value.trim().length < 2 ? "Informe o logradouro." : "";
     case "number": return !value.trim() ? "Informe o número." : "";
@@ -258,7 +274,7 @@ export function CheckoutClient({ savedData }: { savedData?: CheckoutSavedData | 
     if (submitting) return;
 
     // Validate all required fields before hitting the server
-    const required = ["name", "email", "cep", "street", "number", "city", "state"] as const;
+    const required = ["name", "email", "cpf", "cep", "street", "number", "city", "state"] as const;
     const newErrors: Record<string, string> = {};
     let hasError = false;
     for (const key of required) {
@@ -281,7 +297,7 @@ export function CheckoutClient({ savedData }: { savedData?: CheckoutSavedData | 
         name:  form.name,
         email: form.email,
         phone: form.phone || undefined,
-        cpf:   form.cpf   || undefined,
+        cpf:   form.cpf,
       },
       address: {
         cep:          form.cep,
@@ -375,12 +391,15 @@ export function CheckoutClient({ savedData }: { savedData?: CheckoutSavedData | 
                     placeholder="(11) 99999-9999" value={form.phone}
                     onChange={(e) => set("phone", maskPhone(e.target.value))} />
                 </Field>
-                <Field label="CPF">
-                  <input type="text" inputMode="numeric" className={inp(false)}
-                    style={{ color: "var(--text-primary)" }}
-                    placeholder="000.000.000-00" value={form.cpf}
-                    onChange={(e) => set("cpf", maskCpf(e.target.value))} />
-                </Field>
+                <div data-field-error={fieldErrors.cpf ? true : undefined}>
+                  <Field label="CPF" required error={fieldErrors.cpf}>
+                    <input type="text" inputMode="numeric" className={inp(!!fieldErrors.cpf)}
+                      style={{ color: "var(--text-primary)" }}
+                      placeholder="000.000.000-00" value={form.cpf}
+                      onChange={(e) => { set("cpf", maskCpf(e.target.value)); setErr("cpf", ""); }}
+                      onBlur={() => handleBlur("cpf")} />
+                  </Field>
+                </div>
               </div>
             </Section>
 
