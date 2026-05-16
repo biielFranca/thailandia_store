@@ -31,6 +31,7 @@ export interface PlaceOrderInput {
   customer: CheckoutCustomerInput;
   address: CheckoutAddressInput;
   paymentMethod: PaymentMethod;
+  installments?: number;
   notes?: string;
   couponCode?: string;
 }
@@ -89,7 +90,9 @@ export function round2(n: number): number {
   return Math.round(n * 100) / 100;
 }
 
-/** Pricing rules: PIX = subtotal; cartão = subtotal + 8%. Recalculated on the server. */
-export function applyPaymentTotal(subtotal: number, method: PaymentMethod): number {
-  return method === "pix" ? round2(subtotal) : round2(subtotal * 1.08);
+/** PIX and card both use the subtotal as transaction_amount sent to Mercado Pago.
+ *  Interest for installments is handled by MP based on the merchant's configured plan —
+ *  the merchant always receives `subtotal` minus MDR, regardless of installments chosen. */
+export function applyPaymentTotal(subtotal: number, _method: PaymentMethod): number {
+  return round2(subtotal);
 }

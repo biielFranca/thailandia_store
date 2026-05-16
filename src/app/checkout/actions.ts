@@ -244,6 +244,10 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
     product_snapshot: r.snapshot,
   }));
 
+  const installments = (input.paymentMethod === "card" && input.installments && input.installments > 1)
+    ? input.installments
+    : 1;
+
   // Use the service client so the SECURITY DEFINER RPC (execute revoked from
   // anon/authenticated) can be reached from a trusted server context. The
   // RPC runs in a single transaction: SELECT FOR UPDATE → stock check →
@@ -357,6 +361,10 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
   }
 
   // ── Card: order created; payment happens on the next page via Brick ──────────
+  // Store installments in order notes so the payment page can pre-configure the Brick.
+  if (installments > 1) {
+    await service.from("orders").update({ notes: `installments:${installments}` }).eq("id", order.id);
+  }
   void sendOrderReceivedEmail(order.id, "card");
   return { ok: true, orderId: order.id, total, paymentMethod: "card" };
 }

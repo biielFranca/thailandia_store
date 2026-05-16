@@ -27,6 +27,39 @@ function formatBRL(value: number) {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+// ─── Installment simulation ───────────────────────────────────────────────────
+// Mirrors a typical Mercado Pago installment table (3x sem juros by default).
+// TODO: replace with real MP API call once credentials are available:
+//   GET /v1/payment_methods/installments?payment_method_id=visa&amount={total}&issuer_id={issuer}
+// Then map the returned `installments` array to this same shape.
+
+interface InstallmentOption {
+  n: number;
+  monthlyRate: number;
+  installmentValue: number;
+  total: number;
+}
+
+// Approximate MP rates — 1-3x sem juros, 4-6x ~2.49%/mês, 7-12x ~2.99%/mês
+const MP_RATES: Record<number, number> = {
+  1: 0, 2: 0, 3: 0,
+  4: 0.0249, 5: 0.0249, 6: 0.0249,
+  7: 0.0299, 8: 0.0299, 9: 0.0299, 10: 0.0299, 11: 0.0299, 12: 0.0299,
+};
+
+function simulateInstallments(total: number): InstallmentOption[] {
+  return Array.from({ length: 12 }, (_, i) => {
+    const n = i + 1;
+    const r = MP_RATES[n];
+    if (r === 0) {
+      return { n, monthlyRate: 0, installmentValue: total / n, total };
+    }
+    const factor = Math.pow(1 + r, n);
+    const installmentValue = (total * r * factor) / (factor - 1);
+    return { n, monthlyRate: r, installmentValue, total: Math.round(installmentValue * n * 100) / 100 };
+  });
+}
+
 // ─── Input masks ──────────────────────────────────────────────────────────────
 
 function maskCep(v: string) {
@@ -169,6 +202,7 @@ export function CheckoutClient({ savedData }: { savedData?: CheckoutSavedData | 
   const [couponLoading, setCouponLoading] = useState(false);
   const [couponError, setCouponError] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<CouponPreview | null>(null);
+  const [selectedInstallments, setSelectedInstallments] = useState(1);
 
   const [form, setForm] = useState({
     name:         savedData?.name ?? user?.name ?? "",
@@ -185,10 +219,12 @@ export function CheckoutClient({ savedData }: { savedData?: CheckoutSavedData | 
     payment:      "pix" as "pix" | "card",
   });
 
-  const discount    = appliedCoupon?.discountAmount ?? 0;
-  const pixTotal    = Math.max(0, subtotal - discount);
-  const cardTotal   = Math.max(0, subtotal - discount) * 1.08;
-  const installment = cardTotal / 3;
+  const discount           = appliedCoupon?.discountAmount ?? 0;
+  const baseTotal          = Math.max(0, subtotal - discount);
+  const pixTotal           = baseTotal;
+  const installmentOptions = simulateInstallments(baseTotal);
+  const chosen             = installmentOptions[selectedInstallments - 1] ?? installmentOptions[0];
+  const cardTotal          = chosen.total;
 
   async function handleApplyCoupon() {
     if (!couponInput.trim()) return;
@@ -309,6 +345,7 @@ export function CheckoutClient({ savedData }: { savedData?: CheckoutSavedData | 
         state:        form.state,
       },
       paymentMethod: form.payment,
+      installments: form.payment === "card" ? selectedInstallments : undefined,
       couponCode: appliedCoupon?.code,
     });
 
@@ -523,23 +560,52 @@ export function CheckoutClient({ savedData }: { savedData?: CheckoutSavedData | 
                   </div>
                 </label>
 
-                <label className="flex cursor-pointer items-start gap-3 rounded-[10px] border p-4 transition-colors"
+                <div className="flex flex-col rounded-[10px] border transition-colors"
                   style={{
                     borderColor: form.payment === "card" ? "var(--cta)" : "var(--border-subtle)",
                     backgroundColor: form.payment === "card" ? "rgba(30,107,255,0.06)" : "transparent",
                   }}>
-                  <input type="radio" name="payment" value="card" className="mt-0.5"
-                    checked={form.payment === "card"} onChange={() => set("payment", "card")} />
-                  <div>
-                    <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Cartão de crédito</p>
-                    <p className="mt-1 text-sm font-bold" style={{ color: "var(--text-primary)" }}>
+                  <label className="flex cursor-pointer items-start gap-3 p-4">
+                    <input type="radio" name="payment" value="card" className="mt-0.5"
+                      checked={form.payment === "card"} onChange={() => set("payment", "card")} />
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Cartão de crédito</p>
+                      <p className="mt-0.5 text-xs" style={{ color: "var(--text-tertiary)" }}>
+                        {chosen.monthlyRate === 0
+                          ? `${selectedInstallments}× de ${formatBRL(chosen.installmentValue)} sem juros`
+                          : `${selectedInstallments}× de ${formatBRL(chosen.installmentValue)} · total ${formatBRL(chosen.total)}`}
+                      </p>
+                    </div>
+                    <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>
                       {formatBRL(cardTotal)}
                     </p>
-                    <p className="text-xs" style={{ color: "var(--text-tertiary)" }}>
-                      ou 3× de {formatBRL(installment)} sem juros
-                    </p>
-                  </div>
-                </label>
+                  </label>
+
+                  {form.payment === "card" && (
+                    <div className="border-t px-4 pb-4 pt-3" style={{ borderColor: "rgba(30,107,255,0.2)" }}>
+                      <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.1em]"
+                        style={{ color: "var(--text-tertiary)" }}>
+                        Parcelas
+                      </label>
+                      <select
+                        value={selectedInstallments}
+                        onChange={(e) => setSelectedInstallments(Number(e.target.value))}
+                        className="h-10 w-full rounded-[8px] border bg-transparent px-3 text-sm appearance-none outline-none focus:[border-color:var(--cta)]"
+                        style={{ borderColor: "var(--border-subtle)", color: "var(--text-primary)", backgroundColor: "var(--surface-1)" }}
+                      >
+                        {installmentOptions.map((opt) => (
+                          <option key={opt.n} value={opt.n}>
+                            {opt.n === 1
+                              ? `1× de ${formatBRL(opt.installmentValue)} à vista`
+                              : opt.monthlyRate === 0
+                              ? `${opt.n}× de ${formatBRL(opt.installmentValue)} sem juros`
+                              : `${opt.n}× de ${formatBRL(opt.installmentValue)} (total ${formatBRL(opt.total)}) — ${(opt.monthlyRate * 100).toFixed(2)}% a.m.`}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
               </div>
             </Section>
           </div>
@@ -645,7 +711,11 @@ export function CheckoutClient({ savedData }: { savedData?: CheckoutSavedData | 
                     </div>
                     {form.payment === "card" && (
                       <p className="price mt-0.5 text-right text-xs" style={{ color: "var(--text-tertiary)" }}>
-                        3× de {formatBRL(installment)} sem juros
+                        {selectedInstallments === 1
+                          ? "à vista"
+                          : chosen.monthlyRate === 0
+                          ? `${selectedInstallments}× de ${formatBRL(chosen.installmentValue)} sem juros`
+                          : `${selectedInstallments}× de ${formatBRL(chosen.installmentValue)} com juros`}
                       </p>
                     )}
                   </div>
