@@ -126,11 +126,25 @@ export function ProductEditorClient({ product, categories }: Props) {
   const [uploading, setUploading] = useState(false);
   const [pending, startTransition] = useTransition();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Tracks whether the admin manually typed in the slug field; if so, stop auto-filling.
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState(!isNew);
 
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
     setError("");
     setSuccess("");
+  }
+
+  function handleNameChange(value: string) {
+    set("name", value);
+    if (!slugManuallyEdited) {
+      set("slug", slugify(value));
+    }
+  }
+
+  function handleSlugChange(value: string) {
+    setSlugManuallyEdited(true);
+    set("slug", value.toLowerCase().replace(/[^a-z0-9-]/g, ""));
   }
 
   function toggleSize(size: string) {
@@ -305,13 +319,13 @@ export function ProductEditorClient({ product, categories }: Props) {
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Nome completo">
                   <input type="text" required className={inputCls} style={inputStyle}
-                    value={form.name} onChange={(e) => set("name", e.target.value)} />
+                    value={form.name} onChange={(e) => handleNameChange(e.target.value)} />
                 </Field>
-                <Field label={`Slug (URL)${isNew ? " — auto" : ""}`}>
+                <Field label={`Slug (URL)${isNew && !slugManuallyEdited ? " — auto" : ""}`}>
                   <input type="text" required className={inputCls} style={inputStyle}
-                    placeholder={isNew ? "preenchido automaticamente do nome" : ""}
+                    placeholder={isNew && !slugManuallyEdited ? "gerado do nome automaticamente" : ""}
                     value={form.slug}
-                    onChange={(e) => set("slug", e.target.value.toLowerCase())} />
+                    onChange={(e) => handleSlugChange(e.target.value)} />
                 </Field>
                 <Field label="Nome curto">
                   <input type="text" className={inputCls} style={inputStyle}
