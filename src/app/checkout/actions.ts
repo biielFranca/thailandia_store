@@ -178,15 +178,15 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
     "create_order_atomic",
     {
       p_store_id:         storeId,
-      p_profile_id:       profileId,
+      p_profile_id:       profileId ?? "",
       p_subtotal:         subtotal,
       p_shipping_cost:    shippingCost,
       p_total:            total,
       p_shipping_address: shippingAddress as unknown as Json,
       p_customer_name:    input.customer.name.trim(),
       p_customer_email:   input.customer.email.trim().toLowerCase(),
-      p_customer_phone:   input.customer.phone?.trim() || null,
-      p_notes:            input.notes?.trim() || null,
+      p_customer_phone:   input.customer.phone?.trim() ?? "",
+      p_notes:            input.notes?.trim() ?? "",
       p_items:            itemsPayload as unknown as Json,
     },
   );

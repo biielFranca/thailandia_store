@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -149,7 +150,7 @@ function PriceBlock({ priceValue }: { priceValue: number }) {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export function ProductPageClient({ product }: { product: CatalogProduct }) {
+export function ProductPageClient({ product, wishlistSlot }: { product: CatalogProduct; wishlistSlot?: React.ReactNode }) {
   const { addItem, openCart } = useStore();
   const [selectedSize, setSelectedSize] = useState<string>(product.sizes[0] ?? "");
   const [buying, setBuying] = useState(false);
@@ -314,13 +315,16 @@ export function ProductPageClient({ product }: { product: CatalogProduct }) {
               {isOutOfStock ? "Esgotado" : buying ? "Adicionado ao carrinho ✓" : "Comprar agora"}
             </button>
 
-            {/* Secondary — Adicionar ao carrinho */}
-            <button type="button" onClick={handleAddToCart} disabled={added || isOutOfStock}
-              className="flex items-center justify-center gap-2 rounded-[8px] border py-3 text-sm font-medium transition-colors duration-200 hover:[border-color:var(--border-strong)] disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ borderColor: "var(--border-subtle)", color: "var(--text-primary)" }}>
-              <CartIcon />
-              {added ? "Adicionado ✓" : "Adicionar ao carrinho"}
-            </button>
+            {/* Secondary row — cart + wishlist */}
+            <div className="flex gap-2">
+              <button type="button" onClick={handleAddToCart} disabled={added || isOutOfStock}
+                className="flex flex-1 items-center justify-center gap-2 rounded-[8px] border py-3 text-sm font-medium transition-colors duration-200 hover:[border-color:var(--border-strong)] disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ borderColor: "var(--border-subtle)", color: "var(--text-primary)" }}>
+                <CartIcon />
+                {added ? "Adicionado ✓" : "Adicionar ao carrinho"}
+              </button>
+              {wishlistSlot}
+            </div>
           </div>
 
           {/* Detail chips */}

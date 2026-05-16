@@ -89,6 +89,7 @@ function mapProduct(row: ProductRow): CatalogProduct {
   const priceLabel = meta.priceLabel ?? formatBRL(priceValue);
 
   return {
+    id: row.id,
     slug: row.slug,
     name: row.name,
     shortName: meta.shortName ?? row.name,

@@ -259,6 +259,16 @@ export function StoreHeader() {
                         <p className="text-[10px] truncate" style={{ color: "var(--text-tertiary)" }}>{user.email}</p>
                       </div>
                       <div className="p-1.5">
+                        <Link href="/conta" onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-2 rounded-[6px] px-3 py-2 text-xs font-medium transition-colors hover:[background-color:var(--surface-2)]"
+                          style={{ color: "var(--text-primary)" }}>
+                          Minha conta
+                        </Link>
+                        <Link href="/conta/pedidos" onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-2 rounded-[6px] px-3 py-2 text-xs font-medium transition-colors hover:[background-color:var(--surface-2)]"
+                          style={{ color: "var(--text-secondary)" }}>
+                          Meus pedidos
+                        </Link>
                         {isAdmin && (
                           <Link href="/admin" onClick={() => setUserMenuOpen(false)}
                             className="flex items-center gap-2 rounded-[6px] px-3 py-2 text-xs font-semibold transition-colors hover:[background-color:var(--surface-2)]"
@@ -354,11 +364,11 @@ export function StoreHeader() {
               <SearchIcon /> Buscar
             </button>
             {user ? (
-              <button type="button" onClick={() => { setMobileOpen(false); void handleLogout(); }}
+              <Link href="/conta" onClick={() => setMobileOpen(false)}
                 className="flex flex-1 items-center justify-center gap-2 rounded-[8px] border py-2.5 text-sm font-semibold"
                 style={{ borderColor: "var(--border-subtle)", color: "var(--text-primary)" }}>
-                <UserIcon /> Sair
-              </button>
+                <UserIcon /> Minha conta
+              </Link>
             ) : (
               <Link href="/login"
                 className="flex flex-1 items-center justify-center gap-2 rounded-[8px] border py-2.5 text-sm font-semibold"

@@ -28,6 +28,13 @@ export type OrderWithItems = Order & {
   payments: Payment[]
 }
 
+export type ProductReview = Tables<'product_reviews'>
+export type Wishlist = Tables<'wishlists'>
+
+export type ReviewWithProfile = ProductReview & {
+  profiles: { full_name: string | null } | null
+}
+
 export type CartItem = {
   product: ProductWithImages
   quantity: number
