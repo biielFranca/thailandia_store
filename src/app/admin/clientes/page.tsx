@@ -42,7 +42,6 @@ export default async function ClientesPage() {
 
   const clients = (profiles ?? [])
     .map((p) => ({ ...p, stats: statsMap.get(p.id) ?? null }))
-    .filter((p) => p.stats !== null)  // only show profiles with at least 1 order
     .sort((a, b) => (b.stats?.total ?? 0) - (a.stats?.total ?? 0));
 
   const totalClients = profiles?.length ?? 0;
@@ -77,7 +76,7 @@ export default async function ClientesPage() {
       {/* Table */}
       {clients.length === 0 ? (
         <div className="rounded-[12px] border p-10 text-center" style={{ borderColor: "var(--border-subtle)", backgroundColor: "var(--surface-1)" }}>
-          <p className="text-sm" style={{ color: "var(--text-tertiary)" }}>Nenhum cliente com pedidos ainda.</p>
+          <p className="text-sm" style={{ color: "var(--text-tertiary)" }}>Nenhum cliente cadastrado ainda.</p>
         </div>
       ) : (
         <div className="overflow-hidden rounded-[12px] border" style={{ borderColor: "var(--border-subtle)" }}>
