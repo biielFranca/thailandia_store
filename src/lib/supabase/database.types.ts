@@ -655,6 +655,56 @@ export type Database = {
           },
         ]
       }
+      coupons: {
+        Row: {
+          id: string
+          store_id: string
+          code: string
+          type: string
+          discount_value: number | null
+          min_order_value: number
+          max_uses: number | null
+          uses_count: number
+          active: boolean
+          expires_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          store_id: string
+          code: string
+          type: string
+          discount_value?: number | null
+          min_order_value?: number
+          max_uses?: number | null
+          uses_count?: number
+          active?: boolean
+          expires_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          store_id?: string
+          code?: string
+          type?: string
+          discount_value?: number | null
+          min_order_value?: number
+          max_uses?: number | null
+          uses_count?: number
+          active?: boolean
+          expires_at?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coupons_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
