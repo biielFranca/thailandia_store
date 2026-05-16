@@ -42,7 +42,7 @@ function SearchIcon() {
 
 function UserIcon() {
   return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4.5 w-4.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-[18px] w-[18px] shrink-0" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="7" r="4" />
       <path d="M5.5 21a8.38 8.38 0 0 1 13 0" />
     </svg>
@@ -238,10 +238,10 @@ export function StoreHeader() {
               <div className="relative hidden sm:block">
                 <button type="button"
                   onClick={() => setUserMenuOpen((v) => !v)}
-                  className="hidden h-9 items-center gap-2 rounded-[8px] border px-3 text-xs font-semibold transition-colors duration-200 hover:[border-color:var(--border-strong)] sm:inline-flex"
+                  className="hidden h-9 items-center gap-1.5 rounded-[8px] border px-3 text-xs font-semibold transition-colors duration-200 hover:[border-color:var(--border-strong)] sm:inline-flex"
                   style={{ borderColor: "var(--border-subtle)", color: "var(--text-primary)" }}>
                   <UserIcon />
-                  <span className="hidden max-w-[80px] truncate md:inline">{user.name.split(" ")[0]}</span>
+                  <span className="hidden max-w-[96px] truncate md:inline leading-none">{user.name.split(" ")[0]}</span>
                   {isAdmin && (
                     <span className="hidden rounded-[3px] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] md:inline"
                       style={{ backgroundColor: "rgba(30,107,255,0.2)", color: "var(--cta)" }}>
