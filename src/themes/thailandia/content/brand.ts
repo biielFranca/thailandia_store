@@ -22,11 +22,11 @@ export const brand = {
     'Camisas importadas de clubes europeus, brasileiros e seleções. Estoque limitado, novidades frequentes e envio para todo o Brasil.',
   // WhatsApp — number in E.164 format (digits only, with country code, no +).
   // Used to build wa.me links: https://wa.me/{whatsappNumber}?text=...
-  whatsappNumber: '77882821661',
+  whatsappNumber: '7788282166',
   whatsappDefaultMessage: 'Olá! Vi o site da TS e gostaria de mais informações.',
   social: [
     { label: 'Instagram', short: 'IG', href: 'https://www.instagram.com/thailandia_store/' },
-    { label: 'WhatsApp', short: 'WA', href: 'https://wa.me/5577882821661' },
+    { label: 'WhatsApp', short: 'WA', href: 'https://wa.me/557788282166' },
   ],
 } as const
 
