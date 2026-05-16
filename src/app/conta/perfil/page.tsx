@@ -8,11 +8,10 @@ export default async function ContaPerfilPage() {
   const user = await requireAuth("/conta/perfil");
   const supabase = await createClient();
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("full_name, phone, created_at")
-    .eq("id", user.id)
-    .maybeSingle();
+  const [{ data: profile }, { data: address }] = await Promise.all([
+    supabase.from("profiles").select("full_name, phone, created_at").eq("id", user.id).maybeSingle(),
+    supabase.from("addresses").select("id, label, zip_code, street, number, complement, neighborhood, city, state").eq("profile_id", user.id).eq("is_default", true).maybeSingle(),
+  ]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -28,6 +27,7 @@ export default async function ContaPerfilPage() {
         initialPhone={profile?.phone ?? ""}
         email={user.email}
         memberSince={profile?.created_at ?? null}
+        savedAddress={address ?? null}
       />
     </div>
   );

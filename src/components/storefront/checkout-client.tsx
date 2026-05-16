@@ -8,6 +8,21 @@ import { useStore } from "@/contexts/store";
 import { useAuth } from "@/contexts/auth";
 import { placeOrder, validateCoupon, type CouponPreview } from "@/app/checkout/actions";
 
+export interface CheckoutSavedData {
+  name: string;
+  email: string;
+  phone: string;
+  address: {
+    cep: string;
+    street: string;
+    number: string;
+    complement: string;
+    neighborhood: string;
+    city: string;
+    state: string;
+  } | null;
+}
+
 function formatBRL(value: number) {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
@@ -125,7 +140,7 @@ function Field({
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function CheckoutClient() {
+export function CheckoutClient({ savedData }: { savedData?: CheckoutSavedData | null }) {
   const { items, subtotal, clearCart } = useStore();
   const { user } = useAuth();
   const router = useRouter();
@@ -140,17 +155,17 @@ export function CheckoutClient() {
   const [appliedCoupon, setAppliedCoupon] = useState<CouponPreview | null>(null);
 
   const [form, setForm] = useState({
-    name:         user?.name ?? "",
-    email:        user?.email ?? "",
-    phone:        "",
+    name:         savedData?.name ?? user?.name ?? "",
+    email:        savedData?.email ?? user?.email ?? "",
+    phone:        savedData?.phone ?? "",
     cpf:          "",
-    cep:          "",
-    street:       "",
-    number:       "",
-    comp:         "",
-    neighborhood: "",
-    city:         "",
-    state:        "",
+    cep:          savedData?.address?.cep ?? "",
+    street:       savedData?.address?.street ?? "",
+    number:       savedData?.address?.number ?? "",
+    comp:         savedData?.address?.complement ?? "",
+    neighborhood: savedData?.address?.neighborhood ?? "",
+    city:         savedData?.address?.city ?? "",
+    state:        savedData?.address?.state ?? "",
     payment:      "pix" as "pix" | "card",
   });
 
@@ -371,6 +386,15 @@ export function CheckoutClient() {
 
             {/* Endereço */}
             <Section title="Endereço de entrega">
+              {savedData?.address && (
+                <div
+                  className="mb-4 flex items-center gap-2 rounded-[8px] px-3 py-2.5 text-xs"
+                  style={{ backgroundColor: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.25)", color: "var(--success)" }}
+                >
+                  <span>✓</span>
+                  <span>Endereço salvo carregado — confira os dados abaixo.</span>
+                </div>
+              )}
               <div className="grid gap-4 sm:grid-cols-2">
                 {/* CEP */}
                 <div data-field-error={fieldErrors.cep ? true : undefined}>
