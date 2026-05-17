@@ -8,8 +8,6 @@ import type { CatalogProduct } from "@/themes/thailandia/content/catalog";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-// Slides carry their resolved product so the client component never has to
-// query the catalog itself. The server (home-page.tsx) prefetches.
 export type HeroSlide = {
   slug: string;
   title: string;
@@ -52,24 +50,46 @@ function CartIcon() {
   );
 }
 
-// ─── Sports atmosphere background (CSS-only, no external image needed) ────────
-// Simulates arena spotlights + subtle diamond grid texture
+// ─── Visual layers ─────────────────────────────────────────────────────────────
 
-const ARENA_BG = `
-  radial-gradient(ellipse at 55% 90%, rgba(30,107,255,0.22) 0%, transparent 52%),
-  radial-gradient(ellipse at 85% 15%, rgba(255,255,255,0.07) 0%, transparent 42%),
-  radial-gradient(ellipse at 15% 40%, rgba(30,107,255,0.10) 0%, transparent 38%),
-  radial-gradient(ellipse at 50% 50%, rgba(10,10,20,0.5) 0%, transparent 80%),
-  #07070f
-`.trim().replace(/\s+/g, " ");
+// Deep arena atmosphere: stadium spotlights from the top corners, a stage-floor
+// uplighting cone from the bottom-centre, plus a subtle colour-field depth layer.
+const ARENA_BG = [
+  // stadium flood-lights — top corners
+  "radial-gradient(ellipse at 22% 0%,  rgba(30,107,255,0.16) 0%, transparent 52%)",
+  "radial-gradient(ellipse at 82% 2%,  rgba(50, 80,255,0.12) 0%, transparent 46%)",
+  // stage-floor uplighting — bottom-centre behind product
+  "radial-gradient(ellipse at 62% 90%, rgba(30,107,255,0.38) 0%, transparent 48%)",
+  "radial-gradient(ellipse at 62% 110%,rgba(80,130,255,0.22) 0%, transparent 40%)",
+  // subtle left-side atmosphere
+  "radial-gradient(ellipse at 8%  52%, rgba(10, 40,200,0.08) 0%, transparent 34%)",
+  // mid-depth colour field (keeps the image from looking flat)
+  "radial-gradient(ellipse at 50% 42%, rgba(8,10,30,0.55)   0%, transparent 78%)",
+  "#06060e",
+].join(", ");
 
+// Faint diagonal mesh — gives the scene a sporty fabric / pitch feel
 const GRID_TEXTURE = `repeating-linear-gradient(
   45deg,
-  rgba(255,255,255,0.028) 0px,
-  rgba(255,255,255,0.028) 1px,
+  rgba(255,255,255,0.020) 0px,
+  rgba(255,255,255,0.020) 1px,
   transparent 1px,
-  transparent 14px
+  transparent 16px
 )`;
+
+// Two barely-visible diagonal light beams from the top — simulates arena floodlights
+const BEAM_TEXTURE = [
+  "linear-gradient(158deg, rgba(30,107,255,0.07) 0%, transparent 44%)",
+  "linear-gradient(204deg, rgba(30,107,255,0.05) 0%, transparent 38%)",
+].join(", ");
+
+// Concentric stadium-bowl rings radiating from the bottom-right (where the
+// product sits). Three rings — each just 0.5 px wide and very faint.
+const RING_TEXTURE = [
+  "radial-gradient(ellipse 130% 65% at 62% 105%, transparent 22%,  rgba(255,255,255,0.016) 22.5%, transparent 23%)",
+  "radial-gradient(ellipse 160% 80% at 62% 105%, transparent 34%,  rgba(255,255,255,0.012) 34.5%, transparent 35%)",
+  "radial-gradient(ellipse 200% 100% at 62% 105%, transparent 48%, rgba(255,255,255,0.009) 48.5%, transparent 49%)",
+].join(", ");
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -112,8 +132,13 @@ export function HeroCarousel({ slides }: Props) {
 
   return (
     <section
-      className="relative w-full overflow-hidden rounded-[14px]"
-      style={{ height: "clamp(380px, 60vh, 640px)", backgroundColor: "#07070f" }}
+      className="relative w-full overflow-hidden rounded-[16px]"
+      style={{
+        height: "clamp(400px, 62vh, 660px)",
+        backgroundColor: "#06060e",
+        // Subtle inset border glow — premium product shot feel
+        boxShadow: "inset 0 0 0 1px rgba(30,107,255,0.12), 0 24px 64px rgba(0,0,0,0.55)",
+      }}
       aria-roledescription="carousel"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
@@ -126,68 +151,141 @@ export function HeroCarousel({ slides }: Props) {
             style={{ opacity: isActive ? 1 : 0, pointerEvents: isActive ? "auto" : "none" }}>
 
             {/* ── Desktop: split layout ── */}
-            <div className="hidden h-full lg:grid lg:grid-cols-[48%_52%]">
+            <div className="hidden h-full lg:grid lg:grid-cols-[46%_54%]">
 
-              {/* Left — copy */}
-              <div className="relative z-10 flex flex-col justify-center px-[clamp(1.5rem,4vw,3rem)] py-[clamp(1.5rem,4vw,3rem)]"
-                style={{ background: "linear-gradient(to right, #07070f 70%, transparent)" }}>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/50">
-                  Importado selecionado
-                </p>
-                <h2 className="font-title mt-3 text-[clamp(2.2rem,4vw,3.4rem)] leading-[1.02] text-[#fff]"
+              {/* ── Left — copy ─────────────────────────────────────────── */}
+              <div className="relative z-10 flex flex-col justify-center px-[clamp(1.75rem,4vw,3.25rem)] py-[clamp(1.5rem,4vw,3rem)]"
+                style={{ background: "linear-gradient(to right, #06060e 65%, transparent)" }}>
+
+                {/* Eyebrow tag */}
+                <div className="inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1"
+                  style={{ backgroundColor: "rgba(30,107,255,0.15)", border: "1px solid rgba(30,107,255,0.28)" }}>
+                  <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: "var(--cta)" }} />
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em]" style={{ color: "var(--cta)" }}>
+                    Importado selecionado
+                  </p>
+                </div>
+
+                {/* Title */}
+                <h2 className="font-title mt-4 text-[clamp(2.1rem,3.8vw,3.3rem)] leading-[1.02] text-white"
                   style={{ whiteSpace: "pre-line" }}>
                   {slide.title}
                 </h2>
-                <p className="mt-4 max-w-[340px] text-sm leading-relaxed text-white/65">
+
+                {/* Description */}
+                <p className="mt-3 max-w-[320px] text-sm leading-relaxed text-white/60">
                   {slide.description}
                 </p>
-                <div className="mt-7 flex flex-wrap gap-3">
+
+                {/* Price badge — shown if product data is available */}
+                {slide.product && (
+                  <div className="mt-4 flex items-baseline gap-2">
+                    <span className="price text-3xl font-bold leading-none"
+                      style={{ color: "var(--cta)" }}>
+                      {slide.product.displayPrice}
+                    </span>
+                    <span className="text-xs font-medium text-white/35">no pix</span>
+                  </div>
+                )}
+
+                {/* CTA buttons */}
+                <div className="mt-6 flex flex-wrap gap-3">
                   <Link href={`/produtos/${slide.slug}`}
-                    className="inline-flex items-center gap-2 rounded-[8px] px-6 py-3 text-sm font-semibold transition-opacity hover:opacity-90"
-                    style={{ backgroundColor: "var(--cta)", color: "var(--cta-foreground)" }}>
-                    Comprar agora
+                    className="inline-flex items-center gap-2 rounded-[8px] px-6 py-3 text-sm font-semibold shadow-lg transition-opacity hover:opacity-90"
+                    style={{
+                      backgroundColor: "var(--cta)",
+                      color: "var(--cta-foreground)",
+                      boxShadow: "0 4px 20px rgba(30,107,255,0.40)",
+                    }}>
+                    {slide.buttonLabel || "Comprar agora"}
                   </Link>
                   <button type="button" onClick={() => handleAddToCart(slide)}
-                    className="inline-flex items-center gap-2 rounded-[8px] border px-5 py-3 text-sm font-medium text-[#fff] transition-colors hover:bg-white/10"
-                    style={{ borderColor: "rgba(255,255,255,0.25)" }}>
+                    className="inline-flex items-center gap-2 rounded-[8px] border px-5 py-3 text-sm font-medium text-white backdrop-blur-sm transition-colors hover:bg-white/10"
+                    style={{ borderColor: "rgba(255,255,255,0.22)" }}>
                     <CartIcon />
                     {addedSlug === slide.slug ? "Adicionado ✓" : "Adicionar ao carrinho"}
                   </button>
                 </div>
               </div>
 
-              {/* Right — arena atmosphere + product */}
-              <div className="relative overflow-hidden"
-                style={{ background: ARENA_BG }}>
+              {/* ── Right — arena atmosphere + product ──────────────────── */}
+              <div className="relative overflow-hidden" style={{ background: ARENA_BG }}>
 
-                {/* Diagonal grid texture */}
-                <div className="absolute inset-0"
+                {/* Layer 1 — diagonal mesh texture */}
+                <div className="absolute inset-0 pointer-events-none"
                   style={{ backgroundImage: GRID_TEXTURE }} />
 
-                {/* Spotlight glow behind product */}
-                <div className="absolute inset-x-0 bottom-0 h-3/4"
+                {/* Layer 2 — faint diagonal flood-light beams */}
+                <div className="absolute inset-0 pointer-events-none"
+                  style={{ backgroundImage: BEAM_TEXTURE }} />
+
+                {/* Layer 3 — stadium bowl rings (very faint concentric arcs) */}
+                <div className="absolute inset-0 pointer-events-none"
+                  style={{ backgroundImage: RING_TEXTURE }} />
+
+                {/* Layer 4 — left-edge blend into copy column */}
+                <div className="absolute inset-y-0 left-0 w-20 pointer-events-none"
+                  style={{ background: "linear-gradient(to right, #06060e, transparent)" }} />
+
+                {/* Layer 5 — large soft spotlight orb centred behind the product.
+                    This is the primary atmospheric glow that makes the shirt "pop". */}
+                <div className="absolute pointer-events-none"
                   style={{
-                    background: "radial-gradient(ellipse at 50% 100%, rgba(30,107,255,0.18) 0%, transparent 65%)",
+                    width: "80%",
+                    height: "80%",
+                    left: "10%",
+                    bottom: "-10%",
+                    background: "radial-gradient(ellipse, rgba(30,107,255,0.24) 0%, rgba(30,107,255,0.10) 38%, transparent 68%)",
+                    filter: "blur(32px)",
                   }} />
 
-                {/* Left edge blend into copy column */}
-                <div className="absolute inset-y-0 left-0 w-16"
-                  style={{ background: "linear-gradient(to right, #07070f, transparent)" }} />
+                {/* Layer 6 — tight floor glow right below the product hem.
+                    Simulates the light pooling on a stage floor. */}
+                <div className="absolute bottom-0 inset-x-0 pointer-events-none"
+                  style={{
+                    height: "30%",
+                    background: "radial-gradient(ellipse 70% 100% at 50% 100%, rgba(30,107,255,0.28) 0%, transparent 70%)",
+                    filter: "blur(4px)",
+                  }} />
 
-                {/* Product image — contained, bottom-anchored */}
+                {/* Layer 7 — top vignette to keep the header area dark & readable */}
+                <div className="absolute inset-x-0 top-0 h-24 pointer-events-none"
+                  style={{ background: "linear-gradient(to bottom, rgba(6,6,14,0.45), transparent)" }} />
+
+                {/* Product image — larger, bottom-anchored, multi-layer premium shadow */}
                 <div className="absolute inset-0 flex items-end justify-center">
-                  <div className="relative h-[96%] w-[72%]"
-                    style={{ filter: "drop-shadow(0 -8px 32px rgba(30,107,255,0.25)) drop-shadow(0 20px 40px rgba(0,0,0,0.7))" }}>
+                  <div
+                    className="relative"
+                    style={{
+                      width: "82%",
+                      height: "98%",
+                      // Layered drop-shadows: blue halo + directional shadow + deep base
+                      filter: [
+                        "drop-shadow(0 0 48px rgba(30,107,255,0.32))",
+                        "drop-shadow(0 -6px 20px rgba(30,107,255,0.18))",
+                        "drop-shadow(0 28px 48px rgba(0,0,0,0.85))",
+                      ].join(" "),
+                    }}
+                  >
                     <Image
                       src={slide.image}
                       alt={slide.title.replace("\n", " ")}
                       fill
-                      sizes="(min-width: 1280px) 640px, 55vw"
+                      sizes="(min-width: 1280px) 680px, 58vw"
                       priority={idx === 0}
                       className="object-contain object-bottom"
                     />
                   </div>
                 </div>
+
+                {/* Layer 8 — very subtle horizontal scan-line at mid-height.
+                    Breaks the background monotony without adding noise. */}
+                <div className="absolute inset-x-0 pointer-events-none"
+                  style={{
+                    top: "38%",
+                    height: "1px",
+                    background: "linear-gradient(to right, transparent, rgba(30,107,255,0.10) 30%, rgba(30,107,255,0.10) 70%, transparent)",
+                  }} />
               </div>
             </div>
 
@@ -197,29 +295,46 @@ export function HeroCarousel({ slides }: Props) {
               <Image src={slide.image} alt={slide.title.replace("\n", " ")} fill
                 sizes="(max-width: 1024px) 100vw, 0px" priority={idx === 0}
                 className="object-cover object-center" />
-              {/* Gradient */}
-              <div className="absolute inset-0"
-                style={{ background: "linear-gradient(to top, rgba(7,7,15,0.95) 35%, rgba(7,7,15,0.4) 70%, transparent)" }} />
+
+              {/* Gradient overlays — strong bottom scrim + top vignette */}
+              <div className="absolute inset-0 pointer-events-none"
+                style={{ background: "linear-gradient(to top, rgba(6,6,14,0.97) 30%, rgba(6,6,14,0.55) 62%, rgba(6,6,14,0.15) 100%)" }} />
+              <div className="absolute inset-0 pointer-events-none"
+                style={{ background: "radial-gradient(ellipse at 50% 85%, rgba(30,107,255,0.20) 0%, transparent 60%)" }} />
+
               {/* Content */}
               <div className="relative z-10 px-6 pb-10 pt-4">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/50">
-                  Importado selecionado
-                </p>
-                <h2 className="font-title mt-2 text-[2rem] leading-[1.03] text-[#fff]"
+                <div className="mb-3 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5"
+                  style={{ backgroundColor: "rgba(30,107,255,0.18)", border: "1px solid rgba(30,107,255,0.30)" }}>
+                  <span className="h-1 w-1 rounded-full" style={{ backgroundColor: "var(--cta)" }} />
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.22em]" style={{ color: "var(--cta)" }}>
+                    Importado selecionado
+                  </p>
+                </div>
+                <h2 className="font-title text-[2rem] leading-[1.03] text-white"
                   style={{ whiteSpace: "pre-line" }}>
                   {slide.title}
                 </h2>
-                <p className="mt-2 text-sm leading-relaxed text-white/65">
+                {slide.product && (
+                  <p className="price mt-1.5 text-xl font-bold" style={{ color: "var(--cta)" }}>
+                    {slide.product.displayPrice}
+                  </p>
+                )}
+                <p className="mt-2 max-w-[320px] text-sm leading-relaxed text-white/60">
                   {slide.description}
                 </p>
                 <div className="mt-5 flex flex-wrap gap-2.5">
                   <Link href={`/produtos/${slide.slug}`}
                     className="inline-flex items-center gap-2 rounded-[8px] px-5 py-2.5 text-sm font-semibold"
-                    style={{ backgroundColor: "var(--cta)", color: "var(--cta-foreground)" }}>
-                    Comprar agora
+                    style={{
+                      backgroundColor: "var(--cta)",
+                      color: "var(--cta-foreground)",
+                      boxShadow: "0 4px 16px rgba(30,107,255,0.40)",
+                    }}>
+                    {slide.buttonLabel || "Comprar agora"}
                   </Link>
                   <button type="button" onClick={() => handleAddToCart(slide)}
-                    className="inline-flex items-center gap-2 rounded-[8px] border px-4 py-2.5 text-sm font-medium text-[#fff]"
+                    className="inline-flex items-center gap-2 rounded-[8px] border px-4 py-2.5 text-sm font-medium text-white"
                     style={{ borderColor: "rgba(255,255,255,0.25)" }}>
                     <CartIcon />
                     {addedSlug === slide.slug ? "✓" : "Adicionar"}
@@ -232,23 +347,25 @@ export function HeroCarousel({ slides }: Props) {
         );
       })}
 
-      {/* Controls — top-right */}
+      {/* ── Controls — top-right ── */}
       <div className="absolute right-4 top-4 z-20 flex gap-2">
         <button type="button" aria-label="Slide anterior"
           onClick={() => { setPaused(true); go(active - 1); }}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-black/45 text-[#fff] backdrop-blur-sm transition-colors hover:bg-black/65">
+          className="inline-flex h-8 w-8 items-center justify-center rounded-full text-white backdrop-blur-sm transition-colors hover:bg-black/65"
+          style={{ backgroundColor: "rgba(0,0,0,0.50)", border: "1px solid rgba(255,255,255,0.10)" }}>
           <ChevronLeft />
         </button>
         <button type="button" aria-label="Próximo slide"
           onClick={() => { setPaused(true); go(active + 1); }}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-black/45 text-[#fff] backdrop-blur-sm transition-colors hover:bg-black/65">
+          className="inline-flex h-8 w-8 items-center justify-center rounded-full text-white backdrop-blur-sm transition-colors hover:bg-black/65"
+          style={{ backgroundColor: "rgba(0,0,0,0.50)", border: "1px solid rgba(255,255,255,0.10)" }}>
           <ChevronRight />
         </button>
       </div>
 
-      {/* Indicators — bottom-right */}
+      {/* ── Indicators — bottom-right ── */}
       <div className="absolute bottom-4 right-4 z-20 flex items-center gap-2">
-        <span className="price text-[11px] tabular-nums text-white/40">
+        <span className="price text-[11px] tabular-nums text-white/35">
           {String(active + 1).padStart(2, "0")}/{String(slides.length).padStart(2, "0")}
         </span>
         <div className="flex gap-1.5">
@@ -258,13 +375,13 @@ export function HeroCarousel({ slides }: Props) {
               className="h-1 rounded-full transition-all duration-300"
               style={{
                 width: idx === active ? "20px" : "6px",
-                backgroundColor: idx === active ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.3)",
+                backgroundColor: idx === active ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.28)",
               }} />
           ))}
         </div>
       </div>
 
-      {/* Progress bar */}
+      {/* ── Progress bar ── */}
       {!paused && (
         <div key={`${active}-prog`}
           className="absolute bottom-0 left-0 h-[2px] animate-carousel-progress"
