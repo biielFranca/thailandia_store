@@ -254,12 +254,11 @@ export function HeroCarousel({ slides }: Props) {
 
                 {/* Product image — centralizada, bordas arredondadas */}
                 <div className="absolute inset-0 flex items-center justify-center">
+                  {/* Outer div: aplica drop-shadow sobre a forma já recortada */}
                   <div
-                    className="relative overflow-hidden"
                     style={{
                       width: "78%",
                       height: "88%",
-                      borderRadius: "20px",
                       filter: [
                         "drop-shadow(0 0 48px rgba(30,107,255,0.32))",
                         "drop-shadow(0 -6px 20px rgba(30,107,255,0.18))",
@@ -267,14 +266,18 @@ export function HeroCarousel({ slides }: Props) {
                       ].join(" "),
                     }}
                   >
-                    <Image
-                      src={slide.image}
-                      alt={slide.title.replace("\n", " ")}
-                      fill
-                      sizes="(min-width: 1280px) 680px, 58vw"
-                      priority={idx === 0}
-                      className="object-contain object-center"
-                    />
+                    {/* Inner div: recorta a imagem com bordas arredondadas */}
+                    <div className="relative w-full h-full overflow-hidden"
+                      style={{ borderRadius: "20px" }}>
+                      <Image
+                        src={slide.image}
+                        alt={slide.title.replace("\n", " ")}
+                        fill
+                        sizes="(min-width: 1280px) 680px, 58vw"
+                        priority={idx === 0}
+                        className="object-contain object-center"
+                      />
+                    </div>
                   </div>
                 </div>
 
