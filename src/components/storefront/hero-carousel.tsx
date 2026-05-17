@@ -252,14 +252,14 @@ export function HeroCarousel({ slides }: Props) {
                 <div className="absolute inset-x-0 top-0 h-24 pointer-events-none"
                   style={{ background: "linear-gradient(to bottom, rgba(6,6,14,0.45), transparent)" }} />
 
-                {/* Product image — larger, bottom-anchored, multi-layer premium shadow */}
-                <div className="absolute inset-0 flex items-end justify-center">
+                {/* Product image — centralizada, bordas arredondadas */}
+                <div className="absolute inset-0 flex items-center justify-center">
                   <div
-                    className="relative"
+                    className="relative overflow-hidden"
                     style={{
-                      width: "82%",
-                      height: "98%",
-                      // Layered drop-shadows: blue halo + directional shadow + deep base
+                      width: "78%",
+                      height: "88%",
+                      borderRadius: "20px",
                       filter: [
                         "drop-shadow(0 0 48px rgba(30,107,255,0.32))",
                         "drop-shadow(0 -6px 20px rgba(30,107,255,0.18))",
@@ -273,7 +273,7 @@ export function HeroCarousel({ slides }: Props) {
                       fill
                       sizes="(min-width: 1280px) 680px, 58vw"
                       priority={idx === 0}
-                      className="object-contain object-bottom"
+                      className="object-contain object-center"
                     />
                   </div>
                 </div>
