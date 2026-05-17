@@ -153,9 +153,21 @@ export function HeroCarousel({ slides }: Props) {
             {/* ── Desktop: split layout ── */}
             <div className="hidden h-full lg:grid lg:grid-cols-[46%_54%]">
 
+              {/* Stadium background image — shared base for both columns */}
+              <Image
+                src="/bg-stadium.jpg"
+                alt=""
+                fill
+                sizes="100vw"
+                priority={idx === 0}
+                aria-hidden="true"
+                className="object-cover object-right"
+                style={{ opacity: 0.55 }}
+              />
+
               {/* ── Left — copy ─────────────────────────────────────────── */}
               <div className="relative z-10 flex flex-col justify-center px-[clamp(1.75rem,4vw,3.25rem)] py-[clamp(1.5rem,4vw,3rem)]"
-                style={{ background: "linear-gradient(to right, #06060e 65%, transparent)" }}>
+                style={{ background: "linear-gradient(to right, #06060e 70%, transparent)" }}>
 
                 {/* Eyebrow tag */}
                 <div className="inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1"
@@ -208,20 +220,12 @@ export function HeroCarousel({ slides }: Props) {
                 </div>
               </div>
 
-              {/* ── Right — arena atmosphere + product ──────────────────── */}
-              <div className="relative overflow-hidden" style={{ background: ARENA_BG }}>
+              {/* ── Right — product spotlight over stadium photo ─────────── */}
+              <div className="relative overflow-hidden">
 
-                {/* Layer 1 — diagonal mesh texture */}
+                {/* Dark vignette so the left copy column stays readable */}
                 <div className="absolute inset-0 pointer-events-none"
-                  style={{ backgroundImage: GRID_TEXTURE }} />
-
-                {/* Layer 2 — faint diagonal flood-light beams */}
-                <div className="absolute inset-0 pointer-events-none"
-                  style={{ backgroundImage: BEAM_TEXTURE }} />
-
-                {/* Layer 3 — stadium bowl rings (very faint concentric arcs) */}
-                <div className="absolute inset-0 pointer-events-none"
-                  style={{ backgroundImage: RING_TEXTURE }} />
+                  style={{ background: "linear-gradient(to left, rgba(6,6,14,0.15) 0%, rgba(6,6,14,0.45) 100%)" }} />
 
                 {/* Layer 4 — left-edge blend into copy column */}
                 <div className="absolute inset-y-0 left-0 w-20 pointer-events-none"
@@ -294,10 +298,14 @@ export function HeroCarousel({ slides }: Props) {
 
             {/* ── Mobile: full-bleed image + overlay ── */}
             <div className="relative flex h-full flex-col justify-end lg:hidden">
-              {/* Background image */}
+              {/* Stadium background */}
+              <Image src="/bg-stadium.jpg" alt="" fill aria-hidden="true"
+                sizes="(max-width: 1024px) 100vw, 0px" priority={idx === 0}
+                className="object-cover object-right" style={{ opacity: 0.6 }} />
+              {/* Product image layered on top */}
               <Image src={slide.image} alt={slide.title.replace("\n", " ")} fill
                 sizes="(max-width: 1024px) 100vw, 0px" priority={idx === 0}
-                className="object-cover object-center" />
+                className="object-contain object-bottom" />
 
               {/* Gradient overlays — strong bottom scrim + top vignette */}
               <div className="absolute inset-0 pointer-events-none"
