@@ -260,17 +260,7 @@ export function HeroCarousel({ slides }: Props) {
 
                 {/* Product image — centralizada, bordas arredondadas */}
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div
-                    className="relative"
-                    style={{
-                      width: "78%",
-                      height: "88%",
-                      // mask-image: desvanece as bordas da foto para transparente,
-                      // eliminando o corte retangular do fundo cinza do produto
-                      maskImage: "radial-gradient(ellipse 82% 85% at 50% 50%, black 50%, transparent 100%)",
-                      WebkitMaskImage: "radial-gradient(ellipse 82% 85% at 50% 50%, black 50%, transparent 100%)",
-                    }}
-                  >
+                  <div className="relative" style={{ width: "78%", height: "88%" }}>
                     <Image
                       src={slide.image}
                       alt={slide.title.replace("\n", " ")}
@@ -278,6 +268,10 @@ export function HeroCarousel({ slides }: Props) {
                       sizes="(min-width: 1280px) 680px, 58vw"
                       priority={idx === 0}
                       className="object-contain object-center"
+                      style={{
+                        maskImage: "radial-gradient(ellipse 80% 82% at 50% 50%, black 45%, transparent 100%)",
+                        WebkitMaskImage: "radial-gradient(ellipse 80% 82% at 50% 50%, black 45%, transparent 100%)",
+                      }}
                     />
                   </div>
                 </div>
