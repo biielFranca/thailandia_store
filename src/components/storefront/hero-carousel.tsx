@@ -166,11 +166,13 @@ export function HeroCarousel({ slides }: Props) {
               />
 
               {/* ── Left — copy ─────────────────────────────────────────── */}
-              <div className="relative z-10 flex flex-col justify-center px-[clamp(1.75rem,4vw,3.25rem)] py-[clamp(1.5rem,4vw,3rem)]"
-                style={{ background: "linear-gradient(to right, #06060e 70%, transparent)" }}>
+              <div className="relative z-10 flex flex-col justify-center px-[clamp(1.75rem,4vw,3.25rem)] py-[clamp(1.5rem,4vw,3rem)]">
+                {/* Dark overlay para legibilidade do texto — não bloqueia o fundo */}
+                <div className="absolute inset-0 pointer-events-none"
+                  style={{ background: "linear-gradient(to right, rgba(6,6,14,0.82) 55%, rgba(6,6,14,0.40) 100%)" }} />
 
                 {/* Eyebrow tag */}
-                <div className="inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1"
+                <div className="relative z-10 inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1"
                   style={{ backgroundColor: "rgba(30,107,255,0.15)", border: "1px solid rgba(30,107,255,0.28)" }}>
                   <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: "var(--cta)" }} />
                   <p className="text-[10px] font-semibold uppercase tracking-[0.24em]" style={{ color: "var(--cta)" }}>
@@ -179,19 +181,19 @@ export function HeroCarousel({ slides }: Props) {
                 </div>
 
                 {/* Title */}
-                <h2 className="font-title mt-4 text-[clamp(2.1rem,3.8vw,3.3rem)] leading-[1.02] text-white"
+                <h2 className="relative z-10 font-title mt-4 text-[clamp(2.1rem,3.8vw,3.3rem)] leading-[1.02] text-white"
                   style={{ whiteSpace: "pre-line" }}>
                   {slide.title}
                 </h2>
 
                 {/* Description */}
-                <p className="mt-3 max-w-[320px] text-sm leading-relaxed text-white/60">
+                <p className="relative z-10 mt-3 max-w-[320px] text-sm leading-relaxed text-white/60">
                   {slide.description}
                 </p>
 
                 {/* Price badge — shown if product data is available */}
                 {slide.product && (
-                  <div className="mt-4 flex items-baseline gap-2">
+                  <div className="relative z-10 mt-4 flex items-baseline gap-2">
                     <span className="price text-3xl font-bold leading-none"
                       style={{ color: "var(--cta)" }}>
                       {slide.product.displayPrice}
@@ -201,7 +203,7 @@ export function HeroCarousel({ slides }: Props) {
                 )}
 
                 {/* CTA buttons */}
-                <div className="mt-6 flex flex-wrap gap-3">
+                <div className="relative z-10 mt-6 flex flex-wrap gap-3">
                   <Link href={`/produtos/${slide.slug}`}
                     className="inline-flex items-center gap-2 rounded-[8px] px-6 py-3 text-sm font-semibold shadow-lg transition-opacity hover:opacity-90"
                     style={{
@@ -258,8 +260,8 @@ export function HeroCarousel({ slides }: Props) {
 
                 {/* Product image — centralizada, bordas arredondadas */}
                 <div className="absolute inset-0 flex items-center justify-center">
-                  {/* Outer div: aplica drop-shadow sobre a forma já recortada */}
                   <div
+                    className="relative"
                     style={{
                       width: "78%",
                       height: "88%",
@@ -270,18 +272,14 @@ export function HeroCarousel({ slides }: Props) {
                       ].join(" "),
                     }}
                   >
-                    {/* Inner div: recorta a imagem com bordas arredondadas */}
-                    <div className="relative w-full h-full overflow-hidden"
-                      style={{ borderRadius: "20px" }}>
-                      <Image
-                        src={slide.image}
-                        alt={slide.title.replace("\n", " ")}
-                        fill
-                        sizes="(min-width: 1280px) 680px, 58vw"
-                        priority={idx === 0}
-                        className="object-contain object-center"
-                      />
-                    </div>
+                    <Image
+                      src={slide.image}
+                      alt={slide.title.replace("\n", " ")}
+                      fill
+                      sizes="(min-width: 1280px) 680px, 58vw"
+                      priority={idx === 0}
+                      className="object-contain object-center"
+                    />
                   </div>
                 </div>
 
