@@ -258,7 +258,7 @@ export function HeroCarousel({ slides }: Props) {
                 <div className="absolute inset-x-0 top-0 h-24 pointer-events-none"
                   style={{ background: "linear-gradient(to bottom, rgba(6,6,14,0.45), transparent)" }} />
 
-                {/* Product image — centralizada, bordas arredondadas */}
+                {/* Product image — centralizada, sem fundo cinza */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="relative" style={{ width: "78%", height: "88%" }}>
                     <Image
@@ -268,9 +268,20 @@ export function HeroCarousel({ slides }: Props) {
                       sizes="(min-width: 1280px) 680px, 58vw"
                       priority={idx === 0}
                       className="object-contain object-center"
+                    />
+                    {/* Overlay: dissolves the gray studio background into the dark scene.
+                        Transparent in the centre (product) → opaque dark at the edges. */}
+                    <div
+                      className="absolute inset-0 pointer-events-none z-10"
                       style={{
-                        maskImage: "radial-gradient(ellipse 80% 82% at 50% 50%, black 45%, transparent 100%)",
-                        WebkitMaskImage: "radial-gradient(ellipse 80% 82% at 50% 50%, black 45%, transparent 100%)",
+                        background: [
+                          // main vignette — fades all 4 edges
+                          "radial-gradient(ellipse 60% 64% at 50% 50%, transparent 50%, rgba(6,6,14,0.82) 72%, #06060e 90%)",
+                          // extra bottom edge — merges with the floor glow below
+                          "linear-gradient(to top,  #06060e 0%, transparent 32%)",
+                          // extra top edge — merges into header vignette
+                          "linear-gradient(to bottom, #06060e 0%, transparent 22%)",
+                        ].join(", "),
                       }}
                     />
                   </div>

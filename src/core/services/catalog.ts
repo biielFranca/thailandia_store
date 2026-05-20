@@ -136,7 +136,10 @@ export async function getCatalogCategories(): Promise<CatalogCategory[]> {
     .select("slug, name, description, active")
     .eq("active", true)
     .order("position", { ascending: true });
-  if (error) throw error;
+  if (error) {
+    console.error("[catalog] getCatalogCategories:", error.message);
+    return [];
+  }
   return (data ?? []).map(mapCategory);
 }
 
@@ -160,7 +163,10 @@ export async function getCatalogProducts(): Promise<CatalogProduct[]> {
     .select(PRODUCT_SELECT)
     .eq("active", true)
     .order("created_at", { ascending: false });
-  if (error) throw error;
+  if (error) {
+    console.error("[catalog] getCatalogProducts:", error.message);
+    return [];
+  }
   return ((data ?? []) as ProductRow[]).map(mapProduct);
 }
 
@@ -201,7 +207,10 @@ export async function getCatalogProductsByCategory(slug: string): Promise<Catalo
     .eq("active", true)
     .eq("categories.slug", slug)
     .order("created_at", { ascending: false });
-  if (error) throw error;
+  if (error) {
+    console.error("[catalog] getCatalogProductsByCategory:", error.message);
+    return [];
+  }
   return ((data ?? []) as ProductRow[])
     // Filter out rows whose join didn't match (`!inner` is preferred but
     // breaks the type inference; this is equivalent and explicit).
@@ -217,7 +226,10 @@ export async function getFeaturedCatalogProducts(): Promise<CatalogProduct[]> {
     .eq("active", true)
     .eq("featured", true)
     .order("created_at", { ascending: false });
-  if (error) throw error;
+  if (error) {
+    console.error("[catalog] getFeaturedCatalogProducts:", error.message);
+    return [];
+  }
   return ((data ?? []) as ProductRow[]).map(mapProduct);
 }
 
@@ -229,7 +241,10 @@ export async function getBestsellerCatalogProducts(): Promise<CatalogProduct[]> 
     .eq("active", true)
     .eq("metadata->>isBestseller", "true")
     .order("created_at", { ascending: false });
-  if (error) throw error;
+  if (error) {
+    console.error("[catalog] getBestsellerCatalogProducts:", error.message);
+    return [];
+  }
   return ((data ?? []) as ProductRow[]).map(mapProduct);
 }
 
@@ -349,7 +364,10 @@ export async function getCatalogProductsByCollection(collection: string): Promis
     .eq("active", true)
     .eq("metadata->>collection", collection)
     .order("created_at", { ascending: false });
-  if (error) throw error;
+  if (error) {
+    console.error("[catalog] getCatalogProductsByCollection:", error.message);
+    return [];
+  }
   return ((data ?? []) as ProductRow[]).map(mapProduct);
 }
 
