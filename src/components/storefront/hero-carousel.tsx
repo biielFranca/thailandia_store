@@ -151,7 +151,7 @@ export function HeroCarousel({ slides }: Props) {
             style={{ opacity: isActive ? 1 : 0, pointerEvents: isActive ? "auto" : "none" }}>
 
             {/* ── Desktop: split layout ── */}
-            <div className="hidden h-full lg:grid lg:grid-cols-[46%_54%]">
+            <div className="relative hidden h-full lg:grid lg:grid-cols-[46%_54%]">
 
               {/* Stadium background image — shared base for both columns */}
               <Image
