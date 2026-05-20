@@ -265,11 +265,10 @@ export function HeroCarousel({ slides }: Props) {
                     style={{
                       width: "78%",
                       height: "88%",
-                      filter: [
-                        "drop-shadow(0 0 48px rgba(30,107,255,0.32))",
-                        "drop-shadow(0 -6px 20px rgba(30,107,255,0.18))",
-                        "drop-shadow(0 28px 48px rgba(0,0,0,0.85))",
-                      ].join(" "),
+                      // mask-image: desvanece as bordas da foto para transparente,
+                      // eliminando o corte retangular do fundo cinza do produto
+                      maskImage: "radial-gradient(ellipse 82% 85% at 50% 50%, black 50%, transparent 100%)",
+                      WebkitMaskImage: "radial-gradient(ellipse 82% 85% at 50% 50%, black 50%, transparent 100%)",
                     }}
                   >
                     <Image
