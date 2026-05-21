@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useStore } from "@/contexts/store";
+import { useStore, getCartAnonId } from "@/contexts/store";
 import { useAuth } from "@/contexts/auth";
 import { placeOrder, validateCoupon, type CouponPreview } from "@/app/checkout/actions";
 
@@ -327,7 +327,9 @@ export function CheckoutClient({ savedData }: { savedData?: CheckoutSavedData | 
     setSubmitError("");
     setSubmitting(true);
 
+    const anonCartId = getCartAnonId();
     const result = await placeOrder({
+      anonCartId,
       items: items.map((i) => ({
         slug: i.slug,
         size: i.size,

@@ -18,6 +18,7 @@ import {
   resolveCustomizationPrice,
   validateCustomizationInput,
 } from "@/core/services/customization";
+import { markCartConverted } from "@/app/actions/cart-sessions";
 
 // ─── Coupon validation ────────────────────────────────────────────────────────
 
@@ -325,6 +326,9 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
   }
 
   const order = { id: (rpcResult as { order_id: string }).order_id };
+
+  // Mark this shopper's active cart_sessions row as converted (fire-and-forget).
+  void markCartConverted(order.id, input.anonCartId?.trim() || null);
 
   // ── Persist coupon usage ──────────────────────────────────────────────────
   if (appliedCouponCode && discountAmount > 0) {

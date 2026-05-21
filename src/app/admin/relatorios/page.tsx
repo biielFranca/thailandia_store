@@ -38,6 +38,12 @@ const REPORTS = [
     desc: "Pedidos iniciados que não foram pagos",
     icon: "🛒",
   },
+  {
+    slug: "abandono-de-carrinho",
+    title: "Abandono de carrinho",
+    desc: "Carrinhos rastreados antes do checkout",
+    icon: "🧺",
+  },
 ] as const;
 
 export default async function RelatoriosPage() {

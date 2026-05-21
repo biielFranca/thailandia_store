@@ -40,6 +40,9 @@ export interface PlaceOrderInput {
   installments?: number;
   notes?: string;
   couponCode?: string;
+  /** Anonymous identifier from localStorage — used to mark the matching
+   *  cart_sessions row as converted. Optional. */
+  anonCartId?: string;
 }
 
 const BR_STATES = new Set([

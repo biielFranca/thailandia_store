@@ -68,6 +68,67 @@ export type Database = {
           },
         ]
       }
+      cart_sessions: {
+        Row: {
+          anon_id: string | null
+          converted_order_id: string | null
+          created_at: string
+          id: string
+          items: Json
+          items_count: number
+          profile_id: string | null
+          store_id: string
+          subtotal: number
+          updated_at: string
+        }
+        Insert: {
+          anon_id?: string | null
+          converted_order_id?: string | null
+          created_at?: string
+          id?: string
+          items?: Json
+          items_count?: number
+          profile_id?: string | null
+          store_id: string
+          subtotal?: number
+          updated_at?: string
+        }
+        Update: {
+          anon_id?: string | null
+          converted_order_id?: string | null
+          created_at?: string
+          id?: string
+          items?: Json
+          items_count?: number
+          profile_id?: string | null
+          store_id?: string
+          subtotal?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cart_sessions_converted_order_id_fkey"
+            columns: ["converted_order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cart_sessions_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cart_sessions_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categories: {
         Row: {
           active: boolean

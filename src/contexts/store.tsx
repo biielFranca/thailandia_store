@@ -6,8 +6,10 @@ import {
   useContext,
   useEffect,
   useReducer,
+  useRef,
   useState,
 } from "react";
+import { upsertCartSession } from "@/app/actions/cart-sessions";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -125,10 +127,39 @@ interface StoreContextValue {
 const StoreContext = createContext<StoreContextValue | null>(null);
 
 const STORAGE_KEY = "ts_cart";
+const ANON_ID_KEY = "ts_anon_id";
 
 /** Per-unit price including any customization extra. */
 function lineUnitPrice(i: CartItem): number {
   return i.priceValue + (i.customization?.price ?? 0);
+}
+
+/**
+ * Ensures a stable anonymous identifier exists in localStorage. Used for
+ * server-side cart abandonment tracking (cart_sessions table).
+ */
+function ensureAnonId(): string {
+  if (typeof window === "undefined") return "";
+  try {
+    const existing = localStorage.getItem(ANON_ID_KEY);
+    if (existing) return existing;
+    const id = (typeof crypto !== "undefined" && "randomUUID" in crypto)
+      ? crypto.randomUUID()
+      : `anon-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    localStorage.setItem(ANON_ID_KEY, id);
+    return id;
+  } catch {
+    return "";
+  }
+}
+
+export function getCartAnonId(): string {
+  if (typeof window === "undefined") return "";
+  try {
+    return localStorage.getItem(ANON_ID_KEY) ?? "";
+  } catch {
+    return "";
+  }
 }
 
 // ─── Provider ────────────────────────────────────────────────────────────────
@@ -154,6 +185,40 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(cart.items));
     } catch {}
+  }, [cart.items]);
+
+  // ── Server-side cart mirror (for abandonment tracking) ───────────────────
+  //
+  // Debounced 1.5s — fast enough to capture real intent, slow enough to skip
+  // the noise of rapid +/- qty clicks. Skips the very first render (hydration)
+  // so we don't immediately recreate a row the user just abandoned and
+  // emptied client-side.
+  const skipFirstSyncRef = useRef(true);
+  useEffect(() => {
+    if (skipFirstSyncRef.current) {
+      skipFirstSyncRef.current = false;
+      return;
+    }
+    const anonId = ensureAnonId();
+    if (!anonId) return;
+    const items = cart.items;
+    const subtotal = items.reduce((s, i) => s + lineUnitPrice(i) * i.quantity, 0);
+    const handle = window.setTimeout(() => {
+      void upsertCartSession({
+        anonId,
+        items: items.map((i) => ({
+          slug: i.slug,
+          name: i.name,
+          image: i.image,
+          size: i.size,
+          quantity: i.quantity,
+          priceValue: i.priceValue,
+          customization: i.customization ?? null,
+        })),
+        subtotal,
+      });
+    }, 1500);
+    return () => window.clearTimeout(handle);
   }, [cart.items]);
 
   const addItem = useCallback((item: CartItem) => {
