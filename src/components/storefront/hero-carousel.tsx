@@ -258,32 +258,51 @@ export function HeroCarousel({ slides }: Props) {
                 <div className="absolute inset-x-0 top-0 h-24 pointer-events-none"
                   style={{ background: "linear-gradient(to bottom, rgba(6,6,14,0.45), transparent)" }} />
 
-                {/* Product image — centralizada, sem fundo cinza */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="relative" style={{ width: "78%", height: "88%" }}>
-                    <Image
-                      src={slide.image}
-                      alt={slide.title.replace("\n", " ")}
-                      fill
-                      sizes="(min-width: 1280px) 680px, 58vw"
-                      priority={idx === 0}
-                      className="object-contain object-center"
-                    />
-                    {/* Overlay: dissolves the gray studio background into the dark scene.
-                        Transparent in the centre (product) → opaque dark at the edges. */}
+                {/* Product image — premium rounded card */}
+                <div className="absolute inset-0 flex items-center justify-center px-[clamp(1.25rem,3vw,2.75rem)] py-[clamp(1.25rem,3vw,2.5rem)]">
+                  <div className="relative h-full w-full max-h-[86%] max-w-[78%]">
+                    {/* Outer soft blue halo */}
                     <div
-                      className="absolute inset-0 pointer-events-none z-10"
+                      aria-hidden="true"
+                      className="absolute -inset-8 rounded-[36px] pointer-events-none"
                       style={{
-                        background: [
-                          // main vignette — fades all 4 edges
-                          "radial-gradient(ellipse 60% 64% at 50% 50%, transparent 50%, rgba(6,6,14,0.82) 72%, #06060e 90%)",
-                          // extra bottom edge — merges with the floor glow below
-                          "linear-gradient(to top,  #06060e 0%, transparent 32%)",
-                          // extra top edge — merges into header vignette
-                          "linear-gradient(to bottom, #06060e 0%, transparent 22%)",
-                        ].join(", "),
+                        background: "radial-gradient(ellipse at 50% 55%, rgba(30,107,255,0.32) 0%, rgba(30,107,255,0.12) 38%, transparent 70%)",
+                        filter: "blur(28px)",
                       }}
                     />
+                    {/* Card */}
+                    <div
+                      className="relative h-full w-full overflow-hidden rounded-[28px] border border-white/10"
+                      style={{
+                        background: "radial-gradient(ellipse at 50% 65%, rgba(30,107,255,0.14) 0%, rgba(10,12,28,0.92) 60%, #06060e 100%)",
+                        boxShadow: [
+                          "0 30px 80px -20px rgba(0,0,0,0.75)",
+                          "0 0 60px -12px rgba(30,107,255,0.35)",
+                          "inset 0 1px 0 rgba(255,255,255,0.06)",
+                        ].join(", "),
+                      }}
+                    >
+                      {/* Inner top highlight — subtle rim light */}
+                      <div
+                        aria-hidden="true"
+                        className="absolute inset-x-0 top-0 h-[40%] pointer-events-none"
+                        style={{ background: "linear-gradient(to bottom, rgba(255,255,255,0.05), transparent)" }}
+                      />
+                      {/* Floor reflection glow inside the card */}
+                      <div
+                        aria-hidden="true"
+                        className="absolute inset-x-0 bottom-0 h-[35%] pointer-events-none"
+                        style={{ background: "radial-gradient(ellipse 70% 100% at 50% 100%, rgba(30,107,255,0.22) 0%, transparent 70%)" }}
+                      />
+                      <Image
+                        src={slide.image}
+                        alt={slide.title.replace("\n", " ")}
+                        fill
+                        sizes="(min-width: 1280px) 680px, 58vw"
+                        priority={idx === 0}
+                        className="relative object-contain object-center p-4"
+                      />
+                    </div>
                   </div>
                 </div>
 
