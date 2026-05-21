@@ -60,6 +60,19 @@ export default function RootLayout({
       lang="pt-BR"
       className={`${titleFont.variable} ${displayFont.variable} ${bodyFont.variable} h-full`}
     >
+      <head>
+        {/*
+          Blocking inline script: applies the saved theme to <html data-theme>
+          before React hydrates. Prevents flash-of-dark on light-theme users
+          AND prevents the header's useState default from racing localStorage
+          on every client-side navigation.
+        */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var t=localStorage.getItem('ts-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');}}catch(e){}`,
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col w-full overflow-x-hidden">{children}</body>
     </html>
   );

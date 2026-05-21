@@ -94,16 +94,15 @@ export function StoreHeader() {
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
+  // Lazy initializer — reads the attribute set by the blocking script in
+  // app/layout.tsx so the initial render already matches the persisted theme.
+  // Avoids the previous bug where the default "dark" useEffect overwrote
+  // localStorage on every client navigation.
+  const [theme, setTheme] = useState<"dark" | "light">(() => {
+    if (typeof document === "undefined") return "dark";
+    return document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
+  });
   const headerRef = useRef<HTMLElement | null>(null);
-
-  useEffect(() => {
-    const id = window.setTimeout(() => {
-      const saved = localStorage.getItem("ts-theme") as "dark" | "light" | null;
-      if (saved) setTheme(saved);
-    }, 0);
-    return () => window.clearTimeout(id);
-  }, []);
 
   useEffect(() => {
     localStorage.setItem("ts-theme", theme);
