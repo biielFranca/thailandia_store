@@ -35,7 +35,8 @@ export function LoadingScreen({ fullScreen = true, label = "Carregando..." }: Lo
         src="/loading-field.svg"
         alt=""
         aria-hidden="true"
-        className="h-32 w-32 sm:h-40 sm:w-40"
+        style={{ width: "clamp(180px, 28vw, 360px)", height: "auto" }}
+        className="aspect-square"
         draggable={false}
       />
       {label && (
