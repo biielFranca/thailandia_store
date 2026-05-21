@@ -158,9 +158,8 @@ export function HeroCarousel({ slides }: Props) {
 
   return (
     <section
-      className="relative w-full overflow-hidden rounded-[28px] border border-blue-500/15"
+      className="relative w-full overflow-hidden rounded-[22px] border border-blue-500/15 min-h-[860px] sm:min-h-[820px] lg:min-h-[clamp(560px,64vh,720px)] sm:rounded-[28px]"
       style={{
-        minHeight: "clamp(560px, 64vh, 720px)",
         background:
           "radial-gradient(ellipse at 20% 0%, rgba(30,107,255,0.18) 0%, transparent 55%)," +
           "radial-gradient(ellipse at 80% 100%, rgba(30,107,255,0.16) 0%, transparent 55%)," +
@@ -233,7 +232,7 @@ export function HeroCarousel({ slides }: Props) {
             style={{ opacity: isActive ? 1 : 0, pointerEvents: isActive ? "auto" : "none" }}
           >
             {/* ─────────────────── Desktop layout ─────────────────── */}
-            <div className="relative z-10 hidden h-full lg:grid lg:grid-cols-[54%_46%]">
+            <div className="relative z-10 hidden h-full min-h-[clamp(560px,64vh,720px)] lg:grid lg:grid-cols-[54%_46%]">
 
               {/* ── Left content column ── */}
               <div className="relative flex flex-col justify-center px-[clamp(2rem,4vw,3.75rem)] py-12">
@@ -453,41 +452,52 @@ export function HeroCarousel({ slides }: Props) {
             </div>
 
             {/* ─────────────────── Mobile layout ─────────────────── */}
-            <div className="relative z-10 flex h-full flex-col gap-5 px-5 py-6 lg:hidden">
-              {/* Badge */}
-              <div className="inline-flex w-fit items-center gap-2 rounded-full border border-blue-400/40 bg-blue-500/10 px-3 py-1.5 backdrop-blur-sm">
+            <div className="relative z-10 flex flex-col gap-4 px-4 pb-14 pt-5 sm:gap-5 sm:px-5 sm:pt-6 lg:hidden">
+
+              {/* Top row: badge (controls are absolute em top-right da section) */}
+              <div className="inline-flex w-fit items-center gap-1.5 rounded-full border border-blue-400/40 bg-blue-500/10 px-2.5 py-1 backdrop-blur-sm">
                 <span className="text-blue-300"><SparkleIcon /></span>
                 <span className="text-[10px] font-bold uppercase tracking-[0.20em] text-blue-200">
                   Lançamento exclusivo
                 </span>
               </div>
 
-              {/* Title */}
-              <h2 className="font-title text-white uppercase" style={{ fontSize: "clamp(1.8rem,7vw,2.4rem)", lineHeight: 0.98 }}>
+              {/* Title — bigger, hero-sized on phones */}
+              <h2 className="font-title text-white uppercase" style={{ fontSize: "clamp(2rem,8.5vw,3rem)", lineHeight: 0.95 }}>
                 <span className="block">{main}</span>
                 {accent && (
-                  <span className="block" style={{ color: "#3a8eff", textShadow: "0 0 24px rgba(58,142,255,0.4)" }}>
+                  <span className="block" style={{ color: "#3a8eff", textShadow: "0 0 24px rgba(58,142,255,0.45)" }}>
                     {accent}
                   </span>
                 )}
               </h2>
 
-              {/* Image card */}
+              {/* Image card — protagonista no mobile */}
               <div
-                className="relative w-full overflow-hidden rounded-[22px] border border-blue-400/25"
+                className="relative w-full overflow-hidden rounded-[20px] border border-blue-400/25"
                 style={{
-                  height: "clamp(220px, 42vw, 320px)",
+                  height: "clamp(300px, 72vw, 440px)",
                   background:
-                    "radial-gradient(ellipse at 50% 35%, rgba(30,107,255,0.22) 0%, rgba(10,18,52,0.92) 55%, #04060f 100%)",
-                  boxShadow: "0 20px 60px -16px rgba(0,0,0,0.8), 0 0 50px -10px rgba(30,107,255,0.35)",
+                    "radial-gradient(ellipse at 50% 35%, rgba(30,107,255,0.24) 0%, rgba(10,18,52,0.92) 55%, #04060f 100%)",
+                  boxShadow: "0 20px 60px -16px rgba(0,0,0,0.8), 0 0 60px -10px rgba(30,107,255,0.40)",
                 }}
               >
+                {/* feixe central sutil */}
                 <div
                   aria-hidden="true"
-                  className="absolute bottom-[10%] left-1/2 h-[14px] w-[55%] -translate-x-1/2 rounded-[50%] border border-blue-300/40"
+                  className="absolute left-1/2 top-0 h-[55%] w-[2px] -translate-x-1/2"
                   style={{
-                    background: "radial-gradient(ellipse at 50% 50%, rgba(80,140,255,0.35) 0%, rgba(20,40,90,0.6) 70%, transparent 100%)",
-                    boxShadow: "0 0 22px rgba(30,107,255,0.55)",
+                    background: "linear-gradient(to bottom, rgba(255,255,255,0.55), transparent)",
+                    filter: "blur(1px)",
+                  }}
+                />
+                {/* pedestal */}
+                <div
+                  aria-hidden="true"
+                  className="absolute bottom-[8%] left-1/2 h-[18px] w-[58%] -translate-x-1/2 rounded-[50%] border border-blue-300/40"
+                  style={{
+                    background: "radial-gradient(ellipse at 50% 50%, rgba(80,140,255,0.40) 0%, rgba(20,40,90,0.6) 70%, transparent 100%)",
+                    boxShadow: "0 0 24px rgba(30,107,255,0.55)",
                   }}
                 />
                 <Image
@@ -496,41 +506,45 @@ export function HeroCarousel({ slides }: Props) {
                   fill
                   sizes="100vw"
                   priority={idx === 0}
-                  className="object-contain object-center p-4"
+                  className="object-contain object-center p-5"
                 />
               </div>
 
-              {/* Description */}
-              <p className="text-sm leading-relaxed text-white/55">{slide.description}</p>
+              {/* Description — opcional, curta */}
+              {slide.description && (
+                <p className="text-sm leading-relaxed text-white/55">{slide.description}</p>
+              )}
 
-              {/* Price */}
+              {/* Price + 3x — uma linha, com hierarquia clara */}
               {slide.product && (
-                <div className="flex flex-wrap items-end gap-x-4 gap-y-1">
+                <div className="flex items-end justify-between gap-3 rounded-[14px] border border-blue-400/15 bg-white/[0.02] px-4 py-3">
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-blue-300">Por apenas</p>
                     <p className="mt-0.5 flex items-baseline gap-1.5 text-white">
                       <span className="text-lg font-bold">R$</span>
-                      <span className="price font-title leading-none" style={{ fontSize: "clamp(2rem,8vw,2.6rem)" }}>
+                      <span className="price font-title leading-none" style={{ fontSize: "clamp(2.2rem,9vw,2.8rem)" }}>
                         {priceNumber}
                       </span>
                     </p>
                   </div>
                   {installment && (
-                    <p className="pb-1 text-xs leading-tight text-blue-200/85">
-                      ou 3x de <span className="font-bold text-blue-300">{installment}</span><br />sem juros
+                    <p className="pb-1.5 text-right text-[11px] leading-tight text-blue-200/85">
+                      ou 3x de<br />
+                      <span className="font-bold text-blue-300">{installment}</span>
+                      <br /><span className="text-white/45">sem juros</span>
                     </p>
                   )}
                 </div>
               )}
 
-              {/* CTAs */}
+              {/* CTAs — primário fullwidth, secundário fullwidth */}
               <div className="flex flex-col gap-2.5">
                 <Link
                   href={slide.slug ? `/produtos/${slide.slug}` : "#"}
-                  className="inline-flex items-center justify-center gap-2 rounded-[10px] px-5 py-3 text-sm font-bold uppercase tracking-[0.10em] text-white"
+                  className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-[12px] px-5 text-sm font-bold uppercase tracking-[0.10em] text-white active:scale-[0.99]"
                   style={{
                     background: "linear-gradient(180deg, #2a78ff 0%, #1659e8 100%)",
-                    boxShadow: "0 8px 24px rgba(30,107,255,0.45)",
+                    boxShadow: "0 10px 28px rgba(30,107,255,0.50), inset 0 1px 0 rgba(255,255,255,0.25)",
                   }}
                 >
                   <BagIcon />
@@ -540,22 +554,21 @@ export function HeroCarousel({ slides }: Props) {
                   type="button"
                   onClick={() => handleAddToCart(slide)}
                   disabled={!slide.product}
-                  className="inline-flex items-center justify-center gap-2 rounded-[10px] border border-white/20 bg-white/[0.04] px-5 py-3 text-sm font-bold uppercase tracking-[0.10em] text-white backdrop-blur-sm disabled:opacity-50"
+                  className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-[12px] border border-white/20 bg-white/[0.04] px-5 text-sm font-bold uppercase tracking-[0.10em] text-white backdrop-blur-sm active:scale-[0.99] disabled:opacity-50"
                 >
                   <CartIcon />
                   {addedSlug === slide.slug ? "Adicionado ✓" : "Adicionar ao carrinho"}
                 </button>
               </div>
 
-              {/* Trust */}
-              <div className="grid grid-cols-3 gap-2 pb-12">
-                {TRUST_ITEMS.map(({ Icon, label, sub }) => (
-                  <div key={label} className="flex flex-col items-start gap-1">
+              {/* Trust — 3 colunas com ícone centralizado e label legível */}
+              <div className="grid grid-cols-3 gap-2 pt-1">
+                {TRUST_ITEMS.map(({ Icon, label }) => (
+                  <div key={label} className="flex flex-col items-center gap-1.5 rounded-[10px] border border-blue-400/15 bg-white/[0.02] px-2 py-2.5 text-center">
                     <div className="grid h-8 w-8 place-items-center rounded-md border border-blue-400/30 bg-blue-500/10 text-blue-300">
                       <Icon />
                     </div>
-                    <p className="text-[9px] font-bold uppercase leading-tight tracking-[0.10em] text-white">{label}</p>
-                    <p className="text-[9px] leading-tight text-white/50">{sub}</p>
+                    <p className="text-[10px] font-bold uppercase leading-tight tracking-[0.06em] text-white">{label}</p>
                   </div>
                 ))}
               </div>
