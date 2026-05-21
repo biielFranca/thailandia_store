@@ -7,6 +7,7 @@ import { useStore } from "@/contexts/store";
 import { useAuth } from "@/contexts/auth";
 import { brand } from "@/themes/thailandia/content/brand";
 import { catalogCategories } from "@/themes/thailandia/content/catalog";
+import { MagneticNav, type MagneticNavItem } from "@/components/ui/magnetic-nav";
 
 // ─── Nav links ────────────────────────────────────────────────────────────────
 
@@ -173,44 +174,26 @@ export function StoreHeader() {
             </span>
           </Link>
 
-          {/* Desktop nav */}
-          <nav className="hidden items-center gap-6 text-sm font-medium lg:flex" style={{ color: "var(--text-secondary)" }}>
-            {mainLinks.map((link) => {
-              if (link.kind === "categories") {
-                const isActive = pathname?.startsWith("/categorias");
-                return (
-                  <button key={link.label} type="button"
-                    aria-haspopup="menu" aria-expanded={categoriesOpen}
-                    onClick={() => setCategoriesOpen((v) => !v)}
-                    className="inline-flex items-center gap-1.5 transition-colors duration-200 hover:[color:var(--text-primary)]"
-                    style={isActive || categoriesOpen ? { color: "var(--text-primary)" } : undefined}>
-                    {link.label}
-                    <ChevronDown open={categoriesOpen} />
-                  </button>
-                );
-              }
-              if (link.kind === "special") {
-                const isActive = pathname?.startsWith(link.href);
-                return (
-                  <Link key={link.label} href={link.href}
-                    className="inline-flex items-center gap-1.5 rounded-[6px] px-2.5 py-1 text-xs font-bold uppercase tracking-[0.08em] transition-all duration-200"
-                    style={isActive
-                      ? { background: "linear-gradient(90deg, #c8960c, #e8b820)", color: "#000" }
-                      : { background: "linear-gradient(90deg, rgba(200,150,12,0.18), rgba(232,184,32,0.12))", color: "#e8b820", border: "1px solid rgba(232,184,32,0.35)" }}>
-                    ⚽ {link.label}
-                  </Link>
-                );
-              }
-              const base = link.href.split("#")[0] || "/";
-              const isActive = link.href === "/" ? pathname === "/" : pathname?.startsWith(base);
-              return (
-                <Link key={link.label} href={link.href}
-                  className="transition-colors duration-200 hover:[color:var(--text-primary)]"
-                  style={isActive ? { color: "var(--text-primary)" } : undefined}>
-                  {link.label}
-                </Link>
-              );
-            })}
+          {/* Desktop nav — magnetic-cursor pill */}
+          <nav className="hidden lg:flex">
+            <MagneticNav
+              activeHref={pathname}
+              items={mainLinks.map<MagneticNavItem>((link) => {
+                if (link.kind === "categories") {
+                  return {
+                    kind: "button",
+                    label: link.label,
+                    onClick: () => setCategoriesOpen((v) => !v),
+                    isOpen: categoriesOpen,
+                    rightSlot: <ChevronDown open={categoriesOpen} />,
+                  };
+                }
+                if (link.kind === "special") {
+                  return { kind: "special", label: link.label, href: link.href };
+                }
+                return { kind: "link", label: link.label, href: link.href };
+              })}
+            />
           </nav>
 
           {/* Right actions */}
