@@ -4,6 +4,7 @@ import { ProductPageClient } from "@/components/storefront/product-page-client";
 import { ProductReviews } from "@/components/storefront/product-reviews";
 import { WishlistButton } from "@/components/storefront/wishlist-button";
 import { getCatalogProductBySlug } from "@/core/services/catalog";
+import { getDefaultCustomizationPrice } from "@/core/services/customization";
 import { createStaticClient } from "@/lib/supabase/static";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth/get-current-user";
@@ -22,9 +23,10 @@ export async function generateStaticParams() {
 
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
-  const [product, user] = await Promise.all([
+  const [product, user, defaultCustomizationPrice] = await Promise.all([
     getCatalogProductBySlug(slug),
     getCurrentUser(),
+    getDefaultCustomizationPrice(),
   ]);
   if (!product) notFound();
 
@@ -54,6 +56,7 @@ export default async function ProductPage({ params }: Props) {
       <main className="mx-auto w-full max-w-[1280px] px-4 pb-16 pt-6 sm:px-6 lg:px-8">
         <ProductPageClient
           product={product}
+          defaultCustomizationPrice={defaultCustomizationPrice}
           wishlistSlot={
             productId ? (
               <WishlistButton

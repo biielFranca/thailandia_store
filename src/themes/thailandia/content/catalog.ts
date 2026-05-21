@@ -39,6 +39,10 @@ export type CatalogProduct = {
   collection?: string;      // "world-cup-2026" | etc. — slug da coleção/campanha
   tags?: string[];          // ["lançamento", "copa", "brasil"]
   league?: string;          // "Premier League" | "La Liga" | "Brasileirão" | "Copa do Mundo" | etc.
+  /** Whether the customer can add name+number on the shirt. */
+  customizationEnabled?: boolean;
+  /** Per-product extra charge for customization. null = use store default. */
+  customizationPrice?: number | null;
 };
 
 // ─── Categories (7) ──────────────────────────────────────────────────────────

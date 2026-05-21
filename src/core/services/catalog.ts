@@ -48,12 +48,15 @@ interface ProductRow {
   active: boolean;
   stock_quantity: number;
   metadata: unknown;
+  customization_enabled: boolean;
+  customization_price: number | null;
   product_images: { url: string; position: number }[];
   categories: { slug: string; name: string } | null;
 }
 
 const PRODUCT_SELECT = `
   id, slug, name, description, price, featured, active, stock_quantity, metadata,
+  customization_enabled, customization_price,
   product_images (url, position),
   categories (slug, name)
 `;
@@ -115,6 +118,8 @@ function mapProduct(row: ProductRow): CatalogProduct {
     collection: meta.collection ?? undefined,
     tags: meta.tags ?? [],
     league: meta.league ?? undefined,
+    customizationEnabled: !!row.customization_enabled,
+    customizationPrice: row.customization_price !== null ? Number(row.customization_price) : null,
   };
 }
 

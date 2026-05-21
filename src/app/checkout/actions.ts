@@ -13,6 +13,11 @@ import {
   validatePlaceOrderInput,
   type PlaceOrderInput,
 } from "@/core/validators/checkout";
+import {
+  getDefaultCustomizationPrice,
+  resolveCustomizationPrice,
+  validateCustomizationInput,
+} from "@/core/services/customization";
 
 // ─── Coupon validation ────────────────────────────────────────────────────────
 
@@ -86,6 +91,8 @@ interface ProductLookup {
   active: boolean;
   stock_quantity: number;
   metadata: { sizes?: string[]; status?: string | null } | null;
+  customization_enabled: boolean;
+  customization_price: number | null;
   product_images: { url: string; position: number }[];
   categories: { slug: string } | null;
 }
@@ -144,6 +151,7 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
     quantity: number;
     name: string;
     unitPrice: number;
+    customizationPrice: number;
     image: string | null;
     productId: string;
     snapshot: Json;
@@ -152,12 +160,15 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
   const slugs = Array.from(new Set(input.items.map((i) => i.slug)));
   const { data: rows } = await supabase
     .from("products")
-    .select("id, slug, name, price, active, stock_quantity, metadata, product_images (url, position), categories (slug)")
+    .select("id, slug, name, price, active, stock_quantity, metadata, customization_enabled, customization_price, product_images (url, position), categories (slug)")
     .eq("store_id", storeId)
     .in("slug", slugs);
   const productBySlug = new Map<string, ProductLookup>(
     ((rows ?? []) as unknown as ProductLookup[]).map((r) => [r.slug, r])
   );
+
+  // Resolve store-default customization price once per request.
+  const defaultCustomizationPrice = await getDefaultCustomizationPrice();
 
   const resolved: ResolvedItem[] = [];
   const totalQtyBySlug = new Map<string, number>();
@@ -189,12 +200,40 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
     const image = sortedImages[0]?.url ?? null;
     const unitPrice = Number(product.price);
 
+    // ── Customization: trust name/number text, NEVER trust client price ────
+    let customizationPrice = 0;
+    let customizationSnapshot: Json | null = null;
+    if (it.customization) {
+      if (!product.customization_enabled) {
+        return { ok: false, error: `Customização indisponível para ${product.name}.` };
+      }
+      const custErr = validateCustomizationInput({
+        name: it.customization.name,
+        number: it.customization.number,
+      });
+      if (custErr) return { ok: false, error: custErr };
+      customizationPrice = round2(
+        resolveCustomizationPrice(
+          product.customization_price !== null ? Number(product.customization_price) : null,
+          defaultCustomizationPrice,
+        )
+      );
+      const nameClean = it.customization.name ? it.customization.name.trim() : null;
+      customizationSnapshot = {
+        enabled: true,
+        name: nameClean && nameClean.length > 0 ? nameClean : null,
+        number: it.customization.number,
+        price: customizationPrice,
+      };
+    }
+
     resolved.push({
       slug: product.slug,
       size: it.size,
       quantity: it.quantity,
       name: product.name,
       unitPrice,
+      customizationPrice,
       image,
       productId: product.id,
       snapshot: {
@@ -204,11 +243,14 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
         unit_price: unitPrice,
         image,
         category_slug: product.categories?.slug ?? null,
+        customization: customizationSnapshot,
       },
     });
   }
 
-  const subtotal = round2(resolved.reduce((sum, r) => sum + r.unitPrice * r.quantity, 0));
+  const subtotal = round2(
+    resolved.reduce((sum, r) => sum + (r.unitPrice + r.customizationPrice) * r.quantity, 0)
+  );
   const shippingCost = 0;
 
   // ── Coupon discount ───────────────────────────────────────────────────────
@@ -240,7 +282,10 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
     product_id: r.productId,
     quantity: r.quantity,
     unit_price: r.unitPrice,
-    total_price: round2(r.unitPrice * r.quantity),
+    // Bake customization into total_price so order totals stay coherent without
+    // changing the order_items schema. The customization breakdown lives in
+    // product_snapshot.customization for the admin order view.
+    total_price: round2((r.unitPrice + r.customizationPrice) * r.quantity),
     product_snapshot: r.snapshot,
   }));
 

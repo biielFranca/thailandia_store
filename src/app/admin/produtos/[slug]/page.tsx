@@ -21,7 +21,7 @@ export default async function AdminProductEditorPage({ params }: Props) {
   const [{ data: product }, { data: categories }] = await Promise.all([
     supabase
       .from("products")
-      .select("id, slug, name, description, price, active, featured, stock_quantity, sku, metadata, product_images (url, position), categories (slug)")
+      .select("id, slug, name, description, price, active, featured, stock_quantity, sku, metadata, customization_enabled, customization_price, product_images (url, position), categories (slug)")
       .eq("slug", slug)
       .maybeSingle(),
     supabase
@@ -44,6 +44,8 @@ export default async function AdminProductEditorPage({ params }: Props) {
     stockQuantity: product.stock_quantity,
     sku: product.sku,
     categorySlug: product.categories?.slug ?? "",
+    customizationEnabled: !!product.customization_enabled,
+    customizationPrice: product.customization_price !== null ? Number(product.customization_price) : null,
     metadata: (product.metadata ?? {}) as Record<string, unknown>,
     imageUrls: sortedImages.map((i) => i.url),
   };

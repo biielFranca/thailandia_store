@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useStore } from "@/contexts/store";
+import { useStore, customizationKey } from "@/contexts/store";
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
@@ -130,9 +130,13 @@ export function CartDrawer() {
             </div>
           ) : (
             <ul className="flex flex-col gap-4">
-              {items.map((item) => (
+              {items.map((item) => {
+                const ck = customizationKey(item.customization);
+                const customExtra = item.customization?.price ?? 0;
+                const unitPrice = item.priceValue + customExtra;
+                return (
                 <li
-                  key={`${item.slug}-${item.size}`}
+                  key={`${item.slug}-${item.size}-${ck}`}
                   className="flex gap-3 rounded-[10px] border p-3"
                   style={{ borderColor: "var(--border-subtle)", backgroundColor: "var(--surface-2)" }}
                 >
@@ -165,11 +169,22 @@ export function CartDrawer() {
                           style={{ color: "var(--text-tertiary)" }}>
                           Tam. {item.size}
                         </p>
+                        {item.customization && (
+                          <div className="mt-1.5 rounded-[6px] border px-2 py-1.5 text-[10px] leading-tight"
+                            style={{ borderColor: "rgba(30,107,255,0.25)", backgroundColor: "rgba(30,107,255,0.08)", color: "var(--text-secondary)" }}>
+                            <p className="font-semibold uppercase tracking-[0.10em]" style={{ color: "var(--cta)" }}>
+                              Customização
+                            </p>
+                            {item.customization.name && <p>Nome: <span className="font-bold" style={{ color: "var(--text-primary)" }}>{item.customization.name}</span></p>}
+                            {item.customization.number !== null && <p>Número: <span className="font-bold" style={{ color: "var(--text-primary)" }}>{item.customization.number}</span></p>}
+                            <p className="mt-0.5">+ {formatBRL(item.customization.price)}</p>
+                          </div>
+                        )}
                       </div>
                       <button
                         type="button"
                         aria-label={`Remover ${item.name}`}
-                        onClick={() => removeItem(item.slug, item.size)}
+                        onClick={() => removeItem(item.slug, item.size, ck)}
                         className="flex-shrink-0 rounded-[4px] p-1 transition-colors duration-200 hover:[color:var(--danger)]"
                         style={{ color: "var(--text-tertiary)" }}
                       >
@@ -183,7 +198,7 @@ export function CartDrawer() {
                         <button
                           type="button"
                           aria-label="Diminuir quantidade"
-                          onClick={() => updateQty(item.slug, item.size, item.quantity - 1)}
+                          onClick={() => updateQty(item.slug, item.size, ck, item.quantity - 1)}
                           className="flex h-7 w-7 items-center justify-center rounded-l-[5px] transition-colors duration-150 hover:[background-color:var(--surface-3)]"
                           style={{ color: "var(--text-secondary)" }}
                         >
@@ -195,7 +210,7 @@ export function CartDrawer() {
                         <button
                           type="button"
                           aria-label="Aumentar quantidade"
-                          onClick={() => updateQty(item.slug, item.size, item.quantity + 1)}
+                          onClick={() => updateQty(item.slug, item.size, ck, item.quantity + 1)}
                           className="flex h-7 w-7 items-center justify-center rounded-r-[5px] transition-colors duration-150 hover:[background-color:var(--surface-3)]"
                           style={{ color: "var(--text-secondary)" }}
                         >
@@ -205,12 +220,13 @@ export function CartDrawer() {
 
                       {/* Line total */}
                       <p className="price text-sm font-bold" style={{ color: "var(--text-primary)" }}>
-                        {formatBRL(item.priceValue * item.quantity)}
+                        {formatBRL(unitPrice * item.quantity)}
                       </p>
                     </div>
                   </div>
                 </li>
-              ))}
+                );
+              })}
             </ul>
           )}
         </div>

@@ -328,7 +328,14 @@ export function CheckoutClient({ savedData }: { savedData?: CheckoutSavedData | 
     setSubmitting(true);
 
     const result = await placeOrder({
-      items: items.map((i) => ({ slug: i.slug, size: i.size, quantity: i.quantity })),
+      items: items.map((i) => ({
+        slug: i.slug,
+        size: i.size,
+        quantity: i.quantity,
+        customization: i.customization
+          ? { name: i.customization.name, number: i.customization.number }
+          : null,
+      })),
       customer: {
         name:  form.name,
         email: form.email,
@@ -622,8 +629,12 @@ export function CheckoutClient({ savedData }: { savedData?: CheckoutSavedData | 
                 </div>
                 <div className="p-5">
                   <ul className="flex flex-col gap-4">
-                    {items.map((item) => (
-                      <li key={`${item.slug}-${item.size}`} className="flex gap-3">
+                    {items.map((item) => {
+                      const cust = item.customization;
+                      const ck = cust ? `${cust.name ?? ""}#${cust.number ?? ""}` : "";
+                      const unitPrice = item.priceValue + (cust?.price ?? 0);
+                      return (
+                      <li key={`${item.slug}-${item.size}-${ck}`} className="flex gap-3">
                         <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-[6px]"
                           style={{ backgroundColor: "var(--surface-2)" }}>
                           <Image src={item.image} alt={item.name} fill sizes="56px" className="object-cover" />
@@ -635,12 +646,20 @@ export function CheckoutClient({ savedData }: { savedData?: CheckoutSavedData | 
                           <p className="text-[10px] uppercase tracking-[0.1em]" style={{ color: "var(--text-tertiary)" }}>
                             Tam. {item.size} · Qtd. {item.quantity}
                           </p>
+                          {cust && (
+                            <p className="mt-0.5 text-[10px]" style={{ color: "var(--text-secondary)" }}>
+                              {cust.name && <>Nome: <span className="font-semibold" style={{ color: "var(--text-primary)" }}>{cust.name}</span> </>}
+                              {cust.number !== null && <>· Nº <span className="font-semibold" style={{ color: "var(--text-primary)" }}>{cust.number}</span> </>}
+                              <span style={{ color: "var(--text-tertiary)" }}>(+{formatBRL(cust.price)})</span>
+                            </p>
+                          )}
                           <p className="price text-xs font-bold" style={{ color: "var(--text-primary)" }}>
-                            {formatBRL(item.priceValue * item.quantity)}
+                            {formatBRL(unitPrice * item.quantity)}
                           </p>
                         </div>
                       </li>
-                    ))}
+                      );
+                    })}
                   </ul>
 
                   {/* Cupom */}

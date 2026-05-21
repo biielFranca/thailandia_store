@@ -30,6 +30,12 @@ interface ProductSnapshot {
   unit_price?: number;
   image?: string | null;
   category_slug?: string | null;
+  customization?: {
+    enabled?: boolean;
+    name?: string | null;
+    number?: number | null;
+    price?: number;
+  } | null;
 }
 
 type Props = { params: Promise<{ id: string }> };
@@ -109,6 +115,21 @@ export default async function AdminOrderDetailPage({ params }: Props) {
                       <p className="text-[11px]" style={{ color: "var(--text-tertiary)" }}>
                         Tam. {snap.size ?? "—"} · Qtd. {it.quantity} · {formatBRL(Number(it.unit_price))} un.
                       </p>
+                      {snap.customization?.enabled && (
+                        <div className="mt-1.5 inline-flex flex-wrap items-center gap-2 rounded-[6px] border px-2 py-1 text-[11px]"
+                          style={{ borderColor: "rgba(30,107,255,0.30)", backgroundColor: "rgba(30,107,255,0.08)", color: "var(--text-secondary)" }}>
+                          <span className="font-bold uppercase tracking-[0.10em]" style={{ color: "var(--cta)" }}>
+                            Customização
+                          </span>
+                          {snap.customization.name && <span>Nome: <strong style={{ color: "var(--text-primary)" }}>{snap.customization.name}</strong></span>}
+                          {snap.customization.number !== null && snap.customization.number !== undefined && (
+                            <span>Nº: <strong style={{ color: "var(--text-primary)" }}>{snap.customization.number}</strong></span>
+                          )}
+                          {typeof snap.customization.price === "number" && (
+                            <span>+ {formatBRL(snap.customization.price)}</span>
+                          )}
+                        </div>
+                      )}
                     </div>
                     <p className="text-sm font-bold tabular-nums" style={{ color: "var(--text-primary)" }}>
                       {formatBRL(Number(it.total_price))}

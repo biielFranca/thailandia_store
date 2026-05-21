@@ -3,10 +3,16 @@
 
 export type PaymentMethod = "pix" | "card";
 
+export interface CheckoutCustomizationInput {
+  name: string | null;
+  number: number | null;
+}
+
 export interface CheckoutItemInput {
   slug: string;
   size: string;
   quantity: number;
+  customization?: CheckoutCustomizationInput | null;
 }
 
 export interface CheckoutCustomerInput {

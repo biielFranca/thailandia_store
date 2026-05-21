@@ -18,6 +18,10 @@ export interface ProductInput {
   featured: boolean;
   stockQuantity: number;
   sku?: string | null;
+  /** When true the storefront shows the name+number customization UI. */
+  customizationEnabled: boolean;
+  /** Per-product extra charge for customization. null = use store default. */
+  customizationPrice: number | null;
   metadata: {
     sizes: string[];
     badge?: string | null;
@@ -65,6 +69,11 @@ function validate(input: ProductInput): string | null {
     return "Selecione pelo menos um tamanho.";
   }
   if (!input.categorySlug) return "Escolha uma categoria.";
+  if (input.customizationPrice !== null) {
+    if (!Number.isFinite(input.customizationPrice) || input.customizationPrice < 0) {
+      return "Valor da customização deve ser maior ou igual a zero.";
+    }
+  }
   return null;
 }
 
@@ -150,6 +159,8 @@ export async function createProduct(input: ProductInput): Promise<ActionResult<{
       active: input.active,
       stock_quantity: input.stockQuantity,
       sku: input.sku?.trim() || null,
+      customization_enabled: input.customizationEnabled,
+      customization_price: input.customizationPrice,
       metadata: metadataToJson(input.metadata),
     })
     .select("id, slug")
@@ -188,6 +199,8 @@ export async function updateProduct(id: string, input: ProductInput): Promise<Ac
       active: input.active,
       stock_quantity: input.stockQuantity,
       sku: input.sku?.trim() || null,
+      customization_enabled: input.customizationEnabled,
+      customization_price: input.customizationPrice,
       metadata: metadataToJson(input.metadata),
     })
     .eq("id", id);

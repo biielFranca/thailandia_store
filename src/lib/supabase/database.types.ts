@@ -489,6 +489,8 @@ export type Database = {
           category_id: string | null
           compare_at_price: number | null
           created_at: string
+          customization_enabled: boolean
+          customization_price: number | null
           description: string | null
           featured: boolean
           id: string
@@ -507,6 +509,8 @@ export type Database = {
           category_id?: string | null
           compare_at_price?: number | null
           created_at?: string
+          customization_enabled?: boolean
+          customization_price?: number | null
           description?: string | null
           featured?: boolean
           id?: string
@@ -525,6 +529,8 @@ export type Database = {
           category_id?: string | null
           compare_at_price?: number | null
           created_at?: string
+          customization_enabled?: boolean
+          customization_price?: number | null
           description?: string | null
           featured?: boolean
           id?: string

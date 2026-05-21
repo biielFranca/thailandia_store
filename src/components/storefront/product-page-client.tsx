@@ -3,8 +3,15 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
-import { useStore } from "@/contexts/store";
+import { useMemo, useState } from "react";
+import { useStore, type CartCustomization } from "@/contexts/store";
+import {
+  MAX_CUSTOMIZATION_NAME_LENGTH,
+  MAX_CUSTOMIZATION_NUMBER,
+  MIN_CUSTOMIZATION_NUMBER,
+  resolveCustomizationPrice,
+  validateCustomizationInput,
+} from "@/core/services/customization";
 import type { CatalogProduct } from "@/themes/thailandia/content/catalog";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -150,12 +157,31 @@ function PriceBlock({ priceValue }: { priceValue: number }) {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export function ProductPageClient({ product, wishlistSlot }: { product: CatalogProduct; wishlistSlot?: React.ReactNode }) {
+export function ProductPageClient({
+  product,
+  defaultCustomizationPrice,
+  wishlistSlot,
+}: {
+  product: CatalogProduct;
+  defaultCustomizationPrice: number;
+  wishlistSlot?: React.ReactNode;
+}) {
   const { addItem, openCart } = useStore();
   const [selectedSize, setSelectedSize] = useState<string>(product.sizes[0] ?? "");
   const [buying, setBuying] = useState(false);
   const [added, setAdded] = useState(false);
   const [sizeError, setSizeError] = useState(false);
+
+  // ── Customization state ────────────────────────────────────────────────
+  const customizationAvailable = !!product.customizationEnabled;
+  const customizationPrice = useMemo(
+    () => resolveCustomizationPrice(product.customizationPrice ?? null, defaultCustomizationPrice),
+    [product.customizationPrice, defaultCustomizationPrice]
+  );
+  const [customEnabled, setCustomEnabled] = useState(false);
+  const [customName, setCustomName] = useState("");
+  const [customNumber, setCustomNumber] = useState("");
+  const [customError, setCustomError] = useState("");
 
   const isOutOfStock = typeof product.stockQuantity === "number" && product.stockQuantity === 0;
   const isLowStock   = typeof product.stockQuantity === "number" && product.stockQuantity > 0 && product.stockQuantity <= 5;
@@ -171,8 +197,36 @@ export function ProductPageClient({ product, wishlistSlot }: { product: CatalogP
     return false;
   }
 
-  function handleBuyNow() {
-    if (!requireSize() || isOutOfStock) return;
+  /**
+   * Returns the validated customization payload (or null when disabled),
+   * or `false` when the user enabled customization but provided invalid data.
+   */
+  function buildCustomization(): CartCustomization | null | false {
+    if (!customizationAvailable || !customEnabled) return null;
+    const name = customName.trim();
+    const numTrim = customNumber.trim();
+    const num = numTrim === "" ? null : Number(numTrim);
+    if (numTrim !== "" && !Number.isInteger(num)) {
+      setCustomError(`O número deve estar entre ${MIN_CUSTOMIZATION_NUMBER} e ${MAX_CUSTOMIZATION_NUMBER}.`);
+      return false;
+    }
+    const err = validateCustomizationInput({
+      name: name.length > 0 ? name : null,
+      number: num,
+    });
+    if (err) { setCustomError(err); return false; }
+    setCustomError("");
+    return {
+      name: name.length > 0 ? name : null,
+      number: num,
+      price: customizationPrice,
+    };
+  }
+
+  function addLine(): boolean {
+    if (!requireSize() || isOutOfStock) return false;
+    const customization = buildCustomization();
+    if (customization === false) return false;
     addItem({
       slug: product.slug,
       name: product.name,
@@ -181,23 +235,20 @@ export function ProductPageClient({ product, wishlistSlot }: { product: CatalogP
       priceValue: product.priceValue,
       size: selectedSize,
       quantity: 1,
+      customization,
     });
+    return true;
+  }
+
+  function handleBuyNow() {
+    if (!addLine()) return;
     openCart();
     setBuying(true);
     setTimeout(() => setBuying(false), 1800);
   }
 
   function handleAddToCart() {
-    if (!requireSize() || isOutOfStock) return;
-    addItem({
-      slug: product.slug,
-      name: product.name,
-      image: product.image,
-      displayPrice: product.displayPrice,
-      priceValue: product.priceValue,
-      size: selectedSize,
-      quantity: 1,
-    });
+    if (!addLine()) return;
     setAdded(true);
     setTimeout(() => setAdded(false), 1800);
   }
@@ -305,6 +356,20 @@ export function ProductPageClient({ product, wishlistSlot }: { product: CatalogP
             </div>
           </div>
 
+          {/* Customization */}
+          {customizationAvailable && (
+            <CustomizationSection
+              enabled={customEnabled}
+              onToggle={(v) => { setCustomEnabled(v); setCustomError(""); }}
+              name={customName}
+              onNameChange={(v) => { setCustomName(v); setCustomError(""); }}
+              number={customNumber}
+              onNumberChange={(v) => { setCustomNumber(v); setCustomError(""); }}
+              price={customizationPrice}
+              error={customError}
+            />
+          )}
+
           {/* CTAs */}
           <div className="flex flex-col gap-2.5">
             {/* Primary — Comprar agora */}
@@ -349,6 +414,122 @@ export function ProductPageClient({ product, wishlistSlot }: { product: CatalogP
         </div>
       </div>
     </>
+  );
+}
+
+function CustomizationSection({
+  enabled,
+  onToggle,
+  name,
+  onNameChange,
+  number,
+  onNumberChange,
+  price,
+  error,
+}: {
+  enabled: boolean;
+  onToggle: (v: boolean) => void;
+  name: string;
+  onNameChange: (v: string) => void;
+  number: string;
+  onNumberChange: (v: string) => void;
+  price: number;
+  error: string;
+}) {
+  const nameLen = name.length;
+  return (
+    <div className="rounded-[12px] border p-4"
+      style={{ borderColor: "var(--border-subtle)", backgroundColor: "var(--surface-1)" }}>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em]" style={{ color: "var(--cta)" }}>
+            Customização
+          </p>
+          <p className="mt-1 text-sm" style={{ color: "var(--text-primary)" }}>
+            Adicionar nome e número na camisa
+          </p>
+          <p className="mt-0.5 text-xs" style={{ color: "var(--text-tertiary)" }}>
+            +{formatBRL(price)} no item
+          </p>
+        </div>
+        <label className="inline-flex cursor-pointer items-center">
+          <input
+            type="checkbox"
+            checked={enabled}
+            onChange={(e) => onToggle(e.target.checked)}
+            className="peer sr-only"
+          />
+          <span
+            className="relative h-6 w-11 rounded-full transition-colors duration-200 peer-checked:[background-color:var(--cta)]"
+            style={{ backgroundColor: enabled ? "var(--cta)" : "var(--surface-3)" }}
+            aria-hidden="true"
+          >
+            <span
+              className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white transition-transform duration-200"
+              style={{ transform: enabled ? "translateX(20px)" : "translateX(0)" }}
+            />
+          </span>
+        </label>
+      </div>
+
+      {enabled && (
+        <div className="mt-4 flex flex-col gap-3">
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center justify-between">
+              <label htmlFor="cust-name" className="text-[11px] font-semibold uppercase tracking-[0.12em]"
+                style={{ color: "var(--text-secondary)" }}>
+                Nome na camisa
+              </label>
+              <span className="price text-[10px] tabular-nums" style={{ color: nameLen > MAX_CUSTOMIZATION_NAME_LENGTH ? "var(--danger)" : "var(--text-tertiary)" }}>
+                {nameLen}/{MAX_CUSTOMIZATION_NAME_LENGTH}
+              </span>
+            </div>
+            <input
+              id="cust-name"
+              type="text"
+              maxLength={MAX_CUSTOMIZATION_NAME_LENGTH}
+              placeholder="Ex: GABRIEL"
+              value={name}
+              onChange={(e) => onNameChange(e.target.value.toUpperCase())}
+              className="h-10 rounded-[8px] border bg-transparent px-3 text-sm outline-none uppercase tracking-wider transition-colors focus:[border-color:var(--cta)] placeholder:[color:var(--text-tertiary)]"
+              style={{ borderColor: "var(--border-subtle)", color: "var(--text-primary)" }}
+              autoComplete="off"
+            />
+            <p className="text-[10px]" style={{ color: "var(--text-tertiary)" }}>
+              Até {MAX_CUSTOMIZATION_NAME_LENGTH} caracteres.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="cust-number" className="text-[11px] font-semibold uppercase tracking-[0.12em]"
+              style={{ color: "var(--text-secondary)" }}>
+              Número
+            </label>
+            <input
+              id="cust-number"
+              type="number"
+              inputMode="numeric"
+              min={MIN_CUSTOMIZATION_NUMBER}
+              max={MAX_CUSTOMIZATION_NUMBER}
+              step={1}
+              placeholder="Ex: 10"
+              value={number}
+              onChange={(e) => {
+                const v = e.target.value.replace(/[^\d]/g, "").slice(0, 3);
+                onNumberChange(v);
+              }}
+              className="h-10 w-full rounded-[8px] border bg-transparent px-3 text-sm outline-none transition-colors focus:[border-color:var(--cta)] placeholder:[color:var(--text-tertiary)]"
+              style={{ borderColor: "var(--border-subtle)", color: "var(--text-primary)" }}
+              autoComplete="off"
+            />
+          </div>
+
+          {error && (
+            <p className="text-xs" style={{ color: "var(--danger)" }}>{error}</p>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 

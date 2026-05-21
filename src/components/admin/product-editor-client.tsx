@@ -27,6 +27,8 @@ export interface EditorProduct {
   stockQuantity: number;
   sku: string | null;
   categorySlug: string;
+  customizationEnabled: boolean;
+  customizationPrice: number | null;
   metadata: Record<string, unknown>;
   imageUrls: string[];
 }
@@ -73,6 +75,8 @@ interface FormState {
   tags: string;
   sizes: string[];
   imageUrls: string[];
+  customizationEnabled: boolean;
+  customizationPrice: string; // empty string = use store default
 }
 
 function slugify(input: string): string {
@@ -112,6 +116,10 @@ function buildInitial(p: EditorProduct | null, categories: EditorCategory[]): Fo
     tags: Array.isArray(meta.tags) ? (meta.tags as string[]).join(", ") : "",
     sizes: Array.isArray(meta.sizes) ? (meta.sizes as string[]) : ["P", "M", "G", "GG"],
     imageUrls: p?.imageUrls ?? [],
+    customizationEnabled: !!p?.customizationEnabled,
+    customizationPrice: p?.customizationPrice !== null && p?.customizationPrice !== undefined
+      ? String(p.customizationPrice)
+      : "",
   };
 }
 
@@ -210,6 +218,8 @@ export function ProductEditorClient({ product, categories }: Props) {
   }
 
   function buildPayload(): ProductInput {
+    const custPriceRaw = form.customizationPrice.trim().replace(",", ".");
+    const custPrice = custPriceRaw === "" ? null : Number(custPriceRaw);
     return {
       slug: form.slug.trim() || slugify(form.name),
       name: form.name,
@@ -220,6 +230,8 @@ export function ProductEditorClient({ product, categories }: Props) {
       featured: form.featured,
       stockQuantity: Number.parseInt(form.stockQuantity || "0", 10) || 0,
       sku: form.sku || null,
+      customizationEnabled: form.customizationEnabled,
+      customizationPrice: custPrice !== null && Number.isFinite(custPrice) ? custPrice : null,
       metadata: {
         sizes: form.sizes,
         badge: form.badge || null,
@@ -418,6 +430,35 @@ export function ProductEditorClient({ product, categories }: Props) {
                   Selecionados: {form.sizes.join(", ")}
                 </p>
               )}
+            </Section>
+
+            <Section title="Customização (nome + número)">
+              <div className="flex flex-col gap-3">
+                <Toggle
+                  label="Permitir customização neste produto"
+                  checked={form.customizationEnabled}
+                  onChange={(v) => set("customizationEnabled", v)}
+                />
+                {form.customizationEnabled && (
+                  <div className="flex flex-col gap-2">
+                    <Field label="Valor da customização neste produto (R$)">
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="Vazio = usar valor padrão da loja"
+                        className={inputCls}
+                        style={inputStyle}
+                        value={form.customizationPrice}
+                        onChange={(e) => set("customizationPrice", e.target.value)}
+                      />
+                    </Field>
+                    <p className="text-[11px]" style={{ color: "var(--text-tertiary)" }}>
+                      Deixe em branco para usar o valor padrão configurado em <code>stores.config.defaultCustomizationPrice</code> (ou o fallback em <code>storeConfig</code>).
+                    </p>
+                  </div>
+                )}
+              </div>
             </Section>
 
             <Section title="Imagens">
