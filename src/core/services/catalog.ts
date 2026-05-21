@@ -8,7 +8,7 @@
 // season, isBestseller, team, region, collection, league, tags, shortName,
 // cardTitle, priceLabel, displayPrice) live in `products.metadata` JSON.
 
-import { createClient } from "@/lib/supabase/server";
+import { createStaticClient } from "@/lib/supabase/static";
 import { storeConfig } from "@/config/store";
 import type {
   CatalogCategory,
@@ -130,7 +130,7 @@ function mapCategory(row: { slug: string; name: string; description: string | nu
 // ─── Categories ──────────────────────────────────────────────────────────────
 
 export async function getCatalogCategories(): Promise<CatalogCategory[]> {
-  const supabase = await createClient();
+  const supabase = createStaticClient();
   const { data, error } = await supabase
     .from("categories")
     .select("slug, name, description, active")
@@ -144,7 +144,7 @@ export async function getCatalogCategories(): Promise<CatalogCategory[]> {
 }
 
 export async function getCatalogCategoryBySlug(slug: string): Promise<CatalogCategory | null> {
-  const supabase = await createClient();
+  const supabase = createStaticClient();
   const { data } = await supabase
     .from("categories")
     .select("slug, name, description, active")
@@ -157,7 +157,7 @@ export async function getCatalogCategoryBySlug(slug: string): Promise<CatalogCat
 // ─── Products ────────────────────────────────────────────────────────────────
 
 export async function getCatalogProducts(): Promise<CatalogProduct[]> {
-  const supabase = await createClient();
+  const supabase = createStaticClient();
   const { data, error } = await supabase
     .from("products")
     .select(PRODUCT_SELECT)
@@ -171,7 +171,7 @@ export async function getCatalogProducts(): Promise<CatalogProduct[]> {
 }
 
 export async function getCatalogProductBySlug(slug: string): Promise<CatalogProduct | null> {
-  const supabase = await createClient();
+  const supabase = createStaticClient();
   const { data } = await supabase
     .from("products")
     .select(PRODUCT_SELECT)
@@ -185,7 +185,7 @@ export async function getCatalogProductsByCategory(slug: string): Promise<Catalo
   // World Cup 2026 mixes products from any category whose metadata.collection
   // marks them as part of the cup. Mirrors the original static helper.
   if (slug === "world-cup-2026") {
-    const supabase = await createClient();
+    const supabase = createStaticClient();
     const { data, error } = await supabase
       .from("products")
       .select(PRODUCT_SELECT)
@@ -200,7 +200,7 @@ export async function getCatalogProductsByCategory(slug: string): Promise<Catalo
     return ((data ?? []) as ProductRow[]).map(mapProduct);
   }
 
-  const supabase = await createClient();
+  const supabase = createStaticClient();
   const { data, error } = await supabase
     .from("products")
     .select(PRODUCT_SELECT)
@@ -219,7 +219,7 @@ export async function getCatalogProductsByCategory(slug: string): Promise<Catalo
 }
 
 export async function getFeaturedCatalogProducts(): Promise<CatalogProduct[]> {
-  const supabase = await createClient();
+  const supabase = createStaticClient();
   const { data, error } = await supabase
     .from("products")
     .select(PRODUCT_SELECT)
@@ -234,7 +234,7 @@ export async function getFeaturedCatalogProducts(): Promise<CatalogProduct[]> {
 }
 
 export async function getBestsellerCatalogProducts(): Promise<CatalogProduct[]> {
-  const supabase = await createClient();
+  const supabase = createStaticClient();
   const { data, error } = await supabase
     .from("products")
     .select(PRODUCT_SELECT)
@@ -254,7 +254,7 @@ export async function getBestsellerCatalogProducts(): Promise<CatalogProduct[]> 
  * is pinned, returns an empty array so the home can hide the entire section.
  */
 export async function getDropCatalogProducts(): Promise<CatalogProduct[]> {
-  const supabase = await createClient();
+  const supabase = createStaticClient();
 
   const { data, error } = await supabase
     .from("products")
@@ -287,7 +287,7 @@ export interface HeroSlideRow {
 }
 
 async function resolveStoreId(): Promise<string | null> {
-  const supabase = await createClient();
+  const supabase = createStaticClient();
   const { data } = await supabase
     .from("stores")
     .select("id")
@@ -324,7 +324,7 @@ function mapHeroSlide(r: RawHeroSlide): HeroSlideRow {
  * Active hero slides ordered by position. Used by the public storefront.
  */
 export async function getHeroSlides(): Promise<HeroSlideRow[]> {
-  const supabase = await createClient();
+  const supabase = createStaticClient();
   const storeId = await resolveStoreId();
   if (!storeId) return [];
 
@@ -343,7 +343,7 @@ export async function getHeroSlides(): Promise<HeroSlideRow[]> {
  * RLS still enforces admin gating.
  */
 export async function getAllHeroSlides(): Promise<HeroSlideRow[]> {
-  const supabase = await createClient();
+  const supabase = createStaticClient();
   const storeId = await resolveStoreId();
   if (!storeId) return [];
 
@@ -357,7 +357,7 @@ export async function getAllHeroSlides(): Promise<HeroSlideRow[]> {
 }
 
 export async function getCatalogProductsByCollection(collection: string): Promise<CatalogProduct[]> {
-  const supabase = await createClient();
+  const supabase = createStaticClient();
   const { data, error } = await supabase
     .from("products")
     .select(PRODUCT_SELECT)
@@ -389,7 +389,7 @@ export async function searchCatalogProducts(query: string): Promise<CatalogProdu
   const q = query.trim();
   if (!q) return [];
   const escaped = escapePostgrestLike(q);
-  const supabase = await createClient();
+  const supabase = createStaticClient();
   // ilike on name/description; UI-side matching extends to team/league/etc.
   const { data, error } = await supabase
     .from("products")
